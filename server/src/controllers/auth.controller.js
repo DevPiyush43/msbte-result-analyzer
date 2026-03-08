@@ -9,7 +9,9 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 const registerSchema = z
   .object({
     name: z.string().min(2),
-    email: z.string().email(),
+    email: z.string().email().refine((val) => val.includes(".edu"), {
+      message: "Only .edu email addresses are allowed",
+    }),
     password: z.string().min(6),
     confirmPassword: z.string().min(6),
     role: z.literal("teacher").optional().default("teacher"),
@@ -59,10 +61,7 @@ export const register = asyncHandler(async (req, res) => {
     role,
   });
 
-  const token = signToken(teacher);
-
   return res.status(201).json({
-    token,
     teacher: {
       id: teacher._id,
       name: teacher.name,

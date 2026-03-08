@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { BarChart3, GraduationCap, Percent, Trophy } from "lucide-react";
+import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 import { Protected } from "@/components/Protected";
 import { AppShell } from "@/components/AppShell";
@@ -31,6 +32,8 @@ type AnalyticsSummary = {
   classDistribution: Array<{ label: string; value: number }>;
   subjectAverages: Array<{ subject: string; avgPercentage: number | null; samples: number }>;
 };
+
+const CLASS_COLORS = ["#4f46e5", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#64748b"];
 
 export default function AnalyticsPage() {
   const [analytics, setAnalytics] = React.useState<AnalyticsSummary | null>(null);
@@ -106,18 +109,44 @@ export default function AnalyticsPage() {
 
               <FadeIn delay={0.06}>
                 <div className="grid gap-6 md:grid-cols-2">
+                  {/* Class Distribution: Pie + Bar */}
                   <Card>
                     <CardHeader>
                       <div className="text-base font-semibold text-slate-900">Class Distribution</div>
                       <div className="text-sm text-slate-600">Top categories</div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="grid gap-6">
+                      {/* Pie chart (original) */}
                       <PieChart
                         data={analytics.classDistribution.slice(0, 6).map((d, idx) => {
                           const colors = ["#2563eb", "#7c3aed", "#f59e0b", "#10b981", "#ef4444", "#64748b"];
                           return { label: d.label, value: d.value, color: colors[idx % colors.length] };
                         })}
                       />
+                      {/* New Bar Chart */}
+                      <div>
+                        <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Bar view</div>
+                        <div className="h-48">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <RechartsBarChart
+                              data={analytics.classDistribution.slice(0, 6)}
+                              margin={{ top: 4, right: 8, left: -20, bottom: 4 }}
+                            >
+                              <XAxis dataKey="label" tick={{ fontSize: 9 }} interval={0} />
+                              <YAxis tick={{ fontSize: 9 }} allowDecimals={false} />
+                              <Tooltip
+                                contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)", fontSize: 12 }}
+                                cursor={{ fill: "#f8fafc" }}
+                              />
+                              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                                {analytics.classDistribution.slice(0, 6).map((_, idx) => (
+                                  <Cell key={`cell-${idx}`} fill={CLASS_COLORS[idx % CLASS_COLORS.length]} />
+                                ))}
+                              </Bar>
+                            </RechartsBarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
 

@@ -442,7 +442,7 @@ export const exportBatchXlsx = asyncHandler(async (req, res) => {
   };
 
   function buildAnalysisWorksheet(wb) {
-    const sheet = wb.addWorksheet("analysis");
+    const sheet = wb.addWorksheet("Format A");
     const results = batch.results || [];
 
     const appeared = results.filter((r) => r.fetchedAt && !r.errorMessage).length || results.length;
@@ -630,9 +630,226 @@ export const exportBatchXlsx = asyncHandler(async (req, res) => {
     sheet.views = [{ state: "frozen", ySplit: 4 }];
   }
 
+  function buildFormatBWorksheet(wb) {
+    const sheet = wb.addWorksheet("Format B");
+    // Top 3: must have a numeric totalMarks, sorted by percentage desc
+    const top3 = (batch.results || [])
+      .filter((r) => typeof r.percentage === "number" && typeof r.totalMarks === "number")
+      .sort((a, b) => b.percentage - a.percentage)
+      .slice(0, 3);
+
+    // Row 1: Title
+    sheet.mergeCells("A1:E1");
+    sheet.getCell("A1").value = "List of Toppers - ( Winter-2025)";
+    sheet.getCell("A1").font = { bold: true, size: 14 };
+    sheet.getCell("A1").alignment = { horizontal: "center", vertical: "middle" };
+    sheet.getRow(1).height = 25;
+
+    // Row 2: Semester
+    sheet.mergeCells("A2:E2");
+    sheet.getCell("A2").value = "Semester :-";
+    sheet.getCell("A2").font = { bold: true, size: 12 };
+    sheet.getCell("A2").alignment = { horizontal: "left", vertical: "middle" };
+    sheet.getRow(2).height = 20;
+
+    // Row 3: Headers
+    const headers = ["Sr. No.", "Name of Student", "Total Marks", "Out of", "Percentage"];
+    headers.forEach((h, i) => {
+      const cell = sheet.getCell(3, i + 1);
+      cell.value = h;
+      cell.font = { bold: true };
+      cell.alignment = { horizontal: "center", vertical: "middle" };
+      cell.border = {
+        top: { style: "thin" }, left: { style: "thin" },
+        bottom: { style: "thin" }, right: { style: "thin" }
+      };
+    });
+    sheet.getRow(3).height = 20;
+
+    // Data: always 3 rows (pad with empty rows if fewer than 3 students)
+    let currentRow = 4;
+    for (let idx = 0; idx < 3; idx++) {
+      const r = top3[idx] || null;
+      const row = sheet.getRow(currentRow);
+      row.getCell(1).value = idx + 1;
+      row.getCell(2).value = r ? (r.name || "") : "";
+      row.getCell(3).value = r ? (r.totalMarks ?? "") : "";   // obtained marks
+      row.getCell(4).value = r ? 850 : "";                     // total marks always 850
+      row.getCell(5).value = r ? (r.percentage ?? "") : "";
+
+      for (let col = 1; col <= 5; col++) {
+        const cell = row.getCell(col);
+        cell.alignment = { horizontal: "center", vertical: "middle" };
+        cell.border = {
+          top: { style: "thin" }, left: { style: "thin" },
+          bottom: { style: "thin" }, right: { style: "thin" }
+        };
+      }
+      // Left align name
+      row.getCell(2).alignment = { horizontal: "left", vertical: "middle" };
+      currentRow++;
+    }
+
+    sheet.getColumn("A").width = 10;
+    sheet.getColumn("B").width = 35;
+    sheet.getColumn("C").width = 15;
+    sheet.getColumn("D").width = 15;
+    sheet.getColumn("E").width = 15;
+  }
+
+  function buildFormatCWorksheet(wb) {
+    const sheet = wb.addWorksheet("Format C");
+    const results = batch.results || [];
+
+    // First row
+    sheet.getCell("A1").value = "Department :-";
+    sheet.getCell("A1").font = { bold: true };
+    sheet.mergeCells("B1:J1");
+    sheet.getCell("B1").value = "Computer Technology";
+    sheet.getCell("B1").font = { bold: true };
+
+    // Header row
+    const headers = [
+      "Sr. No.",
+      "Name of Subject",
+      "Actual no. of students appeared",
+      "Total no. of students passed",
+      "1st class with Distinction",
+      "1st class",
+      "2nd class",
+      "Pass class",
+      "% of Passing",
+      "Name of Teacher"
+    ];
+
+    const headerRow = sheet.getRow(3);
+    headers.forEach((h, i) => {
+      const cell = headerRow.getCell(i + 1);
+      cell.value = h;
+      cell.font = { bold: true };
+      cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+      cell.border = {
+        top: { style: "thin" }, left: { style: "thin" },
+        bottom: { style: "thin" }, right: { style: "thin" }
+      };
+    });
+    headerRow.height = 40;
+
+    // Collect all subject names across all students
+    const subjectSet = new Set();
+    for (const r of results) {
+      const sm = r.subjectMarks;
+      if (sm && typeof sm === "object") {
+        for (const k of Object.keys(sm)) {
+          subjectSet.add(k);
+        }
+      }
+    }
+
+    // Total students in the batch — this is "Actual no. of students appeared" for all subjects
+    const totalStudentsInBatch = results.length;
+
+    let currentRow = 4;
+    let srNo = 1;
+
+    for (const subj of subjectSet) {
+      // Only include subjects that have a TOTAL column (theory subjects)
+      const isTheorySubject = results.some((r) => {
+        const sm = r.subjectMarks && r.subjectMarks[subj];
+        return sm && typeof sm.totalMax === "number" && sm.totalMax > 0;
+      });
+      if (!isTheorySubject) continue;
+
+      let passed = 0;
+      let dist = 0;
+      let first = 0;
+      let second = 0;
+      let passClass = 0;
+
+      for (const r of results) {
+        const sm = r.subjectMarks && r.subjectMarks[subj];
+
+        if (!sm) {
+          // Student has no entry for this subject — counts in appeared but not passed
+          continue;
+        }
+
+        const totalMax = typeof sm.totalMax === "number" ? sm.totalMax : null;
+        if (!totalMax || totalMax <= 0) continue;
+
+        // Any * in the total OBT or any sub-column → KT, student failed this subject
+        const totalObtRaw = sm.totalObt;
+        const hasKtStar =
+          (typeof totalObtRaw === "string" && totalObtRaw.includes("*")) ||
+          (typeof sm.saThObt === "string" && sm.saThObt.includes("*")) ||
+          (typeof sm.faThObt === "string" && sm.faThObt.includes("*")) ||
+          (typeof sm.faPrObt === "string" && sm.faPrObt.includes("*")) ||
+          (typeof sm.saPrObt === "string" && sm.saPrObt.includes("*"));
+
+        if (hasKtStar) continue; // appeared but not passed
+
+        const totalObt = typeof totalObtRaw === "number" ? totalObtRaw : null;
+        if (totalObt === null) continue;
+
+        const pct = (totalObt / totalMax) * 100;
+
+        if (pct >= 40) {
+          passed++;
+          if (pct >= 75) dist++;
+          else if (pct >= 60) first++;
+          else if (pct >= 50) second++;
+          else passClass++;
+        }
+        // Below 40: appeared but not passed
+      }
+
+      // appeared = total students in batch (same for every subject)
+      const appeared = totalStudentsInBatch;
+      const passPct = appeared > 0 ? ((passed / appeared) * 100).toFixed(2) : "0.00";
+
+      const row = sheet.getRow(currentRow);
+      row.getCell(1).value = srNo++;
+      row.getCell(2).value = subj;
+      row.getCell(3).value = appeared;              // Actual students appeared (= batch total)
+      row.getCell(4).value = passed;                // Students passed (no KT, pct >= 40)
+      row.getCell(5).value = dist;                  // 1st class with Distinction
+      row.getCell(6).value = first;                 // 1st class
+      row.getCell(7).value = second;                // 2nd class
+      row.getCell(8).value = passClass;             // Pass class
+      row.getCell(9).value = passPct;               // % of Passing
+      row.getCell(10).value = "";                   // Name of Teacher (empty)
+
+      for (let col = 1; col <= 10; col++) {
+        const cell = row.getCell(col);
+        cell.alignment = { horizontal: "center", vertical: "middle" };
+        cell.border = {
+          top: { style: "thin" }, left: { style: "thin" },
+          bottom: { style: "thin" }, right: { style: "thin" }
+        };
+      }
+      // Left-align subject name
+      row.getCell(2).alignment = { horizontal: "left", vertical: "middle" };
+
+      currentRow++;
+    }
+
+    sheet.getColumn("A").width = 8;
+    sheet.getColumn("B").width = 25;
+    sheet.getColumn("C").width = 15;
+    sheet.getColumn("D").width = 15;
+    sheet.getColumn("E").width = 15;
+    sheet.getColumn("F").width = 12;
+    sheet.getColumn("G").width = 12;
+    sheet.getColumn("H").width = 12;
+    sheet.getColumn("I").width = 12;
+    sheet.getColumn("J").width = 25;
+  }
+
   function buildSubjectWiseFormattedWorkbook() {
     const wb = new ExcelJS.Workbook();
     buildAnalysisWorksheet(wb);
+    buildFormatBWorksheet(wb);
+    buildFormatCWorksheet(wb);
 
     const results = batch.results || [];
     const sheet = wb.addWorksheet("subject wise");
@@ -836,12 +1053,42 @@ export const exportBatchXlsx = asyncHandler(async (req, res) => {
         }
       }
 
+      // KT detection: student has KT if resultClass is "KT" OR any subjectMarks field contains "*"
+      const isKt = (() => {
+        if (r.resultClass === "KT") return true;
+        const sm = r.subjectMarks;
+        if (!sm || typeof sm !== "object") return false;
+        for (const entry of Object.values(sm)) {
+          if (!entry || typeof entry !== "object") continue;
+          for (const v of Object.values(entry)) {
+            if (typeof v === "string" && v.includes("*")) return true;
+          }
+        }
+        return false;
+      })();
+
+      // Count how many KTs the student has (subjects with * in any field)
+      const ktCount = (() => {
+        if (!r.subjectMarks) return 0;
+        let count = 0;
+        for (const entry of Object.values(r.subjectMarks)) {
+          if (!entry || typeof entry !== "object") continue;
+          const hasKt = Object.values(entry).some((v) => typeof v === "string" && v.includes("*"));
+          if (hasKt) count++;
+        }
+        return count;
+      })();
+
       row.getCell(totalCol).value = typeof r.totalMarks === "number" ? r.totalMarks : "";
-      row.getCell(percentageCol).value =
-        typeof r.percentage === "number" ? r.percentage : r.resultClass === "KT" ? "KT" : "";
-      // Use the same class extraction logic as analysis sheet to show actual MSBTE class
-      const effectiveClass = getEffectiveResultClass(r);
-      row.getCell(resultCol).value = effectiveClass || r.resultClass || r.resultStatus || (r.errorMessage ? "Error" : "");
+      if (isKt) {
+        // Leave percentage empty, show KT remark
+        row.getCell(percentageCol).value = "";
+        row.getCell(resultCol).value = ktCount > 0 ? `KT (${ktCount})` : "KT";
+      } else {
+        row.getCell(percentageCol).value = typeof r.percentage === "number" ? r.percentage : "";
+        const effectiveClass = getEffectiveResultClass(r);
+        row.getCell(resultCol).value = effectiveClass || r.resultClass || r.resultStatus || (r.errorMessage ? "Error" : "");
+      }
       row.commit();
     }
 

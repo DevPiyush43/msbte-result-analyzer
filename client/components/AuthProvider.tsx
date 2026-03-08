@@ -22,7 +22,7 @@ type AuthContextValue = {
     password: string;
     confirmPassword: string;
     role: "teacher";
-  }) => Promise<void>;
+  }) => Promise<any>;
   logout: () => void;
 };
 
@@ -84,11 +84,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string;
     confirmPassword: string;
     role: "teacher";
-  }) {
+  }): Promise<any> {
     const res = await api.post("/auth/register", input);
-    localStorage.setItem(TOKEN_KEY, res.data.token);
-    setToken(res.data.token);
-    setTeacher(res.data.teacher);
+    return res.data;
   }
 
   function logout() {

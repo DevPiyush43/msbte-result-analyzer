@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +31,7 @@ type FormValues = z.infer<typeof schema>;
 export default function RegisterPage() {
   const router = useRouter();
   const { register: registerUser } = useAuth();
+  const [successData, setSuccessData] = useState<{ name: string; email: string } | null>(null);
 
   const {
     register,
@@ -43,18 +45,47 @@ export default function RegisterPage() {
 
   async function onSubmit(values: FormValues) {
     try {
-      await registerUser({
+      const res = await registerUser({
         name: values.name,
         email: values.email,
         password: values.password,
         confirmPassword: values.confirmPassword,
         role: "teacher",
       });
-      router.push("/dashboard");
+      setSuccessData({ name: res.teacher.name, email: res.teacher.email });
     } catch (err: any) {
       const message = err?.response?.data?.error?.message || "Registration failed";
       setError("root", { message });
     }
+  }
+
+  if (successData) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-blue-50 via-white to-white px-4 py-16">
+        <div className="mx-auto w-full max-w-md text-center">
+          <FadeIn>
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-100 text-green-600 shadow-sm border border-green-200">
+              <User className="h-10 w-10" />
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Registration Successful!</h1>
+            <p className="mt-4 text-lg text-slate-700">
+              Welcome aboard, <span className="font-semibold text-blue-700">{successData.name}</span>!
+            </p>
+            <p className="mt-2 text-md text-slate-600">
+              Your account with <span className="font-medium">{successData.email}</span> has been securely created.
+            </p>
+            <p className="mt-4 text-sm text-slate-500 italic">
+              Please log in again with your valid credentials to ensure a secure session.
+            </p>
+            <div className="mt-8">
+              <Button onClick={() => router.push("/login")} size="lg" className="w-full text-base font-semibold shadow-md">
+                Proceed to Login
+              </Button>
+            </div>
+          </FadeIn>
+        </div>
+      </div>
+    );
   }
 
   return (

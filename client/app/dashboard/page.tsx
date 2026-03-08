@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import * as React from "react";
-import { BarChart3, Calendar, Eye, GraduationCap, Percent, Sparkles, Trophy, Upload } from "lucide-react";
+import { BarChart3, Calendar, Eye, GraduationCap, Percent, Sparkles, Trophy, Upload, BookOpen, Star } from "lucide-react";
 
 import { Protected } from "@/components/Protected";
 import { AppShell } from "@/components/AppShell";
@@ -112,12 +112,26 @@ export default function DashboardPage() {
           }
           subtitle="Here's what's happening with your students' performance today."
           actions={
-            <Link href="/upload">
-              <Button>
-                <Upload className="mr-2 h-4 w-4" />
-                Upload Excel
-              </Button>
-            </Link>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link href="/smarteduhub">
+                <Button variant="secondary" className="border-blue-600 border text-blue-700 bg-blue-50 hover:bg-blue-100 bg-opacity-70 shadow-sm font-medium">
+                  <Star className="mr-2 h-4 w-4 fill-orange-400 text-orange-400" />
+                  SmartEdu Hub
+                </Button>
+              </Link>
+              <Link href="/docs">
+                <Button variant="secondary" className="border-slate-300 border font-medium">
+                  <BookOpen className="mr-2 h-4 w-4 text-emerald-600" />
+                  User Guide
+                </Button>
+              </Link>
+              <Link href="/upload">
+                <Button className="font-medium shadow-sm bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800">
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload Excel
+                </Button>
+              </Link>
+            </div>
           }
         />
 

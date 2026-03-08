@@ -80,7 +80,7 @@ function loadSelectors() {
 }
 
 async function fillInputValue(page, selector, value) {
-  await page.waitForSelector(selector, { timeout: 15000 });
+  await page.waitForSelector(selector, { timeout: 6000 });
   await page.evaluate(
     (sel, v) => {
       const el = document.querySelector(sel);
@@ -268,6 +268,8 @@ class MsBteFetchJob {
     });
 
     this.page = await this.browser.newPage();
+    await this.page.setDefaultTimeout(8000);
+await this.page.setDefaultNavigationTimeout(8000);
 
     if (!env.MSBTE_RESULT_URL) {
       const err = new Error("MSBTE_RESULT_URL is not set in server .env");
@@ -397,12 +399,17 @@ class MsBteFetchJob {
         throw new Error("Submit button not found. Configure MSBTE_SELECTORS_JSON.");
       }
 
-      await Promise.all([
-        this.page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 30000 }).catch(() => null),
-        submit.click(),
-      ]);
+     await Promise.all([
+  this.page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 8000 }).catch(() => null),
+  submit.click(),
+]);
+// ✅ detect invalid captcha quickly
+const captchaError = await this.page.$(".error, .errorMessage, #lblError");
+if (captchaError) {
+  throw new Error("Invalid CAPTCHA");
+}
 
-      await this.page.waitForSelector(this.selectors.resultContainer, { timeout: 30000 });
+await this.page.waitForSelector(this.selectors.resultContainer, { timeout: 6000 });
 
       const html = await this.page.content();
       const parsed = parseMsbteResultHtml(html);
