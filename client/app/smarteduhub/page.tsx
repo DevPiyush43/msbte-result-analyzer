@@ -40,7 +40,7 @@ export default function SmartEduHubPage() {
                     SmartEdu Hub connects teachers, administrators, and students under one single blazing-fast platform. Say goodbye to scattered spreadsheets and standalone tools.
                   </p>
                   
-                  <Link href="https://demo.smarteduhub.com" target="_blank" rel="noopener noreferrer">
+                  <Link href="https://tinyurl.com/yc7cx5dd" target="_blank" rel="noopener noreferrer">
                     <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white font-bold border-none shadow-xl shadow-orange-500/30 text-base">
                       Access Live Demo
                       <ExternalLink className="ml-2 h-4 w-4" />
