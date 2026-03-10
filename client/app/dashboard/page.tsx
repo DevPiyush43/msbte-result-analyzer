@@ -45,7 +45,7 @@ type AnalyticsSummary = {
 };
 
 export default function DashboardPage() {
-  const { teacher } = useAuth();
+  const { teacher, loading: authLoading } = useAuth();
 
   const [batches, setBatches] = React.useState<BatchSummary[]>([]);
   const [loadingBatches, setLoadingBatches] = React.useState(true);
@@ -55,6 +55,8 @@ export default function DashboardPage() {
   const [loadingAnalytics, setLoadingAnalytics] = React.useState(true);
 
   React.useEffect(() => {
+    if (authLoading || !teacher) return;
+
     async function load() {
       try {
         setLoadError(null);
@@ -81,7 +83,7 @@ export default function DashboardPage() {
     }
 
     load();
-  }, []);
+  }, [teacher, authLoading]);
 
   const totals = React.useMemo(() => {
     const totalStudents = analytics?.totals.totalStudents ?? batches.reduce((acc, b) => acc + (b.totalStudents || 0), 0);

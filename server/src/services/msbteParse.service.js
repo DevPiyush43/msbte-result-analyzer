@@ -426,23 +426,34 @@ export function parseMsbteResultHtml(html) {
     return false;
   })();
 
-  const isKt = !errorLike && (finalPercentage === null || hasKtStar);
+  const looksLikeResultPage =
+    name ||
+    enrollmentFromHeader ||
+    seatNumber ||
+    finalPercentage !== null ||
+    Object.keys(subjectMarks).length > 0;
+
+  const finalOk = !errorLike && looksLikeResultPage;
+
+  const isKt = finalOk && (finalPercentage === null || hasKtStar);
   if (isKt) {
     resultStatus = "Fail";
   }
 
   return {
-    ok: !errorLike,
+    ok: finalOk,
     name,
     enrollmentNumber: enrollmentFromHeader || null,
     seatNumber,
     percentage: finalPercentage,
     totalMarks: finalTotalMarks,
-    resultStatus,
+    resultStatus: finalOk ? resultStatus : "Error",
     resultClass: isKt ? "KT" : resultClass,
     subjectMarks: Object.keys(subjectMarks).length ? subjectMarks : null,
     errorMessage: errorLike
       ? explicitErrorText || "MSBTE page indicates an error (possibly wrong CAPTCHA or invalid enrollment)"
-      : null,
+      : !looksLikeResultPage
+        ? "Could not find result data on page. The session may have expired or the form submission failed."
+        : null,
   };
 }

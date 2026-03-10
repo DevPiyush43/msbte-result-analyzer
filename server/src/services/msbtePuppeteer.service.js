@@ -309,8 +309,14 @@ class MsBteFetchJob {
     const f = await getFetch();
 
     // Determine which submit button / mode the MSBTE page uses
-    // (config via env, default to enrollment-number mode)
-    const modeValue = process.env.MSBTE_MODE_VALUE || "1";
+    // (1 = Seat No, 2 = Enrollment No)
+    let modeValue = process.env.MSBTE_MODE_VALUE || "1";
+    
+    // If the enrollment looks like a seat number (usually 6 digits), 
+    // we can try to be smart, but better to check the batch data.
+    if (this.currentEnrollment && this.currentEnrollment.length > 8) {
+      modeValue = "2"; // Likely an enrollment number
+    }
 
     const formData = new URLSearchParams();
 
@@ -325,14 +331,17 @@ class MsBteFetchJob {
     const enrollInputName =
       process.env.MSBTE_ENROLL_INPUT_NAME || "txtEnrollOrSeatNo";
     const captchaInputName =
-      process.env.MSBTE_CAPTCHA_INPUT_NAME || "txtCaptcha";
+      process.env.MSBTE_CAPTCHA_INPUT_NAME || "txtCaptchaHot";
     const submitBtnName =
       process.env.MSBTE_SUBMIT_BTN_NAME || "btnShowResult";
 
     formData.set(modeSelectName, modeValue);
     formData.set(enrollInputName, this.currentEnrollment);
     formData.set(captchaInputName, captchaText);
-    formData.set(submitBtnName, "Show Result");
+    
+    // ASP.NET Image buttons often expect .x and .y coordinates
+    formData.set(submitBtnName + ".x", "0");
+    formData.set(submitBtnName + ".y", "0");
 
     const resp = await f(this._baseUrl, {
       method: "POST",
