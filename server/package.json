@@ -24,8 +24,6 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.1",
     "multer": "^2.0.2",
-    "@sparticuz/chromium": "^131.0.0",
-    "puppeteer-core": "^24.37.3",
     "zod": "^4.3.6"
   },
   "devDependencies": {

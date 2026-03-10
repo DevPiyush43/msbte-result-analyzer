@@ -1,222 +1,168 @@
-import puppeteer from "puppeteer-core";
-import fs from "fs";
+/**
+ * MSBTE Result Fetcher — HTTP-based (no Puppeteer / no browser)
+ *
+ * Why: Render.com (and most PaaS providers) do not ship a Chrome binary.
+ * Puppeteer would crash on /fetch/start with a 500 error, and
+ * long-running browser sessions exceed Render's 30-second HTTP timeout.
+ *
+ * How it works:
+ *  1. GET the MSBTE result page to grab the ASP.NET __VIEWSTATE + CAPTCHA image.
+ *  2. Return the CAPTCHA image (base64 PNG) to the frontend.
+ *  3. The teacher types the CAPTCHA text and presses "Continue".
+ *  4. POST the form with enrollment number + CAPTCHA; save the HTML result.
+ *  5. Repeat for every remaining enrollment in the batch.
+ *
+ * A job is a plain JS object stored in a Map (ephemeral in-process).
+ * If the server restarts the job is lost — that is acceptable because
+ * the teacher simply presses "Start" again; already-fetched records are
+ * preserved in MongoDB and skipped automatically.
+ */
 
-import { env } from "../config/env.js";
 import { ResultBatch } from "../models/ResultBatch.js";
 import { parseMsbteResultHtml } from "./msbteParse.service.js";
+import { env } from "../config/env.js";
 
-let chromiumModule = null;
-async function getChromium() {
-  if (chromiumModule) return chromiumModule;
+// ---------------------------------------------------------------------------
+// Lightweight HTTP helper (uses Node's built-in fetch, available in Node 18+)
+// Falls back to node-fetch if present, otherwise errors with a clear message.
+// ---------------------------------------------------------------------------
+
+let _fetch;
+async function getFetch() {
+  if (_fetch) return _fetch;
+  if (typeof globalThis.fetch === "function") {
+    _fetch = globalThis.fetch.bind(globalThis);
+    return _fetch;
+  }
+  // Older Node — try node-fetch
   try {
-    const mod = await import("@sparticuz/chromium");
-    chromiumModule = mod?.default || mod;
-    return chromiumModule;
+    const mod = await import("node-fetch");
+    _fetch = mod.default || mod;
+    return _fetch;
   } catch {
-    return null;
+    throw new Error(
+      "No fetch implementation found. Use Node 18+ or install node-fetch."
+    );
   }
 }
 
-function firstExistingPath(paths) {
-  for (const p of paths) {
-    if (!p) continue;
-    try {
-      if (fs.existsSync(p)) return p;
-    } catch {
-      // ignore
-    }
-  }
-  return null;
-}
+// ---------------------------------------------------------------------------
+// ASP.NET ViewState / form helpers
+// ---------------------------------------------------------------------------
 
-function resolveLocalBrowserExecutablePath() {
-  // Prefer explicit user config.
-  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-    const p = process.env.PUPPETEER_EXECUTABLE_PATH;
-    try {
-      if (fs.existsSync(p)) return p;
-    } catch {
-      // ignore
-    }
-  }
-
-  // Windows: try common Chrome/Edge install locations.
-  if (process.platform === "win32") {
-    const pf = process.env.PROGRAMFILES || "C:\\Program Files";
-    const pf86 = process.env["PROGRAMFILES(X86)"] || "C:\\Program Files (x86)";
-    const lad = process.env.LOCALAPPDATA;
-
-    return firstExistingPath([
-      `${pf}\\Google\\Chrome\\Application\\chrome.exe`,
-      `${pf86}\\Google\\Chrome\\Application\\chrome.exe`,
-      lad ? `${lad}\\Google\\Chrome\\Application\\chrome.exe` : null,
-      `${pf}\\Microsoft\\Edge\\Application\\msedge.exe`,
-      `${pf86}\\Microsoft\\Edge\\Application\\msedge.exe`,
-      lad ? `${lad}\\Microsoft\\Edge\\Application\\msedge.exe` : null,
-    ]);
-  }
-
-  // Linux/macOS are not currently auto-detected here.
-  return null;
-}
-
-function defaultSelectors() {
-  return {
-    modeSelect: "select#ddlEnrollOrSeatNo",
-    enrollmentInput: "input#txtEnrollOrSeatNo",
-    captchaInput: "input#txtCaptcha, input[id*='captcha' i], input[name*='captcha' i]",
-    submitButton: "input#btnShowResult, input[name='btnShowResult']",
-    resultContainer: "#pnlResult, #UpdatePanel1, table",
-  };
-}
-
-function loadSelectors() {
-  if (!env.MSBTE_SELECTORS_JSON) return defaultSelectors();
-  try {
-    return { ...defaultSelectors(), ...JSON.parse(env.MSBTE_SELECTORS_JSON) };
-  } catch {
-    return defaultSelectors();
-  }
-}
-
-async function fillInputValue(page, selector, value) {
-  await page.waitForSelector(selector, { timeout: 6000 });
-  await page.evaluate(
-    (sel, v) => {
-      const el = document.querySelector(sel);
-      if (!el) return;
-      el.focus();
-      el.value = "";
-      el.dispatchEvent(new Event("input", { bubbles: true }));
-      el.value = v;
-      el.dispatchEvent(new Event("input", { bubbles: true }));
-      el.dispatchEvent(new Event("change", { bubbles: true }));
-    },
-    selector,
-    value
+function extractHidden(html, name) {
+  // Match  <input type="hidden" name="NAME" value="VALUE" ...>  in any order
+  const re = new RegExp(
+    `<input[^>]+name=["']${name}["'][^>]*value=["']([^"']*)["']`,
+    "i"
   );
+  let m = html.match(re);
+  if (m) return m[1];
+  // Also try value before name
+  const re2 = new RegExp(
+    `<input[^>]+value=["']([^"']*)["'][^>]*name=["']${name}["']`,
+    "i"
+  );
+  m = html.match(re2);
+  return m ? m[1] : "";
 }
+
+function extractAllHidden(html) {
+  const out = {};
+  const re =
+    /<input[^>]+type=["']hidden["'][^>]*/gi;
+  let match;
+  while ((match = re.exec(html)) !== null) {
+    const tag = match[0];
+    const nameM = tag.match(/name=["']([^"']*)["']/i);
+    const valueM = tag.match(/value=["']([^"']*)["']/i);
+    if (nameM) out[nameM[1]] = valueM ? valueM[1] : "";
+  }
+  return out;
+}
+
+// Extract the src of the CAPTCHA image from the HTML
+function extractCaptchaSrc(html) {
+  // common patterns: id="imgCaptcha", src containing "captcha" or ".aspx"
+  const patterns = [
+    /<img[^>]+id=["']imgCaptcha["'][^>]*src=["']([^"']+)["']/i,
+    /<img[^>]+src=["']([^"']*captcha[^"']*)["']/i,
+    /<img[^>]+src=["']([^"']*\.aspx[^"']*)["'][^>]*id=["'][^"']*captcha/i,
+  ];
+  for (const p of patterns) {
+    const m = html.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+// Resolve a (possibly relative) URL against a base URL
+function resolveUrl(base, relative) {
+  if (!relative) return null;
+  if (/^https?:\/\//i.test(relative)) return relative;
+  try {
+    return new URL(relative, base).href;
+  } catch {
+    const baseNoPath = base.replace(/\/[^/]*$/, "");
+    return `${baseNoPath}/${relative.replace(/^\//, "")}`;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// MsBteFetchJob — one per batch
+// ---------------------------------------------------------------------------
 
 class MsBteFetchJob {
   constructor({ batchId, teacherId }) {
     this.batchId = batchId;
     this.teacherId = teacherId;
+
     this.status = "idle";
     this.currentIndex = 0;
     this.total = 0;
     this.currentEnrollment = null;
     this.lastError = null;
-    this.selectors = loadSelectors();
+
+    // State preserved between GET and POST
+    this._cookies = "";
+    this._hiddenFields = {};
+    this._captchaImgUrl = null;
+    this._captchaPngBase64 = null; // cached after fetch
+    this._baseUrl = env.MSBTE_RESULT_URL || "";
+  }
+
+  // -------------------------------------------------------------------------
+  // Public API expected by fetch.controller.js
+  // -------------------------------------------------------------------------
+
+  getState() {
+    return {
+      batchId: this.batchId,
+      status: this.status,
+      currentIndex: this.currentIndex,
+      total: this.total,
+      currentEnrollment: this.currentEnrollment,
+      lastError: this.lastError,
+    };
   }
 
   async getCaptchaPngBase64() {
-    if (!this.page) {
-      const err = new Error("Job not started");
-      err.statusCode = 400;
+    if (this._captchaPngBase64) return this._captchaPngBase64;
+    if (!this._captchaImgUrl) {
+      const err = new Error("CAPTCHA image URL not available. Try refreshing.");
+      err.statusCode = 404;
       throw err;
     }
-    if (!this.selectors.captchaInput) {
-      const err = new Error("CAPTCHA selector not configured");
-      err.statusCode = 500;
-      throw err;
-    }
-
-    // Try to capture the captcha image near the captcha input. MSBTE pages sometimes render
-    // captcha as an <img> next to the input.
-    const handle = await this.page
-      .evaluateHandle((captchaSel) => {
-        const direct = document.querySelector("img#imgCaptcha");
-        if (direct) return direct;
-
-        const input = document.querySelector(captchaSel);
-        if (!input) return null;
-
-        const root = input.closest("tr") || input.closest("table") || input.parentElement || document;
-
-        const imgs = Array.from(root.querySelectorAll("img"));
-        const preferred = imgs.find((img) => {
-          const id = (img.getAttribute("id") || "").toLowerCase();
-          const src = (img.getAttribute("src") || "").toLowerCase();
-          const alt = (img.getAttribute("alt") || "").toLowerCase();
-          return (
-            id.includes("captcha") ||
-            src.includes("captcha") ||
-            alt.includes("captcha") ||
-            id.includes("img") && src.includes("aspx")
-          );
-        });
-
-        if (preferred) return preferred;
-
-        const row = input.closest("tr") || input.parentElement;
-        if (row) {
-          const rowImgs = Array.from(row.querySelectorAll("img"));
-          if (rowImgs[0]) return rowImgs[0];
-        }
-
-        return input;
-      }, this.selectors.captchaInput)
-      .catch(() => null);
-
-    const element = handle ? handle.asElement() : null;
-    if (element) {
-      await element.scrollIntoViewIfNeeded?.().catch(() => null);
-
-      // If we ended up with the input element, screenshotting it is usually blank.
-      // In that case screenshot a clipped region around it.
-      const tag = await this.page.evaluate((el) => (el ? el.tagName : ""), element).catch(() => "");
-      if (String(tag).toLowerCase() !== "img") {
-        const box = await element.boundingBox().catch(() => null);
-        if (box) {
-          const clip = {
-            x: Math.max(0, box.x - 140),
-            y: Math.max(0, box.y - 60),
-            width: Math.max(50, box.width + 300),
-            height: Math.max(50, box.height + 140),
-          };
-          const buf = await this.page.screenshot({ type: "png", clip });
-          await handle.dispose?.().catch(() => null);
-          return Buffer.from(buf).toString("base64");
-        }
-      }
-
-      const buf = await element.screenshot({ type: "png" });
-      await handle.dispose?.().catch(() => null);
-      return Buffer.from(buf).toString("base64");
-    }
-
-    const err = new Error("CAPTCHA element not found");
-    err.statusCode = 404;
-    throw err;
+    this._captchaPngBase64 = await this._fetchImageAsBase64(this._captchaImgUrl);
+    return this._captchaPngBase64;
   }
 
   async refreshCaptcha() {
-    if (!this.page) {
-      const err = new Error("Job not started");
-      err.statusCode = 400;
-      throw err;
-    }
-
-    // Many captcha implementations refresh when you click the image.
-    await this.page
-      .evaluate(() => {
-        const img = document.querySelector("img#imgCaptcha");
-        if (img) img.click();
-      })
-      .catch(() => null);
+    // Re-GET the page to obtain a fresh CAPTCHA image
+    await this._loadFormPage();
   }
 
-  async setCaptchaValue(captcha) {
-    if (!this.page) {
-      const err = new Error("Job not started");
-      err.statusCode = 400;
-      throw err;
-    }
-    if (!this.selectors.captchaInput) {
-      const err = new Error("CAPTCHA selector not configured");
-      err.statusCode = 500;
-      throw err;
-    }
+  async continueAfterCaptcha({ captcha } = {}) {
     const value = String(captcha || "").trim();
     if (!value) {
       const err = new Error("CAPTCHA is empty");
@@ -224,62 +170,61 @@ class MsBteFetchJob {
       err.code = "CAPTCHA_EMPTY";
       throw err;
     }
-    await fillInputValue(this.page, this.selectors.captchaInput, value);
+
+    if (this.status !== "ready_for_captcha") {
+      const err = new Error("Job is not waiting for CAPTCHA");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    this.status = "submitting";
+
+    try {
+      await this._submitAndSave(value);
+    } catch (e) {
+      if (e?.code === "CAPTCHA_EMPTY") {
+        this.status = "ready_for_captcha";
+        this.lastError = null;
+        return;
+      }
+      // Mark current enrollment as errored and advance
+      this.lastError = e?.message || "Fetch failed";
+      await this._saveError(this.lastError);
+      this.currentIndex++;
+    }
+
+    // Move to next enrollment
+    await this._prepareCurrent();
   }
 
+  async close() {
+    // Nothing to close for HTTP-based fetcher
+    this.status = "idle";
+  }
+
+  // -------------------------------------------------------------------------
+  // Init — called once by msbteJobService.start()
+  // -------------------------------------------------------------------------
+
   async init() {
-    const batch = await ResultBatch.findOne({ _id: this.batchId, teacherId: this.teacherId });
+    if (!this._baseUrl) {
+      const err = new Error("MSBTE_RESULT_URL is not set in server .env");
+      err.statusCode = 500;
+      throw err;
+    }
+
+    const batch = await ResultBatch.findOne({
+      _id: this.batchId,
+      teacherId: this.teacherId,
+    });
     if (!batch) {
       const err = new Error("Batch not found");
       err.statusCode = 404;
       throw err;
     }
 
-    if (env.NODE_ENV !== "production") {
-      // eslint-disable-next-line no-console
-      console.log("[MSBTE] Using selectors:", this.selectors);
-    }
-
     this.total = batch.results.length;
 
-    // On Windows, '@sparticuz/chromium' is not meant for local dev; it can resolve
-    // to a temp path that doesn't exist. Only enable chromium mode on non-win32.
-    const isProd = env.NODE_ENV === "production" && process.platform !== "win32";
-    const chromium = isProd ? await getChromium() : null;
-    const localExec = resolveLocalBrowserExecutablePath();
-
-    const executablePath = isProd
-      ? process.env.PUPPETEER_EXECUTABLE_PATH || (chromium ? await chromium.executablePath() : localExec)
-      : localExec;
-
-    if (!executablePath) {
-      const err = new Error(
-        "No browser executable found for Puppeteer. Install Google Chrome/Microsoft Edge or set PUPPETEER_EXECUTABLE_PATH."
-      );
-      err.statusCode = 500;
-      throw err;
-    }
-
-    this.browser = await puppeteer.launch({
-      headless: isProd && chromium ? chromium.headless : false,
-      defaultViewport: isProd && chromium ? chromium.defaultViewport : null,
-      executablePath,
-      args: isProd && chromium ? chromium.args : ["--start-maximized"],
-    });
-
-    this.page = await this.browser.newPage();
-    await this.page.setDefaultTimeout(8000);
-await this.page.setDefaultNavigationTimeout(8000);
-
-    if (!env.MSBTE_RESULT_URL) {
-      const err = new Error("MSBTE_RESULT_URL is not set in server .env");
-      err.statusCode = 500;
-      throw err;
-    }
-
-    await this.page.goto(env.MSBTE_RESULT_URL, { waitUntil: "domcontentloaded" });
-
-    this.status = "ready_for_captcha";
     await ResultBatch.updateOne(
       { _id: this.batchId, teacherId: this.teacherId },
       { $set: { status: "fetching" } }
@@ -288,10 +233,20 @@ await this.page.setDefaultNavigationTimeout(8000);
     await this._prepareCurrent();
   }
 
+  // -------------------------------------------------------------------------
+  // Internal helpers
+  // -------------------------------------------------------------------------
+
+  /** Advance currentIndex past already-fetched records, GET the form page. */
   async _prepareCurrent() {
-    const batch = await ResultBatch.findOne({ _id: this.batchId, teacherId: this.teacherId }).lean();
+    const batch = await ResultBatch.findOne({
+      _id: this.batchId,
+      teacherId: this.teacherId,
+    }).lean();
+
     if (!batch) return;
 
+    // Skip already done
     while (this.currentIndex < batch.results.length) {
       const r = batch.results[this.currentIndex];
       if (!r || r.fetchedAt || r.errorMessage) {
@@ -308,194 +263,238 @@ await this.page.setDefaultNavigationTimeout(8000);
         { _id: this.batchId, teacherId: this.teacherId },
         { $set: { status: "completed" } }
       );
-      await this.close();
       return;
     }
 
-    const modeValue = String(process.env.MSBTE_MODE_VALUE || "1");
-    if (this.selectors.modeSelect) {
-      try {
-        await this.page.waitForSelector(this.selectors.modeSelect, { timeout: 15000 });
-        await this.page.select(this.selectors.modeSelect, modeValue);
-        await this.page.waitForFunction(
-          (sel, expected) => {
-            const el = document.querySelector(sel);
-            return !!el && String(el.value) === String(expected);
-          },
-          { timeout: 15000 },
-          this.selectors.modeSelect,
-          modeValue
-        );
-      } catch {
-        // ignore and continue; page might not have the dropdown in some sessions
-      }
-    }
-
-    const enrollmentSel = this.selectors.enrollmentInput;
-
-    const attempts = 3;
-    for (let i = 0; i < attempts; i++) {
-      await fillInputValue(this.page, enrollmentSel, this.currentEnrollment);
-
-      const currentValue = await this.page.$eval(enrollmentSel, (el) => (el?.value ? String(el.value) : ""));
-      if (currentValue.replace(/\s+/g, "") === this.currentEnrollment) {
-        break;
-      }
-
-      if (i === attempts - 1) {
-        throw new Error(
-          "Failed to fill input. The page might be clearing the field after selection; re-check selectors for txtEnrollOrSeatNo."
-        );
-      }
-
-      await this.page.waitForTimeout(150);
-    }
-
+    // GET the form page to capture viewstate + CAPTCHA
+    await this._loadFormPage();
     this.status = "ready_for_captcha";
   }
 
-  async continueAfterCaptcha({ captcha } = {}) {
-    if (!this.page) {
-      const err = new Error("Job not started");
-      err.statusCode = 400;
-      throw err;
-    }
+  /** GET the MSBTE result page, extract hidden fields + CAPTCHA src */
+  async _loadFormPage() {
+    const f = await getFetch();
 
-    if (this.status !== "ready_for_captcha") {
-      const err = new Error("Job is not waiting for CAPTCHA");
-      err.statusCode = 400;
-      throw err;
-    }
+    const resp = await f(this._baseUrl, {
+      method: "GET",
+      headers: this._buildHeaders(),
+      redirect: "follow",
+    });
 
-    this.status = "submitting";
-
-    try {
-      if (captcha) {
-        await this.setCaptchaValue(captcha);
-      }
-
-      // In auto-continue mode we should not submit unless CAPTCHA is actually filled.
-      // If captcha selector is configured and the input value is empty, throw a typed error.
-      if (this.selectors.captchaInput) {
-        try {
-          const captchaValue = await this.page
-            .$eval(this.selectors.captchaInput, (el) => (el?.value ? String(el.value) : ""))
-            .catch(() => "");
-
-          if (!String(captchaValue || "").trim()) {
-            const err = new Error("CAPTCHA is empty");
-            err.statusCode = 409;
-            err.code = "CAPTCHA_EMPTY";
-            throw err;
-          }
-        } catch (e) {
-          if (e?.code === "CAPTCHA_EMPTY") throw e;
-          // if selector doesn't exist, don't block
-        }
-      }
-
-      const submit = await this.page.$(this.selectors.submitButton);
-      if (!submit) {
-        throw new Error("Submit button not found. Configure MSBTE_SELECTORS_JSON.");
-      }
-
-     await Promise.all([
-  this.page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 8000 }).catch(() => null),
-  submit.click(),
-]);
-// ✅ detect invalid captcha quickly
-const captchaError = await this.page.$(".error, .errorMessage, #lblError");
-if (captchaError) {
-  throw new Error("Invalid CAPTCHA");
-}
-
-await this.page.waitForSelector(this.selectors.resultContainer, { timeout: 6000 });
-
-      const html = await this.page.content();
-      const parsed = parseMsbteResultHtml(html);
-
-      await ResultBatch.updateOne(
-        { _id: this.batchId, teacherId: this.teacherId, "results.enrollmentNumber": this.currentEnrollment },
-        {
-          $set: {
-            "results.$.rawHtml": html,
-            "results.$.fetchedAt": new Date(),
-            "results.$.errorMessage": parsed.ok ? null : parsed.errorMessage || "Parse failed",
-            ...(parsed.name ? { "results.$.name": parsed.name } : {}),
-            ...(parsed.enrollmentNumber
-              ? { "results.$.marksheetEnrollmentNumber": parsed.enrollmentNumber }
-              : {}),
-            ...(parsed.seatNumber ? { "results.$.seatNumber": parsed.seatNumber } : {}),
-            ...(typeof parsed.totalMarks === "number" ? { "results.$.totalMarks": parsed.totalMarks } : {}),
-            ...(typeof parsed.percentage === "number" ? { "results.$.percentage": parsed.percentage } : {}),
-            ...(parsed.resultStatus ? { "results.$.resultStatus": parsed.resultStatus } : {}),
-            ...(parsed.resultClass ? { "results.$.resultClass": parsed.resultClass } : {}),
-            ...(parsed.subjectMarks ? { "results.$.subjectMarks": parsed.subjectMarks } : {}),
-          },
-        }
+    if (!resp.ok) {
+      throw new Error(
+        `MSBTE page returned HTTP ${resp.status}. Check MSBTE_RESULT_URL.`
       );
-
-      this.currentIndex++;
-
-      // Go back to form page for next enrollment
-      await this.page.goto(env.MSBTE_RESULT_URL, { waitUntil: "domcontentloaded" });
-
-      await this._prepareCurrent();
-    } catch (e) {
-      if (e?.code === "CAPTCHA_EMPTY") {
-        // User hasn't typed CAPTCHA yet. Do not mark this enrollment as failed.
-        this.lastError = null;
-        this.status = "ready_for_captcha";
-        return;
-      }
-
-      this.lastError = e?.message || "Fetch failed";
-
-      await ResultBatch.updateOne(
-        { _id: this.batchId, teacherId: this.teacherId, "results.enrollmentNumber": this.currentEnrollment },
-        {
-          $set: {
-            "results.$.errorMessage": this.lastError,
-            "results.$.fetchedAt": new Date(),
-          },
-          $push: { errors: `${this.currentEnrollment}: ${this.lastError}` },
-        }
-      );
-
-      this.currentIndex++;
-      await this.page.goto(env.MSBTE_RESULT_URL, { waitUntil: "domcontentloaded" });
-      await this._prepareCurrent();
     }
+
+    // Persist cookies for subsequent POST
+    const setCookie = resp.headers.get("set-cookie") || "";
+    if (setCookie) this._cookies = this._extractCookieString(setCookie);
+
+    const html = await resp.text();
+
+    this._hiddenFields = extractAllHidden(html);
+
+    const captchaSrcRaw = extractCaptchaSrc(html);
+    this._captchaImgUrl = captchaSrcRaw
+      ? resolveUrl(this._baseUrl, captchaSrcRaw)
+      : null;
+    this._captchaPngBase64 = null; // invalidate cache
   }
 
-  getState() {
+  /**
+   * Build the POST body, submit, parse the result HTML, and persist to MongoDB.
+   */
+  async _submitAndSave(captchaText) {
+    const f = await getFetch();
+
+    // Determine which submit button / mode the MSBTE page uses
+    // (config via env, default to enrollment-number mode)
+    const modeValue = process.env.MSBTE_MODE_VALUE || "1";
+
+    const formData = new URLSearchParams();
+
+    // Include all hidden ASP.NET fields (ViewState, EventValidation, etc.)
+    for (const [k, v] of Object.entries(this._hiddenFields)) {
+      formData.set(k, v);
+    }
+
+    // Enrollment / seat selector
+    const modeSelectName =
+      process.env.MSBTE_MODE_SELECT_NAME || "ddlEnrollOrSeatNo";
+    const enrollInputName =
+      process.env.MSBTE_ENROLL_INPUT_NAME || "txtEnrollOrSeatNo";
+    const captchaInputName =
+      process.env.MSBTE_CAPTCHA_INPUT_NAME || "txtCaptcha";
+    const submitBtnName =
+      process.env.MSBTE_SUBMIT_BTN_NAME || "btnShowResult";
+
+    formData.set(modeSelectName, modeValue);
+    formData.set(enrollInputName, this.currentEnrollment);
+    formData.set(captchaInputName, captchaText);
+    formData.set(submitBtnName, "Show Result");
+
+    const resp = await f(this._baseUrl, {
+      method: "POST",
+      headers: {
+        ...this._buildHeaders(),
+        "Content-Type": "application/x-www-form-urlencoded",
+        Referer: this._baseUrl,
+      },
+      body: formData.toString(),
+      redirect: "follow",
+    });
+
+    // Persist cookies from POST response too
+    const setCookie = resp.headers.get("set-cookie") || "";
+    if (setCookie) this._cookies = this._extractCookieString(setCookie);
+
+    const html = await resp.text();
+
+    // Check if CAPTCHA was wrong (page will still contain the CAPTCHA form)
+    const lowerHtml = html.toLowerCase();
+    const captchaFailed =
+      lowerHtml.includes("invalid captcha") ||
+      lowerHtml.includes("please enter valid captcha") ||
+      lowerHtml.includes("incorrect captcha");
+
+    if (captchaFailed) {
+      // Reload fresh CAPTCHA and ask user to retry (don't count this as enrollment error)
+      await this._loadFormPage();
+      this.status = "ready_for_captcha";
+      this.lastError = "Invalid CAPTCHA — please try again";
+      return;
+    }
+
+    const parsed = parseMsbteResultHtml(html);
+
+    await ResultBatch.updateOne(
+      {
+        _id: this.batchId,
+        teacherId: this.teacherId,
+        "results.enrollmentNumber": this.currentEnrollment,
+      },
+      {
+        $set: {
+          "results.$.rawHtml": html,
+          "results.$.fetchedAt": new Date(),
+          "results.$.errorMessage": parsed.ok
+            ? null
+            : parsed.errorMessage || "Parse failed",
+          ...(parsed.name ? { "results.$.name": parsed.name } : {}),
+          ...(parsed.enrollmentNumber
+            ? { "results.$.marksheetEnrollmentNumber": parsed.enrollmentNumber }
+            : {}),
+          ...(parsed.seatNumber
+            ? { "results.$.seatNumber": parsed.seatNumber }
+            : {}),
+          ...(typeof parsed.totalMarks === "number"
+            ? { "results.$.totalMarks": parsed.totalMarks }
+            : {}),
+          ...(typeof parsed.percentage === "number"
+            ? { "results.$.percentage": parsed.percentage }
+            : {}),
+          ...(parsed.resultStatus
+            ? { "results.$.resultStatus": parsed.resultStatus }
+            : {}),
+          ...(parsed.resultClass
+            ? { "results.$.resultClass": parsed.resultClass }
+            : {}),
+          ...(parsed.subjectMarks
+            ? { "results.$.subjectMarks": parsed.subjectMarks }
+            : {}),
+        },
+      }
+    );
+
+    this.currentIndex++;
+    this.lastError = null;
+
+    // Reload form page for next enrollment (gets fresh CAPTCHA)
+    await this._loadFormPage();
+  }
+
+  async _saveError(message) {
+    await ResultBatch.updateOne(
+      {
+        _id: this.batchId,
+        teacherId: this.teacherId,
+        "results.enrollmentNumber": this.currentEnrollment,
+      },
+      {
+        $set: {
+          "results.$.errorMessage": message,
+          "results.$.fetchedAt": new Date(),
+        },
+        $push: { errors: `${this.currentEnrollment}: ${message}` },
+      }
+    );
+  }
+
+  async _fetchImageAsBase64(url) {
+    const f = await getFetch();
+    const resp = await f(url, {
+      headers: {
+        ...this._buildHeaders(),
+        Accept: "image/*,*/*",
+        Referer: this._baseUrl,
+      },
+    });
+    if (!resp.ok) {
+      throw new Error(`Failed to fetch CAPTCHA image: HTTP ${resp.status}`);
+    }
+    const buf = await resp.arrayBuffer();
+    return Buffer.from(buf).toString("base64");
+  }
+
+  _buildHeaders() {
     return {
-      batchId: this.batchId,
-      status: this.status,
-      currentIndex: this.currentIndex,
-      total: this.total,
-      currentEnrollment: this.currentEnrollment,
-      lastError: this.lastError,
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
+      Accept:
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+      Connection: "keep-alive",
+      ...(this._cookies ? { Cookie: this._cookies } : {}),
     };
   }
 
-  async close() {
-    try {
-      if (this.page) await this.page.close();
-    } catch {}
-    try {
-      if (this.browser) await this.browser.close();
-    } catch {}
-    this.page = null;
-    this.browser = null;
+  /** Parse Set-Cookie header(s) into a single Cookie header value string */
+  _extractCookieString(setCookieHeader) {
+    // setCookieHeader may be a comma-joined string from node-fetch or a single cookie
+    const parts = setCookieHeader
+      .split(/,(?=\s*\w+=)/) // split on comma that precedes name=value
+      .map((c) => c.split(";")[0].trim())
+      .filter(Boolean);
+
+    // Merge with existing cookies
+    const existing = {};
+    if (this._cookies) {
+      for (const pair of this._cookies.split(";")) {
+        const [k, ...vs] = pair.trim().split("=");
+        if (k) existing[k.trim()] = vs.join("=");
+      }
+    }
+    for (const pair of parts) {
+      const [k, ...vs] = pair.split("=");
+      if (k) existing[k.trim()] = vs.join("=");
+    }
+    return Object.entries(existing)
+      .map(([k, v]) => `${k}=${v}`)
+      .join("; ");
   }
 }
+
+// ---------------------------------------------------------------------------
+// Job registry
+// ---------------------------------------------------------------------------
 
 const jobs = new Map();
 
 export const msbteJobService = {
   async start({ batchId, teacherId }) {
     const key = `${teacherId}:${batchId}`;
+
     if (jobs.has(key)) return jobs.get(key);
 
     const job = new MsBteFetchJob({ batchId, teacherId });
@@ -522,7 +521,10 @@ export const msbteJobService = {
     jobs.delete(key);
     await ResultBatch.updateOne(
       { _id: batchId, teacherId },
-      { $set: { status: "failed" }, $push: { errors: "Job stopped by user" } }
+      {
+        $set: { status: "failed" },
+        $push: { errors: "Job stopped by user" },
+      }
     );
   },
 };
