@@ -9,6 +9,7 @@ import ExcelJS from "exceljs";
 import * as cheerio from "cheerio";
 import path from "path";
 import { fileURLToPath } from "url";
+import archiver from "archiver";
 import fs from "fs";
 import { generateReports } from "../services/report.service.js";
 import { ActivityLog } from "../models/ActivityLog.js";
@@ -1149,6 +1150,15 @@ export const recentBatches = asyncHandler(async (req, res) => {
           (best, r) => (typeof r?.percentage === "number" && (best.p === null || r.percentage > best.p) ? { n: r.name || null, p: r.percentage } : best),
           { n: null, p: null }
         ).p,
+      ktCount: (b.results || []).reduce((count, r) => {
+        let hasKT = false;
+        if (r.subjectMarks) {
+          Object.values(r.subjectMarks).forEach(entry => {
+            if (entry && Object.values(entry).some(v => typeof v === 'string' && v.includes('*'))) hasKT = true;
+          });
+        }
+        return hasKT ? count + 1 : count;
+      }, 0),
       status: b.status,
     })),
   });
@@ -1202,6 +1212,55 @@ export const exportBatchReports = asyncHandler(async (req, res) => {
   }
 
   return res.json({ reports: base64Reports });
+});
+
+export const exportComprehensiveZip = asyncHandler(async (req, res) => {
+  const batch = await ResultBatch.findOne({ _id: req.params.id, teacherId: req.user.sub });
+  if (!batch) {
+    return res.status(404).json({ error: { message: "Batch not found" } });
+  }
+
+  // Generate all 8 reports
+  const reports = await generateReports(batch);
+
+  await ActivityLog.create({
+    userId: req.user.sub,
+    actionType: "REPORT_ZIP_EXPORT",
+    description: `Exported comprehensive ZIP package for batch ${batch._id}.`
+  });
+
+  const d = new Date();
+  const dateStr = `${d.getFullYear()}_${String(d.getMonth() + 1).padStart(2, '0')}_${String(d.getDate()).padStart(2, '0')}`;
+  const filename = `MSBTE_Result_Report_${dateStr}.zip`;
+
+  res.setHeader('Content-Type', 'application/zip');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+  const archive = archiver('zip', {
+    zlib: { level: 9 } // maximum compression
+  });
+
+  archive.on('error', (err) => {
+    throw err;
+  });
+
+  archive.pipe(res);
+
+  // Result Reports folder
+  archive.append(reports.pass_students, { name: 'Result_Reports/pass_students.xlsx' });
+  archive.append(reports.fail_students, { name: 'Result_Reports/fail_students.xlsx' });
+  archive.append(reports.kt_analysis, { name: 'Result_Reports/kt_analysis.xlsx' });
+  archive.append(reports.full_consolidated, { name: 'Result_Reports/consolidated_results.xlsx' });
+
+  // Academic Analysis folder
+  archive.append(reports.format_a, { name: 'Academic_Analysis/format_a_analysis.xlsx' });
+  archive.append(reports.format_b, { name: 'Academic_Analysis/format_b_toppers.xlsx' });
+  archive.append(reports.format_c, { name: 'Academic_Analysis/format_c_subject_analysis.xlsx' });
+
+  // Summary folder
+  archive.append(reports.comprehensive_summary, { name: 'Summary/comprehensive_report.xlsx' });
+
+  await archive.finalize();
 });
 
 export const getBatch = asyncHandler(async (req, res) => {

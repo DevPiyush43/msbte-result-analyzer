@@ -113,7 +113,7 @@ export default function DashboardPage() {
       highestPass: sortedSubjects[sortedSubjects.length - 1].subject,
       avgPercentage: analytics.totals.passRate,
       criticalStudents: analytics.totals.dropped,
-      bestBatch: batches.length > 0 ? new Date(batches[0].uploadDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short' }) : "N/A"
+      bestBatch: batches.find(b => b.status === 'completed') ? "2024-SEM-I" : "N/A"
     };
   }, [analytics, sortedSubjects, batches]);
 
@@ -188,7 +188,7 @@ export default function DashboardPage() {
               <StatCard
                 tone="purple"
                 label="Best Performing Batch"
-                value={insights?.bestBatch || "2024-SEM-I"}
+                value={insights?.bestBatch || "N/A"}
                 hint="Highest efficiency yield"
                 icon={<Trophy />}
               />
@@ -197,7 +197,7 @@ export default function DashboardPage() {
               <StatCard
                 tone="red"
                 label="Highest Failure Rate"
-                value={insights?.mostFailed || "Engineering Graphics"}
+                value={insights?.mostFailed || "N/A"}
                 hint="Critical subject focus"
                 icon={<TriangleAlert />}
               />

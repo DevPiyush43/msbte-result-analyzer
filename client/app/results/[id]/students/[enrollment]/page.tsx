@@ -173,49 +173,38 @@ export default function StudentDetailPage() {
               <FadeInStagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
                 <FadeInStaggerItem>
                   <StatCard
-                    tone="blue"
-                    label="Full identity"
-                    value={<span className="text-lg truncate block font-display font-black tracking-tight text-slate-900">{student.name || "-"}</span>}
+                    value={<span className="text-base font-display font-black tracking-tight text-slate-900 break-words leading-tight">{student.name || "N/A"}</span>}
                     icon={<User className="h-5 w-5" />}
-                    className="p-8"
                   />
                 </FadeInStaggerItem>
                 <FadeInStaggerItem>
                   <StatCard
                     tone="indigo"
-                    label="Seat index"
-                    value={<span className="text-slate-900">{student.enrollmentNumber || "-"}</span>}
+                    value={<span className="text-xl text-slate-900 tracking-tight font-black">{student.enrollmentNumber || "N/A"}</span>}
                     icon={<Hash className="h-5 w-5" />}
-                    className="p-8"
                   />
                 </FadeInStaggerItem>
                 <FadeInStaggerItem>
                    <StatCard
                     tone="blue"
-                    label="Enrollment code"
-                    value={<span className="text-slate-900">{student.marksheetEnrollmentNumber || "-"}</span>}
+                    value={<span className="text-xl text-slate-900 tracking-tight font-black">{student.marksheetEnrollmentNumber || "N/A"}</span>}
                     icon={<IdCard className="h-5 w-5" />}
-                    className="p-8"
                   />
                 </FadeInStaggerItem>
                 <FadeInStaggerItem>
                   <StatCard
                     tone={String(student.resultStatus).toLowerCase() === "pass" ? "green" : "red"}
-                    label="Academic efficiency"
-                    value={<span className="text-slate-900">{typeof student.percentage === "number" ? `${student.percentage}%` : "-"}</span>}
-                    hint={<span className="uppercase font-bold tracking-widest text-[9px] text-slate-500">{student.resultClass || "-"}</span>}
+                    value={<span className="text-2xl text-slate-900 font-black">{typeof student.percentage === "number" ? `${student.percentage}%` : "N/A"}</span>}
+                    hint={<span className="uppercase font-bold tracking-widest text-[9px] text-slate-500 truncate block">{student.resultClass || "REGULAR"}</span>}
                     icon={<BadgePercent className="h-5 w-5" />}
-                    className="p-8"
                   />
                 </FadeInStaggerItem>
                 <FadeInStaggerItem>
                   <StatCard
                     tone={student.errorMessage ? "red" : String(student.resultStatus).toLowerCase() === "pass" ? "green" : "indigo"}
-                    label="Authorization status"
-                    value={<span className="text-slate-900">{student.errorMessage ? "Error" : student.resultStatus || "Unknown"}</span>}
-                    hint={<span className="uppercase font-bold tracking-widest text-[9px] text-slate-500">{student.errorMessage ? "Fault Detected" : "Verified"}</span>}
+                    value={<span className="text-2xl text-slate-900 font-black">{student.errorMessage ? "Error" : student.resultStatus || "Unknown"}</span>}
+                    hint={<span className="uppercase font-bold tracking-widest text-[9px] text-slate-500">{student.errorMessage ? "Fault Detected" : "Verified Record"}</span>}
                     icon={<Shield className="h-5 w-5" />}
-                    className="p-8"
                   />
                 </FadeInStaggerItem>
               </FadeInStagger>

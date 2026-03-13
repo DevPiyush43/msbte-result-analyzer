@@ -15,6 +15,7 @@ import {
   uploadMiddleware,
   generateRange,
   exportBatchReports,
+  exportComprehensiveZip,
 } from "../controllers/batches.controller.js";
 
 const router = Router();
@@ -34,6 +35,7 @@ router.post("/batches/:id/reparse", requireAuth, reparseBatch);
 router.post("/batches/:id/reset", requireAuth, resetFailedOrUnknown);
 router.get("/batches/:id/export.xlsx", requireAuth, exportBatchXlsx);
 router.get("/batches/:id/export/v2", requireAuth, exportBatchReports);
+router.get("/batches/:id/export/zip", requireAuth, exportComprehensiveZip);
 router.delete("/batches/:id", requireAuth, deleteBatch);
 
 export default router;

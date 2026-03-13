@@ -202,26 +202,155 @@ function buildFormatCWorksheet(wb, batch) {
 }
 
 /**
+ * Pass Students Report
+ */
+function buildPassStudentsWorksheet(wb, batch) {
+  const sheet = wb.addWorksheet("Pass Students");
+  const pass = (batch.results || []).filter(r => String(r.resultStatus || "").toLowerCase() === "pass");
+
+  sheet.addRow(["Sr. No.", "Enrollment No.", "Name of Student", "Total Marks", "Percentage"]).font = { bold: true };
+  pass.forEach((r, i) => {
+    sheet.addRow([i + 1, r.enrollmentNumber || "", r.name || "", r.totalMarks ?? "", r.percentage ? r.percentage.toFixed(2) + "%" : ""]);
+  });
+  sheet.columns = [{ width: 8 }, { width: 18 }, { width: 35 }, { width: 12 }, { width: 15 }];
+  sheet.eachRow(r => r.eachCell(c => c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }));
+}
+
+/**
+ * Fail Students Report
+ */
+function buildFailStudentsWorksheet(wb, batch) {
+  const sheet = wb.addWorksheet("Fail Students");
+  const fail = (batch.results || []).filter(r => String(r.resultStatus || "").toLowerCase() === "fail" || String(r.resultStatus || "").toLowerCase() === "unknown" || r.errorMessage);
+
+  sheet.addRow(["Sr. No.", "Enrollment No.", "Name of Student", "Status", "Remarks"]).font = { bold: true };
+  fail.forEach((r, i) => {
+    sheet.addRow([i + 1, r.enrollmentNumber || "", r.name || "", r.resultStatus || "Unknown", r.errorMessage || ""]);
+  });
+  sheet.columns = [{ width: 8 }, { width: 18 }, { width: 35 }, { width: 15 }, { width: 25 }];
+  sheet.eachRow(r => r.eachCell(c => c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }));
+}
+
+/**
+ * KT Analysis Report
+ */
+function buildKtAnalysisWorksheet(wb, batch) {
+  const sheet = wb.addWorksheet("KT Analysis");
+  
+  sheet.addRow(["Sr. No.", "Enrollment No.", "Name of Student", "Failed Subjects (KT)", "Total KTs"]).font = { bold: true };
+  let sr = 1;
+  (batch.results || []).forEach(r => {
+    const ktSubjects = [];
+    const sm = r.subjectMarks;
+    if (sm && typeof sm === "object") {
+      for (const [subj, entry] of Object.entries(sm)) {
+        if (entry && Object.values(entry).some(v => typeof v === "string" && v.includes("*"))) {
+          ktSubjects.push(subj);
+        }
+      }
+    }
+    const cText = getEffectiveResultClass(r) || "";
+    if (ktSubjects.length > 0 || cText.toLowerCase().includes("kt")) {
+      sheet.addRow([sr++, r.enrollmentNumber || "", r.name || "", ktSubjects.join(", ") || "Unknown", ktSubjects.length]);
+    }
+  });
+  sheet.columns = [{ width: 8 }, { width: 18 }, { width: 35 }, { width: 40 }, { width: 10 }];
+  sheet.eachRow(r => r.eachCell(c => c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }));
+}
+
+/**
+ * Comprehensive Summary Report
+ */
+function buildComprehensiveSummaryWorksheet(wb, batch) {
+  const sheet = wb.addWorksheet("Comprehensive Summary");
+  const results = batch.results || [];
+  const app = results.filter(r => r.fetchedAt && !r.errorMessage).length || results.length;
+  const pass = results.filter(r => String(r.resultStatus || "").toLowerCase() === "pass").length;
+  const fail = results.filter(r => String(r.resultStatus || "").toLowerCase() === "fail").length;
+  
+  let totalKTs = 0;
+  let droppedCount = 0;
+  results.forEach(r => {
+    let kt = 0;
+    if (r.subjectMarks) {
+      Object.values(r.subjectMarks).forEach(entry => {
+        if (entry && Object.values(entry).some(v => typeof v === "string" && v.includes("*"))) kt++;
+      });
+    }
+    totalKTs += kt;
+    if (kt >= 4) droppedCount++;
+  });
+  
+  const passRate = app > 0 ? ((pass / app) * 100).toFixed(2) : 0;
+
+  sheet.mergeCells("A1:B1");
+  sheet.getCell("A1").value = "Batch Comprehensive Academic Summary";
+  sheet.getCell("A1").font = { bold: true, size: 14 };
+  sheet.getCell("A1").alignment = { horizontal: "center" };
+  
+  sheet.addRow([]);
+  
+  const data = [
+    ["Total Students Analyzed", app],
+    ["Total Passed", pass],
+    ["Total Failed", fail],
+    ["Aggregate Pass Percentage", `${passRate}%`],
+    ["Critical Backlog Students (4+ KTs)", droppedCount],
+    ["Total Subject Failures (KTs)", totalKTs]
+  ];
+  
+  data.forEach(d => {
+    const r = sheet.addRow(d);
+    r.getCell(1).font = { bold: true };
+    r.getCell(2).alignment = { horizontal: "left" };
+  });
+  
+  sheet.getColumn(1).width = 40;
+  sheet.getColumn(2).width = 20;
+}
+
+/**
  * Generate all reports
  */
 export const generateReports = async (batch) => {
   const reports = {};
   
+  // 1. Pass Students
+  const wbPass = new ExcelJS.Workbook(); buildPassStudentsWorksheet(wbPass, batch);
+  reports.pass_students = await wbPass.xlsx.writeBuffer();
+
+  // 2. Fail Students
+  const wbFail = new ExcelJS.Workbook(); buildFailStudentsWorksheet(wbFail, batch);
+  reports.fail_students = await wbFail.xlsx.writeBuffer();
+
+  // 3. KT Analysis
+  const wbKt = new ExcelJS.Workbook(); buildKtAnalysisWorksheet(wbKt, batch);
+  reports.kt_analysis = await wbKt.xlsx.writeBuffer();
+
+  // 4. Full Consolidated (A, B, C)
   const wbFull = new ExcelJS.Workbook();
   buildAnalysisWorksheet(wbFull, batch);
   buildFormatBWorksheet(wbFull, batch);
   buildFormatCWorksheet(wbFull, batch);
   reports.full_consolidated = await wbFull.xlsx.writeBuffer();
 
+  // 5. Format A
   const wbA = new ExcelJS.Workbook(); buildAnalysisWorksheet(wbA, batch);
   reports.format_a = await wbA.xlsx.writeBuffer();
 
+  // 6. Format B
   const wbB = new ExcelJS.Workbook(); buildFormatBWorksheet(wbB, batch);
   reports.format_b = await wbB.xlsx.writeBuffer();
 
+  // 7. Format C
   const wbC = new ExcelJS.Workbook(); buildFormatCWorksheet(wbC, batch);
   reports.format_c = await wbC.xlsx.writeBuffer();
 
+  // 8. Comprehensive Summary
+  const wbComp = new ExcelJS.Workbook(); buildComprehensiveSummaryWorksheet(wbComp, batch);
+  reports.comprehensive_summary = await wbComp.xlsx.writeBuffer();
+
   return reports;
 };
+
 
