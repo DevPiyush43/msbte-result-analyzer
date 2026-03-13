@@ -405,7 +405,7 @@ export default function DashboardPage() {
              <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-4">
                   <History className="h-6 w-6 text-primary" />
-                  <h3 className="text-2xl font-display font-black text-slate-900 tracking-tight">Recent Results Archive</h3>
+                  <h3 className="text-2xl font-display font-black text-slate-900 tracking-tight">Batch History</h3>
                 </div>
                 <Link href="/results">
                   <Button variant="ghost" className="text-primary font-bold hover:bg-primary/5 px-6 rounded-xl transition-all">View All Results</Button>

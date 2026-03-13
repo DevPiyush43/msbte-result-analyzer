@@ -589,8 +589,8 @@ export default function ResultsPage() {
                           <Terminal className="h-5 w-5" />
                         </div>
                         <div className="space-y-0.5">
-                          <h3 className="text-lg font-display font-black text-slate-900 tracking-tight">Access Control</h3>
-                          <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Manage institutional automation flow</p>
+                          <h3 className="text-lg font-display font-black text-slate-900 tracking-tight">Process Control</h3>
+                          <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Manage result fetching activity</p>
                         </div>
                       </div>
                       <div className="h-7 px-3 rounded-lg border border-slate-200 bg-white flex items-center gap-2">
@@ -606,7 +606,7 @@ export default function ResultsPage() {
                           <div className="relative z-10">
                             <div className="text-[9px] uppercase font-bold text-slate-400 tracking-widest mb-4 flex items-center gap-2">
                               <Activity className="h-3.5 w-3.5 text-primary" />
-                              Synchronizer status
+                              Fetching status
                             </div>
                             <div className="flex items-center gap-4">
                               <div className={cn(
@@ -636,7 +636,7 @@ export default function ResultsPage() {
                             className="h-12 rounded-xl font-bold uppercase tracking-widest text-[10px] px-8 bg-primary text-white hover:bg-primary/90 transition-all shadow-md active:scale-95 group flex-1"
                           >
                             <Play className="mr-2 h-3.5 w-3.5 fill-current" />
-                            {busy === "start" ? "Starting..." : "Start Protocol"}
+                            {busy === "start" ? "Starting..." : "Start Fetching"}
                           </Button>
                           <Button 
                             variant="outline" 
@@ -646,7 +646,7 @@ export default function ResultsPage() {
                             className="h-12 rounded-xl font-bold uppercase tracking-widest text-[10px] px-8 border-slate-200 bg-white text-rose-600 hover:bg-rose-50 transition-all active:scale-95"
                           >
                             <Square className="mr-2 h-3.5 w-3.5 fill-current" />
-                            Emergency Halt
+                            Stop Process
                           </Button>
                         </div>
                       </div>
@@ -701,19 +701,19 @@ export default function ResultsPage() {
                             {/* Top: CAPTCHA Image */}
                             <div className="relative group/img-container">
                                 {captchaPngBase64 ? (
-                                  <div className="relative p-8 bg-white rounded-[3rem] border-4 border-primary shadow-2xl overflow-hidden min-w-[320px] flex items-center justify-center">
+                                  <div className="relative p-4 bg-white rounded-2xl border-2 border-primary/20 shadow-lg overflow-hidden flex items-center justify-center">
                                     <div className="absolute inset-0 bg-primary/5 pointer-events-none" />
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                       alt="captcha"
                                       src={`data:image/png;base64,${captchaPngBase64}`}
-                                      className="h-32 w-auto rounded-xl select-none scale-150 saturate-150 contrast-125 transition-transform group-hover/img-container:scale-[1.6]"
+                                      className="h-16 w-auto select-none transition-transform group-hover/img-container:scale-105"
                                     />
                                   </div>
                                 ) : (
-                                  <div className="h-48 w-80 bg-slate-100 animate-pulse rounded-[3rem] flex flex-col items-center justify-center gap-4 border-4 border-slate-200 border-dashed">
-                                    <RefreshCw className="h-10 w-10 text-primary opacity-20 animate-spin" />
-                                    <p className="text-[12px] text-slate-400 uppercase font-black tracking-widest">Awaiting Capture...</p>
+                                  <div className="h-24 w-64 bg-slate-50 animate-pulse rounded-2xl flex flex-col items-center justify-center gap-2 border-2 border-slate-200 border-dashed">
+                                    <RefreshCw className="h-6 w-6 text-primary opacity-20 animate-spin" />
+                                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Awaiting Capture...</p>
                                   </div>
                                 )}
                                 <Button
@@ -721,45 +721,45 @@ export default function ResultsPage() {
                                   size="icon"
                                   onClick={() => loadCaptcha({ refresh: true })}
                                   disabled={busy !== null}
-                                  className="absolute -top-6 -right-6 h-16 w-16 rounded-full bg-white text-primary border-4 border-primary shadow-2xl hover:bg-slate-50 transition-all active:scale-90 z-20"
+                                  className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-white text-primary border border-slate-200 shadow-md hover:bg-slate-50 transition-all active:scale-90 z-20"
                                 >
-                                  <RefreshCw className={cn("h-8 w-8", busy === "refresh" && "animate-spin")} />
+                                  <RefreshCw className={cn("h-4 w-4", busy === "refresh" && "animate-spin")} />
                                 </Button>
                             </div>
 
                             {/* Middle: Info Header */}
-                            <div className="space-y-4 max-w-lg">
-                               <div className="flex items-center justify-center gap-4">
-                                  <div className="h-12 w-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg">
-                                   <Lock className="h-6 w-6" />
+                            <div className="space-y-2 max-w-lg">
+                               <div className="flex items-center justify-center gap-3">
+                                  <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shadow-sm">
+                                   <Lock className="h-4 w-4" />
                                  </div>
-                                 <h4 className="text-3xl font-display font-black text-slate-900 tracking-tight uppercase">Manual Verification</h4>
+                                 <h4 className="text-xl font-display font-bold text-slate-900 tracking-tight">Security Verification</h4>
                                </div>
-                               <p className="text-[12px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed">
-                                 Bypass institutional security checks to resume automation.
+                               <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed">
+                                 Please enter the code shown above to continue.
                                </p>
                             </div>
 
                             {/* Bottom: Input & Action */}
-                            <div className="w-full max-w-xl space-y-6">
+                            <div className="w-full max-w-md space-y-4">
                               <div className="relative group/input">
                                 <input
                                   value={captchaText}
                                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCaptchaText(e.target.value.toUpperCase())}
                                   placeholder="ENTER CODE..."
-                                  className="h-28 w-full rounded-[2.5rem] border-4 border-slate-200 bg-white px-12 text-5xl font-display font-black tracking-[0.5em] uppercase text-center focus:outline-none focus:ring-12 focus:ring-primary/10 shadow-2xl transition-all text-primary placeholder:text-slate-100 placeholder:tracking-normal placeholder:text-2xl placeholder:font-black focus:border-primary"
+                                  className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-6 text-2xl font-display font-bold tracking-[0.2em] text-center focus:outline-none focus:ring-4 focus:ring-primary/10 shadow-sm transition-all text-slate-900 placeholder:text-slate-200 placeholder:tracking-normal focus:border-primary"
                                   autoFocus
                                 />
-                                <div className="absolute top-4 right-4 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-[8px] font-black uppercase tracking-widest">V2</div>
+                                
                               </div>
                               
                               <Button 
                                 onClick={cont} 
                                 disabled={busy !== null || !captchaText.trim()}
-                                className="h-20 w-full rounded-[2rem] px-12 font-black uppercase tracking-[0.2em] text-[14px] bg-primary text-white hover:bg-primary-hover shadow-2xl shadow-primary/30 transition-all active:scale-[0.98] group"
+                                className="h-12 w-full rounded-xl px-6 font-bold uppercase tracking-widest text-[11px] bg-primary text-white hover:bg-primary/90 shadow-md transition-all active:scale-[0.98] group"
                               >
-                                Submit Authorization Protocol
-                                <ChevronRight className="ml-4 h-6 w-6 group-hover:translate-x-2 transition-transform" />
+                                Continue Fetching
+                                <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                               </Button>
 
                               {captchaError && (
