@@ -58,10 +58,10 @@ export default function ExportsPage() {
   );
 
   const exportTypes = [
-    { id: "pass", label: "Pass Students", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
-    { id: "fail", label: "Fail Students", icon: XCircle, color: "text-rose-600", bg: "bg-rose-50" },
-    { id: "kt", label: "KT Analysis", icon: AlertTriangle, color: "text-amber-600", bg: "bg-amber-50" },
-    { id: "full", label: "Full Report", icon: FileText, color: "text-blue-600", bg: "bg-blue-50" },
+    { id: "format_a", label: "Format A: Analysis", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
+    { id: "format_b", label: "Format B: Toppers", icon: XCircle, color: "text-rose-600", bg: "bg-rose-50" },
+    { id: "format_c", label: "Format C: Subject-wise", icon: AlertTriangle, color: "text-amber-600", bg: "bg-amber-50" },
+    { id: "full_consolidated", label: "Full Consolidated", icon: FileText, color: "text-blue-600", bg: "bg-blue-50" },
   ];
 
   const handleExport = async (batchId: string, type: string) => {
@@ -69,15 +69,7 @@ export default function ExportsPage() {
       const res = await api.get(`/batches/${batchId}/export/v2`);
       const { reports } = res.data;
       
-      const mapping: Record<string, string> = {
-        pass: "pass_students",
-        fail: "fail_students",
-        kt: "kt_analysis",
-        full: "result_summary"
-      };
-
-      const key = mapping[type];
-      const base64 = reports?.[key];
+      const base64 = reports?.[type];
       
       if (!base64) {
         throw new Error("Report data missing from system.");
@@ -96,7 +88,13 @@ export default function ExportsPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${type}_report_${batchId.slice(-6)}.xlsx`;
+      const filenames: Record<string, string> = {
+        format_a: "Format_A_Analysis",
+        format_b: "Format_B_Toppers",
+        format_c: "Format_C_SubjectWise",
+        full_consolidated: "Full_Consolidated_Report"
+      };
+      a.download = `${filenames[type] || "Report"}_${batchId.slice(-6)}.xlsx`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -105,6 +103,7 @@ export default function ExportsPage() {
       alert("Failed to extract analytical report. Ensure batch processing is complete.");
     }
   };
+
 
   return (
     <Protected>
@@ -224,7 +223,7 @@ export default function ExportsPage() {
                                 <Button 
                                   variant="primary" 
                                   className="w-full sm:w-auto rounded-xl h-10 px-6 font-bold text-[9px] uppercase tracking-widest shadow-sm bg-primary text-white"
-                                  onClick={() => handleExport(batch.id, "full")}
+                                  onClick={() => handleExport(batch.id, "full_consolidated")}
                                 >
                                    Comprehensive Report
                                 </Button>
