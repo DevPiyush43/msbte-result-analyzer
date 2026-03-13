@@ -43,7 +43,7 @@ export const generateReports = async (batch) => {
   passSheet.addRow(["Seat Number", "Student Name", "Percentage", "Result", "KT Count"]);
   applyStyles(passSheet.getRow(1), 1, 5, true);
 
-  const passStudents = batch.results.filter(r => r.resultStatus === "Pass");
+  const passStudents = batch.results.filter(r => (r.resultStatus || "").toLowerCase() === "pass");
   passStudents.forEach(r => {
     // Drop rule is handled during parsing/saving, but we filter here too if needed
     const row = passSheet.addRow([
@@ -64,7 +64,7 @@ export const generateReports = async (batch) => {
   applyStyles(failSheet.getRow(1), 1, 5, true);
 
   const failStudents = batch.results.filter(r => 
-    r.resultStatus === "Fail" || 
+    (r.resultStatus || "").toLowerCase() === "fail" || 
     (calculateKTCount(r) >= 4)
   );
   failStudents.forEach(r => {
@@ -88,7 +88,7 @@ export const generateReports = async (batch) => {
 
   const total = batch.results.length;
   const passCount = passStudents.length;
-  const failCount = batch.results.filter(r => r.resultStatus === "Fail").length;
+  const failCount = batch.results.filter(r => (r.resultStatus || "").toLowerCase() === "fail").length;
   const droppedCount = batch.results.filter(r => calculateKTCount(r) >= 4).length;
 
   const summaryRow = summarySheet.addRow([

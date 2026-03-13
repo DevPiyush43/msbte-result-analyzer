@@ -34,7 +34,7 @@ import { FadeIn, FadeInStagger, FadeInStaggerItem } from "@/components/Animated"
 import { PageHeader } from "@/components/PageHeader";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { StatCard } from "@/components/StatCard";
 import { cn } from "@/lib/utils";
 
@@ -124,13 +124,13 @@ export default function DashboardPage() {
       <AppShell>
         <PageHeader
           title={
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
                <div className="h-14 w-14 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg transition-transform group-hover:rotate-6">
                 <LayoutDashboard className="h-7 w-7" />
               </div>
               <div>
-                <span className="font-display font-black text-3xl text-foreground tracking-tight block">Teacher Dashboard</span>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mt-1 flex items-center gap-2">
+                <span className="font-display font-black text-3xl text-slate-900 tracking-tight block">Teacher Dashboard</span>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 mt-1 flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-sm" />
                   Welcome back, {user?.username}
                 </p>
@@ -142,7 +142,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-4">
               <Button 
                 variant="outline" 
-                className="hidden sm:flex rounded-xl h-12 px-6 font-bold uppercase tracking-widest text-[9px] border-border bg-white text-foreground hover:bg-accent transition-all"
+                className="hidden sm:flex rounded-xl h-12 px-6 font-bold uppercase tracking-widest text-[9px] border-slate-200 bg-white text-slate-900 hover:bg-slate-50 transition-all shadow-sm"
                 onClick={async () => {
                    try {
                      const res = await api.get("/batches/analytics/summary/export", { responseType: "blob" });
@@ -245,13 +245,13 @@ export default function DashboardPage() {
             <div className="lg:col-span-2 space-y-8">
               {/* AI Academic Insights */}
               <FadeIn delay={0.2}>
-                <Card className="border-border shadow-xl rounded-[2.5rem] bg-white overflow-hidden group">
-                  <div className="p-8 border-b border-border bg-accent/50 flex items-center justify-between">
+                <Card className="border-border shadow-xl rounded-[2.5rem] bg-white overflow-hidden group border-slate-200">
+                  <div className="p-8 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
                          <Sparkles className="h-6 w-6" />
                       </div>
-                      <h3 className="text-xl font-display font-black text-foreground tracking-tight">AI Academic Insights</h3>
+                      <h3 className="text-xl font-display font-black text-slate-900 tracking-tight">AI Academic Insights</h3>
                     </div>
                     <div className="px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black text-primary uppercase tracking-widest animate-pulse font-sans">
                       Live Analysis
@@ -260,25 +260,25 @@ export default function DashboardPage() {
                   <CardContent className="p-8">
                     {loadingAnalytics ? (
                       <div className="grid grid-cols-2 gap-6">
-                        {[1,2,3,4].map(i => <div key={i} className="h-32 bg-accent/30 rounded-2xl animate-pulse" />)}
+                        {[1,2,3,4].map(i => <div key={i} className="h-32 bg-slate-50 rounded-2xl animate-pulse" />)}
                       </div>
                     ) : (
                       <div className="grid sm:grid-cols-2 gap-6">
                         <div className="p-6 rounded-2xl bg-rose-50 border border-rose-100 group-hover:shadow-md transition-all">
-                          <p className="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-2">Most Failed Subject</p>
-                          <p className="text-xl font-display font-black text-foreground truncate">{insights?.mostFailed || "N/A"}</p>
+                          <p className="text-[10px] font-bold text-rose-600 uppercase tracking-widest mb-2">Most Failed Subject</p>
+                          <p className="text-xl font-display font-black text-slate-900 truncate">{insights?.mostFailed || "N/A"}</p>
                         </div>
                         <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-100 group-hover:shadow-md transition-all">
-                          <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-2">Highest Pass Subject</p>
-                          <p className="text-xl font-display font-black text-foreground truncate">{insights?.highestPass || "N/A"}</p>
+                          <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-2">Highest Pass Subject</p>
+                          <p className="text-xl font-display font-black text-slate-900 truncate">{insights?.highestPass || "N/A"}</p>
                         </div>
                         <div className="p-6 rounded-2xl bg-blue-50 border border-blue-100 group-hover:shadow-md transition-all">
-                          <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Average Class Percentage</p>
-                          <p className="text-3xl font-display font-black text-foreground tabular-nums">{insights?.avgPercentage}%</p>
+                          <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-2">Average Class Percentage</p>
+                          <p className="text-3xl font-display font-black text-slate-900 tabular-nums">{insights?.avgPercentage}%</p>
                         </div>
                         <div className="p-6 rounded-2xl bg-purple-50 border border-purple-100 group-hover:shadow-md transition-all">
-                          <p className="text-[10px] font-bold text-purple-500 uppercase tracking-widest mb-2">Critical Students</p>
-                          <p className="text-3xl font-display font-black text-foreground tabular-nums">{insights?.criticalStudents}</p>
+                          <p className="text-[10px] font-bold text-purple-600 uppercase tracking-widest mb-2">Critical Students</p>
+                          <p className="text-3xl font-display font-black text-slate-900 tabular-nums">{insights?.criticalStudents}</p>
                         </div>
                       </div>
                     )}
@@ -288,14 +288,14 @@ export default function DashboardPage() {
 
               {/* Subject Failure Heatmap */}
               <FadeIn delay={0.4}>
-                <Card className="border-border shadow-xl rounded-[2.5rem] bg-white overflow-hidden">
-                  <div className="p-8 border-b border-border bg-accent/30 flex items-center gap-4">
+                <Card className="border-slate-200 shadow-xl rounded-[2.5rem] bg-white overflow-hidden">
+                  <div className="p-8 border-b border-slate-200 bg-slate-50/50 flex items-center gap-4">
                     <div className="h-12 w-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center border border-orange-500/20">
                        <BarChart3 className="h-6 w-6" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-display font-black text-foreground tracking-tight">Subject Failure Heatmap</h3>
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Difficulty distribution per subject</p>
+                      <h3 className="text-xl font-display font-black text-slate-900 tracking-tight">Subject Failure Heatmap</h3>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Difficulty distribution per subject</p>
                     </div>
                   </div>
                   <CardContent className="p-4">
@@ -340,22 +340,22 @@ export default function DashboardPage() {
                     {analytics?.topper.name ? (
                       <div className="space-y-6">
                          <div className="space-y-1">
-                            <h4 className="text-2xl font-display font-black text-foreground leading-tight">{analytics.topper.name}</h4>
-                            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Seat: {analytics.topper.seatNumber}</p>
+                            <h4 className="text-2xl font-display font-black text-slate-900 leading-tight">{analytics.topper.name}</h4>
+                            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Seat: {analytics.topper.seatNumber}</p>
                          </div>
-                         <div className="flex items-end justify-between border-t border-border pt-6">
+                         <div className="flex items-end justify-between border-t border-slate-100 pt-6">
                             <div className="text-4xl font-display font-black text-primary tabular-nums">{analytics.topper.percentage}%</div>
-                            <div className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Efficiency</div>
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Efficiency</div>
                          </div>
                       </div>
-                    ) : <p className="text-center py-8 text-muted-foreground text-sm font-bold animate-pulse">Analyzing topper data...</p>}
+                    ) : <p className="text-center py-8 text-slate-400 text-sm font-bold animate-pulse">Analyzing topper data...</p>}
                   </div>
                 </Card>
               </FadeIn>
 
               {/* KT Risk Analysis */}
               <FadeIn delay={0.7}>
-                <Card className="border-border shadow-xl rounded-[2.5rem] bg-white overflow-hidden p-6 md:p-8">
+                <Card className="border-slate-200 shadow-xl rounded-[2.5rem] bg-white overflow-hidden p-6 md:p-8">
                   <div className="flex items-center justify-between mb-8">
                     <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
                       <TrendingUp className="h-6 w-6" />
@@ -364,12 +364,12 @@ export default function DashboardPage() {
                   </div>
                   <div className="space-y-6">
                     <div>
-                      <h4 className="text-3xl font-display font-black text-foreground">Students at Risk</h4>
-                      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mt-1">Found 2+ KT Subjects</p>
+                      <h4 className="text-3xl font-display font-black text-slate-900">Students at Risk</h4>
+                      <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mt-1">Found 2+ KT Subjects</p>
                     </div>
                     <div className="p-6 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-between">
                        <span className="text-4xl font-display font-black text-rose-600 tabular-nums">{highRiskCount}</span>
-                       <span className="text-[10px] font-bold text-rose-400 uppercase tracking-widest text-right">High Risk<br/>Identified</span>
+                       <span className="text-[10px] font-bold text-rose-500 uppercase tracking-widest text-right">High Risk<br/>Identified</span>
                     </div>
                   </div>
                 </Card>
@@ -377,17 +377,17 @@ export default function DashboardPage() {
 
               {/* Department Ranking */}
               <FadeIn delay={0.8}>
-                <Card className="border-border shadow-xl rounded-[2.5rem] bg-white overflow-hidden p-8">
-                  <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.3em] mb-8">Batch Performance Ranking</h4>
+                <Card className="border-slate-200 shadow-xl rounded-[2.5rem] bg-white overflow-hidden p-8">
+                  <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.3em] mb-8">Batch Performance Ranking</h4>
                   <div className="space-y-4">
                      {batches.slice(0, 3).map((b, i) => {
                        const passRate = Math.round((b.passCount / b.totalStudents) * 100) || 0;
                        const emoji = i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉";
                        return (
-                         <div key={b.id} className="flex items-center justify-between p-4 rounded-xl bg-accent border border-border">
+                         <div key={b.id} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-200">
                             <div className="flex items-center gap-3">
                                <span className="text-xl">{emoji}</span>
-                               <span className="text-xs font-bold text-foreground">Batch {String.fromCharCode(65 + i)}</span>
+                               <span className="text-xs font-bold text-slate-900">Batch {String.fromCharCode(65 + i)}</span>
                             </div>
                             <span className="text-xs font-black text-primary tabular-nums">{passRate}% Pass</span>
                          </div>
@@ -403,7 +403,7 @@ export default function DashboardPage() {
              <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-4">
                   <History className="h-6 w-6 text-primary" />
-                  <h3 className="text-2xl font-display font-black text-foreground tracking-tight">Recent Results Archive</h3>
+                  <h3 className="text-2xl font-display font-black text-slate-900 tracking-tight">Recent Results Archive</h3>
                 </div>
                 <Link href="/results">
                   <Button variant="ghost" className="text-primary font-bold hover:bg-primary/5 px-6 rounded-xl transition-all">View All Results</Button>
@@ -413,19 +413,19 @@ export default function DashboardPage() {
              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                {batches.slice(0, 3).map((b) => (
                  <motion.div key={b.id} whileHover={{ y: -5 }} className="group">
-                    <Card className="border-border shadow-lg rounded-[2.5rem] bg-white overflow-hidden hover:border-primary/30 transition-all p-6">
+                    <Card className="border-slate-200 shadow-lg rounded-[2.5rem] bg-white overflow-hidden hover:border-primary/30 transition-all p-6">
                        <div className="flex items-start justify-between mb-6">
-                          <div className="h-12 w-12 rounded-xl bg-accent text-primary flex items-center justify-center border border-border group-hover:bg-primary group-hover:text-white transition-all">
+                          <div className="h-12 w-12 rounded-xl bg-slate-50 text-primary flex items-center justify-center border border-slate-200 group-hover:bg-primary group-hover:text-white transition-all">
                              <FileJson className="h-6 w-6" />
                           </div>
                           <div className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 text-[9px] font-black uppercase tracking-widest font-sans">{b.status}</div>
                        </div>
-                       <div className="space-y-2 mb-6 text-foreground">
+                       <div className="space-y-2 mb-6 text-slate-900">
                           <h4 className="text-xl font-display font-black truncate leading-tight">{new Date(b.uploadDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</h4>
-                          <p className="text-[11px] font-bold text-muted-foreground uppercase">{b.totalStudents} Students Analyzed</p>
+                          <p className="text-[11px] font-bold text-slate-500 uppercase">{b.totalStudents} Students Analyzed</p>
                        </div>
                        <Link href={`/results/${b.id}`}>
-                         <Button className="w-full h-12 rounded-xl bg-accent text-foreground hover:bg-primary hover:text-white font-bold text-[11px] tracking-widest border border-border group-hover:border-primary/20 transition-all">
+                         <Button className="w-full h-12 rounded-xl bg-slate-50 text-slate-900 hover:bg-primary hover:text-white font-bold text-[11px] tracking-widest border border-slate-200 group-hover:border-primary/20 transition-all">
                             VIEW DETAILS
                             <ChevronRight className="ml-2 h-4 w-4" />
                          </Button>

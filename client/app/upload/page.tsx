@@ -102,7 +102,7 @@ export default function UploadPage() {
                <div className="h-12 w-12 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg">
                 <FileUp className="h-6 w-6" />
               </div>
-              <span className="font-display font-black text-2xl text-foreground tracking-tight">Bulk Upload</span>
+              <span className="font-display font-black text-2xl text-slate-900 tracking-tight">Bulk Upload</span>
             </div>
           }
           subtitle="Synchronize academic records via standardized MSBTE XLSX batch upload." 
@@ -142,8 +142,8 @@ export default function UploadPage() {
                         <Upload className="h-6 w-6" />
                       </div>
                       <div className="space-y-1">
-                        <h4 className="text-xl font-display font-black text-foreground tracking-tight">Select Batch File</h4>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider max-w-[280px] mx-auto leading-relaxed">Upload MSBTE student list specifically in XLSX format for analysis.</p>
+                        <h4 className="text-xl font-display font-black text-slate-900 tracking-tight">Select Batch File</h4>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider max-w-[280px] mx-auto leading-relaxed">Upload MSBTE student list specifically in XLSX format for analysis.</p>
                       </div>
                     </div>
                     
@@ -157,8 +157,8 @@ export default function UploadPage() {
                               <FileSpreadsheet className="h-5 w-5" />
                             </div>
                             <div className="text-left leading-tight">
-                              <p className="text-xs font-black text-foreground truncate max-w-[180px]">{file.name}</p>
-                              <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">{(file.size / 1024).toFixed(1)} KB DATA</p>
+                              <p className="text-xs font-black text-slate-900 truncate max-w-[180px]">{file.name}</p>
+                              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">{(file.size / 1024).toFixed(1)} KB DATA</p>
                             </div>
                           </div>
                           <CheckCircle2 className="h-5 w-5 text-emerald-500" />
@@ -207,8 +207,8 @@ export default function UploadPage() {
                                 <Activity className="h-5 w-5 animate-pulse" />
                              </div>
                              <div>
-                                <h4 className="text-lg font-display font-black text-foreground leading-none">Process Tracker</h4>
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Real-time status</p>
+                                <h4 className="text-lg font-display font-black text-slate-900 leading-none">Process Tracker</h4>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Real-time status</p>
                              </div>
                           </div>
                           <div className="text-right">
@@ -219,20 +219,20 @@ export default function UploadPage() {
                        </div>
 
                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-                          <div className="p-4 rounded-xl bg-accent border border-border">
-                             <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Total</p>
-                             <p className="text-xl font-display font-black text-foreground">{extractionStatus.processed}/{extractionStatus.total}</p>
+                           <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                             <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total</p>
+                             <p className="text-xl font-display font-black text-slate-900">{extractionStatus.processed}/{extractionStatus.total}</p>
                           </div>
-                          <div className="p-4 rounded-xl bg-accent border border-border">
-                             <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Success</p>
+                          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100">
+                             <p className="text-[8px] font-bold text-emerald-600 uppercase tracking-widest mb-1">Success</p>
                              <p className="text-xl font-display font-black text-emerald-600">{extractionStatus.success}</p>
                           </div>
-                          <div className="p-4 rounded-xl bg-accent border border-border">
-                             <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Failed</p>
+                          <div className="p-4 rounded-xl bg-rose-50 border border-rose-100">
+                             <p className="text-[8px] font-bold text-rose-600 uppercase tracking-widest mb-1">Failed</p>
                              <p className="text-xl font-display font-black text-rose-600">{extractionStatus.failed}</p>
                           </div>
-                          <div className="p-4 rounded-xl bg-accent border border-border">
-                             <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Retry</p>
+                          <div className="p-4 rounded-xl bg-amber-50 border border-amber-100">
+                             <p className="text-[8px] font-bold text-amber-600 uppercase tracking-widest mb-1">Retry</p>
                              <p className="text-xl font-display font-black text-amber-600">{extractionStatus.retrying}</p>
                           </div>
                        </div>
@@ -271,8 +271,8 @@ export default function UploadPage() {
                         <div key={i} className="flex gap-4 relative">
                            <span className="text-xl font-display font-black text-primary/20">{s.step}</span>
                            <div>
-                              <p className="text-[10px] font-black text-foreground uppercase tracking-widest mb-1">{s.label}</p>
-                              <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">{s.desc}</p>
+                              <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-1">{s.label}</p>
+                              <p className="text-[11px] text-slate-500 leading-relaxed font-medium">{s.desc}</p>
                            </div>
                         </div>
                       ))}

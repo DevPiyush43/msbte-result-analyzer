@@ -36,9 +36,9 @@ const navItems: NavItem[] = [
   { href: "/dashboard", label: "Teacher Dashboard", icon: LayoutDashboard },
   { href: "/results", label: "Results History", icon: ListChecks },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/upload", label: "Upload Batch", icon: GraduationCap },
+  { href: "/upload", label: "Upload", icon: GraduationCap },
   { href: "/exports", label: "Smart Reports", icon: FileJson },
-  { href: "/admin/users", label: "Users", icon: Shield, adminOnly: true },
+  { href: "/admin/users", label: "User Management", icon: Shield, adminOnly: true },
   { href: "/admin/settings", label: "Settings", icon: Settings, systemAdminOnly: true },
 ];
 
