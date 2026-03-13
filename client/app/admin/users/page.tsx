@@ -30,6 +30,19 @@ export default function UserManagementPage() {
   const [query, setQuery] = React.useState("");
   const [roleFilter, setRoleFilter] = React.useState<string>("all");
 
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [submitting, setSubmitting] = React.useState(false);
+  const [modalForm, setModalForm] = React.useState({
+    username: "",
+    email: "",
+    password: "",
+    role: "TEACHER" as "ADMIN" | "TEACHER",
+    fullName: "",
+    department: "",
+    institution: "MSBTE College"
+  });
+  const [formError, setFormError] = React.useState<string | null>(null);
+
   React.useEffect(() => {
     if (authLoading) return;
     if (currentUser?.role !== "SYSTEM_ADMIN" && currentUser?.role !== "ADMIN") {
@@ -49,6 +62,30 @@ export default function UserManagementPage() {
       console.error("Failed to fetch users", err);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleCreateUser(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    setFormError(null);
+    try {
+      await api.post("/admin/users", modalForm);
+      setIsModalOpen(false);
+      setModalForm({
+        username: "",
+        email: "",
+        password: "",
+        role: "TEACHER",
+        fullName: "",
+        department: "",
+        institution: "MSBTE College"
+      });
+      fetchUsers();
+    } catch (err: any) {
+      setFormError(err?.response?.data?.error?.message || "Failed to create user");
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -84,12 +121,128 @@ export default function UserManagementPage() {
           }
           subtitle="Manage authorized staff and system administrators."
           actions={
-            <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 font-bold border-none shadow-lg shadow-indigo-200">
+            <Button 
+              size="sm" 
+              className="bg-indigo-600 hover:bg-indigo-700 font-bold border-none shadow-lg shadow-indigo-200"
+              onClick={() => setIsModalOpen(true)}
+            >
               <UserPlus className="mr-2 h-4 w-4" />
               Provision New User
             </Button>
           }
         />
+
+        {/* Create User Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+              <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h3 className="text-lg font-bold text-slate-800">Provision Staff Account</h3>
+                <Button variant="ghost" size="sm" className="w-8 h-8 p-0" onClick={() => setIsModalOpen(false)}>×</Button>
+              </div>
+              <form onSubmit={handleCreateUser} className="p-6 space-y-4">
+                {formError && (
+                  <div className="p-3 bg-red-50 border border-red-100 text-red-700 text-xs font-semibold rounded-xl">
+                    {formError}
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 ml-1">Username</label>
+                    <Input 
+                      required
+                      value={modalForm.username}
+                      onChange={e => setModalForm({...modalForm, username: e.target.value})}
+                      placeholder="jdoe"
+                      className="h-10 bg-slate-50/50"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 ml-1">Full Name</label>
+                    <Input 
+                      required
+                      value={modalForm.fullName}
+                      onChange={e => setModalForm({...modalForm, fullName: e.target.value})}
+                      placeholder="John Doe"
+                      className="h-10 bg-slate-50/50"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 ml-1">Email Address</label>
+                  <Input 
+                    required
+                    type="email"
+                    value={modalForm.email}
+                    onChange={e => setModalForm({...modalForm, email: e.target.value})}
+                    placeholder="john@college.edu"
+                    className="h-10 bg-slate-50/50"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 ml-1">Password</label>
+                    <Input 
+                      required
+                      type="password"
+                      value={modalForm.password}
+                      onChange={e => setModalForm({...modalForm, password: e.target.value})}
+                      placeholder="••••••••"
+                      className="h-10 bg-slate-50/50"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 ml-1">System Role</label>
+                    <select 
+                      className="h-10 w-full px-3 rounded-2xl border border-slate-200 bg-slate-50/50 text-sm font-medium outline-none"
+                      value={modalForm.role}
+                      onChange={e => setModalForm({...modalForm, role: e.target.value as "ADMIN" | "TEACHER"})}
+                    >
+                      <option value="TEACHER">Teacher</option>
+                      {currentUser?.role === "SYSTEM_ADMIN" && <option value="ADMIN">Administrator</option>}
+                    </select>
+                  </div>
+                </div>
+
+                {modalForm.role === "TEACHER" && (
+                  <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2">
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-500 ml-1">Department</label>
+                      <Input 
+                        value={modalForm.department}
+                        onChange={e => setModalForm({...modalForm, department: e.target.value})}
+                        placeholder="Computer Dept"
+                        className="h-10 bg-slate-50/50"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-500 ml-1">Institution</label>
+                      <Input 
+                        value={modalForm.institution}
+                        onChange={e => setModalForm({...modalForm, institution: e.target.value})}
+                        className="h-10 bg-slate-50/50"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="pt-4 flex items-center justify-end gap-3">
+                  <Button type="button" variant="ghost" className="rounded-xl" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+                  <Button 
+                    type="submit" 
+                    className="rounded-xl px-8 bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100"
+                    disabled={submitting}
+                  >
+                    {submitting ? "Creating..." : "Create Account"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         <main className="mx-auto max-w-6xl px-4 py-8">
           <Card className="border-none shadow-xl bg-white/80 backdrop-blur-sm overflow-hidden mb-6">
