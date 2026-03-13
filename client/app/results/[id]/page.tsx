@@ -367,7 +367,7 @@ export default function ResultsPage() {
       setCaptchaError(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state?.status, authLoading, user, batchId]);
+  }, [state?.status, state?.currentEnrollment, authLoading, user, batchId]);
 
   async function start() {
     setError(null);
@@ -395,6 +395,7 @@ export default function ResultsPage() {
         captcha: captchaText,
       });
       setState(res.data.state);
+      setCaptchaText("");
       await loadBatch();
       if (res.data?.info === "captcha_empty") {
         setCaptchaError("Enter CAPTCHA to continue.");
@@ -745,7 +746,7 @@ export default function ResultsPage() {
                               <div className="relative group/input">
                                 <input
                                   value={captchaText}
-                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCaptchaText(e.target.value.toUpperCase())}
+                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCaptchaText(e.target.value)}
                                   placeholder="ENTER CODE..."
                                   className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-6 text-2xl font-display font-bold tracking-[0.2em] text-center focus:outline-none focus:ring-4 focus:ring-primary/10 shadow-sm transition-all text-slate-900 placeholder:text-slate-200 placeholder:tracking-normal focus:border-primary"
                                   autoFocus
