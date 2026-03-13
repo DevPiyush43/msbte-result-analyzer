@@ -48,9 +48,9 @@ export function FadeInStagger({
   children: React.ReactNode;
   className?: string;
   delay?: number;
-  as?: any;
+  as?: string;
 }) {
-  const Component = motion[as as keyof typeof motion] || motion.div;
+  const Component = (motion as any)[as] || motion.div;
   return (
     <Component
       initial="hidden"
@@ -78,9 +78,9 @@ export function FadeInStaggerItem({
 }: {
   children: React.ReactNode;
   className?: string;
-  as?: any;
+  as?: string;
 }) {
-  const Component = motion[as as keyof typeof motion] || motion.div;
+  const Component = (motion as any)[as] || motion.div;
   return (
     <Component
       variants={{
