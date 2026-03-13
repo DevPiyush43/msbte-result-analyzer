@@ -19,16 +19,17 @@ export default function Home() {
     <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-white relative overflow-hidden font-sans">
       {/* Background Ambience */}
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-[-20%] left-[-10%] h-[60rem] w-[60rem] rounded-full bg-primary/10 blur-[150px] animate-pulse pointer-events-none" />
-        <div className="absolute bottom-[-10%] right-[-10%] h-[50rem] w-[50rem] rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none" />
+        <div className="absolute top-[-20%] left-[-10%] h-[60rem] w-[60rem] rounded-full bg-primary/20 blur-[150px] animate-pulse pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] h-[50rem] w-[50rem] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
         {/* Subtle pattern */}
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.05] pointer-events-none mix-blend-overlay" />
+        <div className="absolute inset-0 bg-[url('/msbte-banner.png')] bg-cover bg-center opacity-10 pointer-events-none mix-blend-multiply" />
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none mix-blend-overlay" />
       </div>
 
       <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-10 relative z-10 lg:px-12">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white border border-border text-primary shadow-xl group hover:scale-110 transition-transform duration-500">
-            <GraduationCap className="h-6 w-6" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white border border-border text-primary shadow-xl group hover:scale-110 transition-transform duration-500 p-1.5">
+            <img src="/msbte-logo.png" alt="MSBTE Logo" className="h-full w-full object-contain" />
           </div>
           <div>
             <div className="text-xl font-display font-black tracking-tight text-foreground leading-none">MSBTE Result Analyzer</div>

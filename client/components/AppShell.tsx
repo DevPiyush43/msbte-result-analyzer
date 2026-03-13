@@ -94,8 +94,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 exit={{ opacity: 0, x: -10 }}
                 className="flex items-center gap-4"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-lg">
-                  <GraduationCap className="h-5 w-5" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-lg border border-border p-1">
+                  <img src="/msbte-logo.png" alt="MSBTE Logo" className="h-full w-full object-contain" />
                 </div>
                 <div className="flex flex-col">
                   <span className="font-display font-black text-base tracking-tight leading-none text-foreground">MSBTE Result</span>
@@ -220,8 +220,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex md:hidden flex-col w-full">
         <header className="h-20 border-b border-border bg-card flex items-center justify-between px-6 sticky top-0 z-40">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shadow-md">
-              <GraduationCap className="h-5 w-5" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-md border border-border p-1">
+              <img src="/msbte-logo.png" alt="MSBTE Logo" className="h-full w-full object-contain" />
             </div>
             <span className="font-display font-black text-xs tracking-tight text-foreground uppercase tracking-widest">MSBTE Result Analyzer System</span>
           </div>
@@ -256,8 +256,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               >
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shadow-lg">
-                      <GraduationCap className="h-5 w-5" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-lg border border-border p-1">
+                      <img src="/msbte-logo.png" alt="MSBTE Logo" className="h-full w-full object-contain" />
                     </div>
                     <span className="font-display font-black text-sm tracking-tight text-foreground">MSBTE Result Analyzer</span>
                   </div>
