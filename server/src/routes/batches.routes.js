@@ -23,6 +23,10 @@ router.post("/batches/upload", requireAuth, uploadMiddleware, uploadBatch);
 router.post("/batches/generate-range", requireAuth, generateRange);
 router.get("/batches/recent", requireAuth, recentBatches);
 router.get("/batches/analytics/summary", requireAuth, analyticsSummary);
+router.get("/batches/analytics/summary/export", requireAuth, (req, res, next) => {
+  // We'll define exportAnalyticsSummary below in controller
+  import("../controllers/batches.controller.js").then(m => m.exportAnalyticsSummary(req, res, next));
+});
 router.get("/batches/:id", requireAuth, getBatch);
 router.get("/batches/:id/analytics", requireAuth, batchAnalytics);
 router.get("/batches/:id/students/:enrollment", requireAuth, getStudentInBatch);

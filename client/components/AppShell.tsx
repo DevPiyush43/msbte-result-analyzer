@@ -35,11 +35,11 @@ type NavItem = {
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Teacher Dashboard", icon: LayoutDashboard },
   { href: "/results", label: "Results History", icon: ListChecks },
-  { href: "/analytics", label: "Analytics Node", icon: BarChart3 },
+  { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/upload", label: "Upload Batch", icon: GraduationCap },
   { href: "/exports", label: "Smart Reports", icon: FileJson },
   { href: "/admin/users", label: "Users", icon: Shield, adminOnly: true },
-  { href: "/admin/settings", label: "Operator Settings", icon: Settings, systemAdminOnly: true },
+  { href: "/admin/settings", label: "Settings", icon: Settings, systemAdminOnly: true },
 ];
 
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -86,8 +86,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <GraduationCap className="h-5 w-5" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-display font-black text-base tracking-tight leading-none text-foreground">MSBTE Analyzer</span>
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground mt-1">Result System</span>
+                  <span className="font-display font-black text-base tracking-tight leading-none text-foreground">MSBTE Result</span>
+                  <span className="text-[9px] uppercase font-black tracking-[0.2em] text-primary mt-1.5">Analyzer System</span>
                 </div>
               </motion.div>
             )}
@@ -178,7 +178,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shadow-md">
               <GraduationCap className="h-5 w-5" />
             </div>
-            <span className="font-display font-black text-base tracking-tight text-foreground uppercase tracking-widest">MSBTE Analyzer</span>
+            <span className="font-display font-black text-xs tracking-tight text-foreground uppercase tracking-widest">MSBTE Result Analyzer System</span>
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
@@ -214,7 +214,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-lg">
                       <GraduationCap className="h-5 w-5" />
                     </div>
-                    <span className="font-display font-black text-lg tracking-tight text-foreground">MSBTE Analyzer</span>
+                    <span className="font-display font-black text-base tracking-tight text-foreground">MSBTE Result Analyzer System</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <ThemeToggle />

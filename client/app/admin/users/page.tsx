@@ -139,8 +139,8 @@ export default function UserManagementPage() {
                 <Users className="h-8 w-8 text-primary" />
               </div>
               <div>
-                <span className="font-display font-black text-3xl text-white tracking-tight block">Personnel Registry</span>
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mt-1">Access Control & Operator Management</p>
+                <span className="font-display font-black text-3xl text-white tracking-tight block">User Management</span>
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mt-1">Access Control & Staff Management</p>
               </div>
             </div>
           }
@@ -152,7 +152,7 @@ export default function UserManagementPage() {
               onClick={() => setIsModalOpen(true)}
             >
               <UserPlus className="mr-3 h-4 w-4 opacity-40 group-hover:opacity-100 transition-opacity" />
-              Provision Operator
+              Add New User
             </Button>
           }
         />
@@ -171,8 +171,8 @@ export default function UserManagementPage() {
                   </Button>
                 </div>
                 <div>
-                  <h3 className="text-3xl font-display font-black text-white tracking-tight leading-none mb-3">Access Provisioning</h3>
-                  <p className="text-[10px] text-white/20 font-black uppercase tracking-[0.4em]">Staff identity registration portal</p>
+                  <h3 className="text-3xl font-display font-black text-white tracking-tight leading-none mb-3">User Registration</h3>
+                  <p className="text-[10px] text-white/20 font-black uppercase tracking-[0.4em]">Create new staff account</p>
                 </div>
               </div>
               
@@ -188,7 +188,7 @@ export default function UserManagementPage() {
                 
                 <div className="grid grid-cols-2 gap-10">
                   <div className="space-y-4">
-                    <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">Unique Identifier</label>
+                    <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">Username</label>
                     <div className="relative group/input">
                       <UserCircle className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20 group-hover/input:text-primary transition-colors" />
                       <Input 
@@ -229,7 +229,7 @@ export default function UserManagementPage() {
 
                 <div className="grid grid-cols-2 gap-10">
                   <div className="space-y-4">
-                    <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">Security Cipher</label>
+                    <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">Account Password</label>
                     <div className="relative group/input">
                       <Lock className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20 group-hover/input:text-primary transition-colors" />
                       <Input 
@@ -243,15 +243,15 @@ export default function UserManagementPage() {
                     </div>
                   </div>
                   <div className="space-y-4">
-                    <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">Access Lifecycle</label>
+                    <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">Account Role</label>
                     <div className="relative group/input">
                       <select 
                         className="h-16 w-full pl-6 pr-12 rounded-2xl border border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-white/60 outline-none ring-offset-background focus:ring-4 focus:ring-primary/10 appearance-none shadow-sm cursor-pointer transition-all hover:border-white/20"
                         value={modalForm.role}
                         onChange={e => setModalForm({...modalForm, role: e.target.value as "ADMIN" | "TEACHER"})}
                       >
-                        <option value="TEACHER">Staff Academician</option>
-                        {currentUser?.role === "SYSTEM_ADMIN" && <option value="ADMIN">Controller</option>}
+                        <option value="TEACHER">Teaching Staff</option>
+                        {currentUser?.role === "SYSTEM_ADMIN" && <option value="ADMIN">Administrator</option>}
                       </select>
                       <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20 pointer-events-none group-hover/input:text-primary transition-colors" />
                     </div>
@@ -273,7 +273,7 @@ export default function UserManagementPage() {
                       </div>
                     </div>
                     <div className="space-y-4">
-                      <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">Institution Node</label>
+                      <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">College Name</label>
                       <Input 
                         value={modalForm.institution}
                         onChange={e => setModalForm({...modalForm, institution: e.target.value})}
@@ -284,13 +284,13 @@ export default function UserManagementPage() {
                 )}
 
                 <div className="pt-12 flex items-center justify-end gap-8">
-                  <Button type="button" variant="ghost" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-16 px-10 border border-white/5 hover:bg-white/5 hover:text-white transition-all" onClick={() => setIsModalOpen(false)}>Abort Protocol</Button>
+                  <Button type="button" variant="ghost" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-16 px-10 border border-white/5 hover:bg-white/5 hover:text-white transition-all" onClick={() => setIsModalOpen(false)}>Cancel</Button>
                   <Button 
                     type="submit" 
                     className="rounded-[1.5rem] px-14 h-16 font-black uppercase tracking-widest text-[11px] bg-white text-black shadow-2xl shadow-primary/20 transition-all hover:bg-primary hover:text-white active:scale-95 group"
                     disabled={submitting}
                   >
-                    {submitting ? "Engaging Protocol..." : "Provision Node"}
+                    {submitting ? "Processing..." : "Create Account"}
                   </Button>
                 </div>
               </form>
@@ -308,7 +308,7 @@ export default function UserManagementPage() {
                       <div className="absolute inset-0 bg-primary/5 blur-2xl rounded-2xl opacity-0 group-hover/search:opacity-100 transition-opacity pointer-events-none" />
                       <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20 group-hover/search:text-primary transition-colors" />
                       <Input 
-                        placeholder="Search personnel, communication nodes or identifiers..." 
+                        placeholder="Search by name, email or username..." 
                         className="pl-16 h-16 bg-white/5 border-white/10 rounded-[2rem] font-bold text-sm shadow-inner focus:ring-4 focus:ring-primary/10 transition-all hover:border-white/20"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
@@ -322,10 +322,10 @@ export default function UserManagementPage() {
                           value={roleFilter}
                           onChange={(e) => setRoleFilter(e.target.value)}
                         >
-                          <option value="all">Global Access</option>
-                          <option value="SYSTEM_ADMIN">Root Administrators</option>
-                          <option value="ADMIN">System Controllers</option>
-                          <option value="TEACHER">Staff Nodes</option>
+                          <option value="all">All Users</option>
+                          <option value="SYSTEM_ADMIN">System Admins</option>
+                          <option value="ADMIN">Administrators</option>
+                          <option value="TEACHER">Teaching Staff</option>
                         </select>
                         <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 h-5 w-5 text-white/10 pointer-events-none group-hover/filter:text-primary transition-colors" />
                       </div>
@@ -350,11 +350,11 @@ export default function UserManagementPage() {
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-white/[0.01] border-b border-white/5">
-                        <th className="px-12 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Biological Identity</th>
-                        <th className="px-12 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Permission Class</th>
-                        <th className="px-12 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Current Status</th>
-                        <th className="px-12 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Initial Sync</th>
-                        <th className="px-12 py-8 text-right text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Directives</th>
+                        <th className="px-12 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Full Name</th>
+                        <th className="px-12 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-white/20">User Role</th>
+                        <th className="px-12 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Status</th>
+                        <th className="px-12 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Date Created</th>
+                        <th className="px-12 py-8 text-right text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
@@ -362,7 +362,7 @@ export default function UserManagementPage() {
                          <tr>
                           <td colSpan={5} className="px-12 py-40 text-center">
                             <RefreshCw className="h-12 w-12 animate-spin text-primary opacity-20 mx-auto" />
-                            <p className="mt-8 text-[10px] font-black text-white/10 uppercase tracking-[0.5em]">Synchronizing Identity Grid...</p>
+                            <p className="mt-8 text-[10px] font-black text-white/10 uppercase tracking-[0.5em]">Loading user database...</p>
                           </td>
                         </tr>
                       ) : filteredUsers.length === 0 ? (
@@ -371,8 +371,8 @@ export default function UserManagementPage() {
                             <div className="h-20 w-20 bg-white/5 rounded-[2rem] flex items-center justify-center mx-auto mb-8 border border-white/5 text-white/10">
                                <Users className="h-10 w-10" />
                             </div>
-                            <h3 className="text-white font-display font-black text-2xl tracking-tight mb-3">Zero Response Grid</h3>
-                            <p className="text-[10px] text-white/20 font-black uppercase tracking-[0.4em]">No personnel matches the search vector</p>
+                            <h3 className="text-white font-display font-black text-2xl tracking-tight mb-3">No Users Found</h3>
+                            <p className="text-[10px] text-white/20 font-black uppercase tracking-[0.4em]">No users match your criteria</p>
                           </td>
                         </tr>
                       ) : (

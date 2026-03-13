@@ -1236,3 +1236,72 @@ export const deleteBatch = asyncHandler(async (req, res) => {
   await ResultBatch.deleteOne({ _id: req.params.id, teacherId: req.user.sub });
   return res.json({ ok: true });
 });
+
+export const exportAnalyticsSummary = asyncHandler(async (req, res) => {
+  const batches = await ResultBatch.find({ teacherId: req.user.sub }).sort({ uploadDate: -1 }).lean();
+
+  let totalStudents = 0;
+  let pass = 0;
+  let fail = 0;
+  let droppedCount = 0;
+  let totalKTs = 0;
+
+  for (const b of batches) {
+    for (const r of b.results || []) {
+      totalStudents++;
+      const status = (r.resultStatus || "Unknown").toLowerCase();
+      if (status === "pass") pass++;
+      if (status === "fail") fail++;
+
+      let studentKts = 0;
+      const sm = r.subjectMarks;
+      if (sm && typeof sm === "object") {
+        for (const [subjectName, entry] of Object.entries(sm)) {
+          const e = entry || {};
+          if (typeof e.totalObt === 'string' && e.totalObt.includes('*')) {
+            studentKts++;
+          }
+        }
+      }
+      totalKTs += studentKts;
+      if (studentKts >= 4) droppedCount++;
+    }
+  }
+
+  const passRate = totalStudents > 0 ? ((pass / totalStudents) * 100).toFixed(2) : 0;
+
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet("Academic Summary");
+
+  sheet.addRow(["MSBTE Result Analyzer - Institutional Academic Summary"]);
+  sheet.mergeCells("A1:E1");
+  sheet.getRow(1).font = { bold: true, size: 14 };
+  sheet.getRow(1).alignment = { horizontal: 'center' };
+
+  sheet.addRow([]); // Spacer
+
+  const data = [
+    ["Total Batches Processed", batches.length],
+    ["Total Students Analyzed", totalStudents],
+    ["Total Passed", pass],
+    ["Total Failed", fail],
+    ["Aggregate Pass Percentage", `${passRate}%`],
+    ["Critical Backlog Students (4+ KTs)", droppedCount],
+    ["Total Subject Failures (KTs)", totalKTs]
+  ];
+
+  data.forEach(item => {
+    const row = sheet.addRow(item);
+    row.getCell(1).font = { bold: true };
+    row.getCell(2).alignment = { horizontal: 'left' };
+  });
+
+  sheet.getColumn(1).width = 40;
+  sheet.getColumn(2).width = 20;
+
+  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  res.setHeader("Content-Disposition", "attachment; filename=academic_summary.xlsx");
+
+  await workbook.xlsx.write(res);
+  res.end();
+});
