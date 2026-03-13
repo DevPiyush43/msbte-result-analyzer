@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lock, Mail } from "lucide-react";
+import { GraduationCap, Lock, Mail } from "lucide-react";
 
 import { useAuth } from "@/components/AuthProvider";
 import { FadeIn, HoverLift } from "@/components/Animated";
@@ -47,20 +47,17 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-background relative overflow-hidden font-sans">
       {/* Dynamic Background Elements */}
-      <div className="absolute inset-0 z-0 bg-slate-50">
-        {/* The new MSBTE Banner as background */}
-        <div className="absolute inset-0 bg-[url('/msbte-banner.png')] bg-cover bg-center opacity-10 pointer-events-none mix-blend-multiply" />
-        
-        <div className="absolute top-[-10%] left-[-10%] h-[50rem] w-[50rem] rounded-full bg-primary/20 blur-[120px] animate-pulse pointer-events-none" />
-        <div className="absolute bottom-[-10%] right-[-10%] h-[40rem] w-[40rem] rounded-full bg-indigo-500/10 blur-[100px] pointer-events-none" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none" />
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-[-10%] left-[-10%] h-[50rem] w-[50rem] rounded-full bg-primary/10 blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] h-[40rem] w-[40rem] rounded-full bg-secondary/10 blur-[100px]" />
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.05] pointer-events-none" />
       </div>
 
       <div className="relative z-10 w-full max-w-md">
         <FadeIn>
           <div className="mb-10 text-center space-y-4">
-             <div className="inline-flex items-center justify-center p-4 rounded-[2rem] bg-white border border-border shadow-xl mb-4">
-                <img src="/msbte-logo.png" alt="MSBTE Logo" className="h-16 w-16 object-contain" />
+             <div className="inline-flex items-center justify-center p-4 rounded-2xl bg-white border border-border shadow-xl mb-2">
+                <GraduationCap className="h-8 w-8 text-primary" />
              </div>
              <div className="space-y-1">
                 <h1 className="text-4xl font-display font-black tracking-tight text-foreground">
