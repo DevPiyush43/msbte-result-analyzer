@@ -20,19 +20,19 @@ export default function SmartEduHubPage() {
                 <Star className="h-6 w-6 text-orange-500 fill-orange-500/20" />
               </div>
               <div>
-                <span className="font-display font-black text-3xl text-white tracking-tight block">SmartEdu Hub</span>
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mt-1">Unified Intelligence Nexus</p>
+                <span className="font-display font-black text-3xl text-foreground tracking-tight block">SmartEdu Hub</span>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-1">College Management System</p>
               </div>
             </div>
           }
-          subtitle="The All-In-One Unified College Utility & Management System."
+          subtitle="The complete institutional utility for student management and academic tracking."
           backHref="/dashboard"
           backLabel="Back to Dashboard"
         />
 
-        <main className="mx-auto max-w-7xl px-6 py-12 lg:px-12">
+        <main className="mx-auto max-w-7xl px-8 py-12 lg:px-12">
           <FadeIn>
-            <div className="mb-16 rounded-[3rem] bg-indigo-600 shadow-[0_0_100px_rgba(79,70,229,0.1)] p-12 lg:p-16 text-white relative overflow-hidden border border-white/10">
+            <div className="mb-16 rounded-[3rem] bg-indigo-600 shadow-xl p-12 lg:p-16 text-white relative overflow-hidden">
               <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.05),transparent)] pointer-events-none" />
               <div className="absolute -top-24 -right-24 w-96 h-96 bg-white/[0.03] rounded-full blur-3xl" />
               <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-400/[0.1] rounded-full blur-3xl opacity-50" />
@@ -98,38 +98,38 @@ export default function SmartEduHubPage() {
             </div>
 
             <div className="grid gap-12 md:grid-cols-3">
-               <Card className="border-white/5 shadow-2xl rounded-[3rem] bg-white/[0.02] backdrop-blur-3xl overflow-hidden border-t-white/10 group transition-all hover:bg-white/[0.04]">
+                <Card className="border-border shadow-xl rounded-[3rem] bg-white overflow-hidden group transition-all hover:-translate-y-1">
                   <CardHeader className="p-10 pb-6">
-                    <div className="text-emerald-400 font-black uppercase text-[10px] tracking-[0.4em] mb-4">Core Architecture</div>
-                    <h3 className="text-2xl font-display font-black text-white tracking-tight group-hover:text-primary transition-colors">Advanced Analytics</h3>
+                    <div className="text-secondary font-bold uppercase text-[10px] tracking-widest mb-4">Academic Data Layers</div>
+                    <h3 className="text-2xl font-display font-black text-foreground tracking-tight group-hover:text-primary transition-colors">Advanced Analytics</h3>
                   </CardHeader>
                   <CardContent className="px-10 pb-10">
-                    <p className="text-sm font-medium text-white/40 leading-relaxed">
-                      Deep-dive into student performance metrics, identify learning gaps dynamically, and let the AI generate customized improvement roadmaps for underperforming departments.
+                    <p className="text-sm font-medium text-muted-foreground leading-relaxed">
+                      Deep-dive into student performance metrics, identify learning gaps dynamically, and generate customized improvement plans for individual departments.
                     </p>
                   </CardContent>
                 </Card>
 
-                <Card className="border-white/5 shadow-2xl rounded-[3rem] bg-white/[0.02] backdrop-blur-3xl overflow-hidden border-t-white/10 group transition-all hover:bg-white/[0.04]">
+                <Card className="border-border shadow-xl rounded-[3rem] bg-white overflow-hidden group transition-all hover:-translate-y-1">
                   <CardHeader className="p-10 pb-6">
-                    <div className="text-blue-400 font-black uppercase text-[10px] tracking-[0.4em] mb-4">Protocol Integration</div>
-                    <h3 className="text-2xl font-display font-black text-white tracking-tight group-hover:text-primary transition-colors">Parent Gateway</h3>
+                    <div className="text-blue-600 font-bold uppercase text-[10px] tracking-widest mb-4">Communication Hub</div>
+                    <h3 className="text-2xl font-display font-black text-foreground tracking-tight group-hover:text-primary transition-colors">Parent Gateway</h3>
                   </CardHeader>
                   <CardContent className="px-10 pb-10">
-                    <p className="text-sm font-medium text-white/40 leading-relaxed">
-                      Automated SMS and email triggers send vital updates (like low attendance alerts or exam scores) directly to parents seamlessly without manual staff work.
+                    <p className="text-sm font-medium text-muted-foreground leading-relaxed">
+                      Automated SMS and email notifications send vital updates like attendance alerts or exam scores directly to parents, ensuring constant academic engagement.
                     </p>
                   </CardContent>
                 </Card>
 
-                <Card className="border-white/5 shadow-2xl rounded-[3rem] bg-white/[0.02] backdrop-blur-3xl overflow-hidden border-t-white/10 group transition-all hover:bg-white/[0.04]">
+                <Card className="border-border shadow-xl rounded-[3rem] bg-white overflow-hidden group transition-all hover:-translate-y-1">
                   <CardHeader className="p-10 pb-6">
-                    <div className="text-orange-400 font-black uppercase text-[10px] tracking-[0.4em] mb-4">Bi-directional Sync</div>
-                    <h3 className="text-2xl font-display font-black text-white tracking-tight group-hover:text-primary transition-colors">Unified Datasets</h3>
+                    <div className="text-orange-600 font-bold uppercase text-[10px] tracking-widest mb-4">Unified Academic Sync</div>
+                    <h3 className="text-2xl font-display font-black text-foreground tracking-tight group-hover:text-primary transition-colors">Centralized Records</h3>
                   </CardHeader>
                   <CardContent className="px-10 pb-10">
-                    <p className="text-sm font-medium text-white/40 leading-relaxed">
-                      Results automatically imported from our MSBTE Analyzer tool flow straight into the student's central master record. Double-data entry is effectively eliminated.
+                    <p className="text-sm font-medium text-muted-foreground leading-relaxed">
+                      Results automatically imported from our MSBTE Analyzer tool flow straight into the central master records, effectively eliminating manual data entry errors.
                     </p>
                   </CardContent>
                 </Card>

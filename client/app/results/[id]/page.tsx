@@ -807,7 +807,7 @@ export default function ResultsPage() {
                           className="p-8 rounded-[2.5rem] border-border bg-accent/10 shadow-sm"
                         />
                         <StatCard
-                          tone="rose"
+                          tone="red"
                           label="KT Count"
                           value={analytics.totals.totalKTs}
                           hint="Students with failed subjects"
