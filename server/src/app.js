@@ -10,6 +10,7 @@ import authV2Routes from "./routes/auth.v2.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import batchesRoutes from "./routes/batches.routes.js";
 import fetchRoutes from "./routes/fetch.routes.js";
+import settingsRoutes from "./routes/settings.routes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 export function createApp() {
@@ -41,6 +42,7 @@ export function createApp() {
   app.use("/api", authRoutes);
   app.use("/api/v2", authV2Routes);
   app.use("/api/admin", adminRoutes);
+  app.use("/api/admin", settingsRoutes);
   app.use("/api", batchesRoutes);
   app.use("/api", fetchRoutes);
 

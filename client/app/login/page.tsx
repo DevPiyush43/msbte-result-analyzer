@@ -72,7 +72,7 @@ export default function LoginPage() {
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700 ml-1">Username</label>
                   <div className="relative">
-                    <Mail className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <GraduationCap className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400" />
                     <Input 
                       className="pl-10 h-11 bg-slate-50/50 border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" 
                       placeholder="Enter your username" 

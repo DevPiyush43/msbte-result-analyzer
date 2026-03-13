@@ -21,6 +21,7 @@
 import { ResultBatch } from "../models/ResultBatch.js";
 import { parseMsbteResultHtml } from "./msbteParse.service.js";
 import { env } from "../config/env.js";
+import { Settings } from "../models/Settings.js";
 
 // ---------------------------------------------------------------------------
 // Lightweight HTTP helper (uses Node's built-in fetch, available in Node 18+)
@@ -229,8 +230,18 @@ class MsBteFetchJob {
   // -------------------------------------------------------------------------
 
   async init() {
+    // Try to get dynamic MSBTE URL from settings
+    try {
+      const setting = await Settings.findOne({ key: "MSBTE_RESULT_URL" });
+      if (setting && setting.value) {
+        this._baseUrl = setting.value;
+      }
+    } catch (e) {
+      console.error("Error loading MSBTE_RESULT_URL from settings:", e);
+    }
+
     if (!this._baseUrl) {
-      const err = new Error("MSBTE_RESULT_URL is not set in server .env");
+      const err = new Error("MSBTE_RESULT_URL is not set (check Admin Settings)");
       err.statusCode = 500;
       throw err;
     }

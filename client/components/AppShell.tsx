@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
-import { BarChart3, LayoutDashboard, ListChecks, Upload } from "lucide-react";
+import { BarChart3, LayoutDashboard, ListChecks, Upload, Shield, Settings } from "lucide-react";
 
 import { useAuth } from "@/components/AuthProvider";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
+  const extraNav: NavItem[] = [];
+  if (user?.role === "ADMIN" || user?.role === "SYSTEM_ADMIN") {
+    extraNav.push({ href: "/admin/users", label: "Users", icon: Shield });
+  }
+  if (user?.role === "SYSTEM_ADMIN") {
+    extraNav.push({ href: "/admin/settings", label: "Settings", icon: Settings });
+  }
+
+  const allNav = [...nav, ...extraNav];
+
   return (
     <div className="min-h-screen bg-[radial-gradient(1200px_circle_at_20%_0%,rgba(37,99,235,0.14),transparent_55%),radial-gradient(900px_circle_at_90%_20%,rgba(124,58,237,0.10),transparent_55%),linear-gradient(to_bottom,#f8fafc,#ffffff_60%,#ffffff)]">
       <div className="mx-auto flex min-h-screen max-w-[1400px]">
@@ -40,7 +50,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
 
             <nav className="grid gap-1 px-3">
-              {nav.map((item) => {
+              {allNav.map((item) => {
                 const active = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href));
                 const Icon = item.icon;
                 return (
