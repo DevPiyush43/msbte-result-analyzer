@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 type User = {
   _id: string;
   username: string;
+  fullName?: string;
   email: string;
   role: "SYSTEM_ADMIN" | "ADMIN" | "TEACHER";
   status: "ACTIVE" | "DISABLED";
@@ -361,10 +362,15 @@ export default function UserManagementPage() {
                                   </div>
                                 </div>
                                 <div className="space-y-1.5">
-                                  <div className="text-lg font-display font-black text-slate-900 tracking-tight group-hover:text-primary transition-colors">{u.username}</div>
-                                  <div className="text-[10px] text-slate-500 font-bold flex items-center gap-3 uppercase tracking-widest">
-                                    <Mail className="h-3.5 w-3.5 text-primary/40" />
-                                    {u.email}
+                                  <div className="text-lg font-display font-black text-slate-900 tracking-tight group-hover:text-primary transition-colors">
+                                    {u.fullName || u.username}
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <div className="text-[9px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md uppercase tracking-widest">{u.username}</div>
+                                    <div className="text-[10px] text-slate-500 font-bold flex items-center gap-2 uppercase tracking-widest">
+                                      <Mail className="h-3.5 w-3.5 text-primary/40" />
+                                      {u.email}
+                                    </div>
                                   </div>
                                 </div>
                               </div>

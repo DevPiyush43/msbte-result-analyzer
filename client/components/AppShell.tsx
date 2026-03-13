@@ -14,9 +14,11 @@ import {
   Menu, 
   X,
   FileJson,
-  History,
   LogOut,
-  GraduationCap
+  GraduationCap,
+  BookOpen,
+  Layers,
+  ExternalLink,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -30,6 +32,8 @@ type NavItem = {
   icon: React.ComponentType<{ className?: string }>;
   adminOnly?: boolean;
   systemAdminOnly?: boolean;
+  external?: boolean;
+  accent?: string;
 };
 
 const navItems: NavItem[] = [
@@ -40,6 +44,11 @@ const navItems: NavItem[] = [
   { href: "/exports", label: "Smart Reports", icon: FileJson },
   { href: "/admin/users", label: "User Management", icon: Shield, adminOnly: true },
   { href: "/admin/settings", label: "Settings", icon: Settings, systemAdminOnly: true },
+];
+
+const utilityItems: NavItem[] = [
+  { href: "/docs", label: "Documentation", icon: BookOpen, accent: "text-indigo-500" },
+  { href: "/smarteduhub", label: "Smart Edu Hub", icon: Layers, accent: "text-emerald-500" },
 ];
 
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -55,6 +64,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     if (item.adminOnly && user?.role !== "ADMIN" && user?.role !== "SYSTEM_ADMIN") return false;
     return true;
   });
+
+  const displayName = user?.fullName || user?.username || "Teacher";
+  const initials = displayName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
 
   return (
     <div className="flex min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-white transition-colors duration-500">
@@ -103,7 +115,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        <nav className="flex-1 space-y-2 p-6 mt-6">
+        {/* Main Nav */}
+        <nav className="flex-1 space-y-1.5 p-4 mt-4 overflow-y-auto">
           {filteredNav.map((item) => {
             const active = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href));
             const Icon = item.icon;
@@ -137,31 +150,63 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
+
+          {/* Utility Nav Divider */}
+          {!isCollapsed && (
+            <div className="pt-3 pb-1 px-2">
+              <div className="h-px bg-border w-full" />
+              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground mt-3 px-1">Tools & Resources</p>
+            </div>
+          )}
+          {isCollapsed && <div className="pt-2 pb-1 px-2"><div className="h-px bg-border" /></div>}
+
+          {utilityItems.map((item) => {
+            const active = pathname?.startsWith(item.href);
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-4 rounded-xl px-4 py-3 text-[12px] font-bold uppercase tracking-wider transition-all group relative overflow-hidden",
+                  active
+                    ? "text-primary bg-primary/5 border border-primary/20 shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                )}
+              >
+                <Icon className={cn("h-5 w-5 shrink-0 transition-all", active ? "text-primary scale-110" : `opacity-60 group-hover:opacity-100 ${item.accent || ""}`)} />
+                {!isCollapsed && (
+                  <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="truncate">
+                    {item.label}
+                  </motion.span>
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
-        <div className="p-6 border-t border-border">
+        {/* User Profile Footer */}
+        <div className="p-4 border-t border-border">
           {isCollapsed ? (
             <div className="flex justify-center">
-              <div className="h-12 w-12 rounded-2xl bg-primary shadow-md transform hover:rotate-6 transition-all duration-500">
-                <div className="h-full w-full rounded-[15px] bg-white flex items-center justify-center text-primary text-xs font-black ring-1 ring-inset ring-black/5">
-                  {user?.username?.[0]?.toUpperCase()}
-                </div>
+              <div className="h-11 w-11 rounded-xl bg-primary shadow-md flex items-center justify-center text-white text-xs font-black">
+                {initials}
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-between gap-4 bg-accent border border-border p-4 rounded-xl group hover:border-primary/20 transition-all">
-              <div className="flex items-center gap-4 min-w-0">
-                <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-white font-black shrink-0 shadow-md">
-                  {user?.username?.[0]?.toUpperCase()}
+            <div className="flex items-center justify-between gap-3 bg-accent border border-border p-3 rounded-xl group hover:border-primary/20 transition-all">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-white font-black shrink-0 shadow-md text-xs">
+                  {initials}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-foreground truncate tracking-tight">{user?.username}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mt-0.5">{user?.role}</p>
+                  <p className="text-xs font-bold text-foreground truncate tracking-tight">{displayName}</p>
+                  <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider mt-0.5">{user?.role}</p>
                 </div>
               </div>
               <button 
                 onClick={logout}
-                className="p-2.5 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all active:scale-90"
+                className="p-2 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all active:scale-90 shrink-0"
                 title="Logout"
               >
                 <LogOut className="h-4 w-4" />
@@ -207,24 +252,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 animate={{ x: 0 }}
                 exit={{ x: "-100%" }}
                 transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                className="fixed top-0 left-0 bottom-0 w-[300px] bg-card border-r border-border z-50 md:hidden flex flex-col p-8"
+                className="fixed top-0 left-0 bottom-0 w-[300px] bg-card border-r border-border z-50 md:hidden flex flex-col p-6"
               >
-                <div className="flex items-center justify-between mb-12">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-lg">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shadow-lg">
                       <GraduationCap className="h-5 w-5" />
                     </div>
-                    <span className="font-display font-black text-base tracking-tight text-foreground">MSBTE Result Analyzer System</span>
+                    <span className="font-display font-black text-sm tracking-tight text-foreground">MSBTE Result Analyzer</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <ThemeToggle />
-                    <button onClick={() => setIsMobileOpen(false)} className="p-3 rounded-xl bg-accent text-foreground border border-border">
+                    <button onClick={() => setIsMobileOpen(false)} className="p-2 rounded-xl bg-accent text-foreground border border-border">
                       <X className="h-5 w-5" />
                     </button>
                   </div>
                 </div>
 
-                <nav className="space-y-3 flex-1">
+                <nav className="space-y-1.5 flex-1 overflow-y-auto">
                   {filteredNav.map((item) => {
                     const active = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href));
                     const Icon = item.icon;
@@ -234,7 +279,33 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         href={item.href}
                         onClick={() => setIsMobileOpen(false)}
                         className={cn(
-                          "flex items-center gap-4 rounded-xl px-5 py-4 text-[12px] font-bold uppercase tracking-widest transition-all",
+                          "flex items-center gap-4 rounded-xl px-4 py-3 text-[12px] font-bold uppercase tracking-widest transition-all",
+                          active
+                            ? "bg-primary text-white shadow-lg"
+                            : "text-muted-foreground hover:bg-accent hover:text-primary"
+                        )}
+                      >
+                        <Icon className="h-5 w-5" />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+
+                  <div className="pt-3 pb-1 px-1">
+                    <div className="h-px bg-border" />
+                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground mt-3">Tools & Resources</p>
+                  </div>
+
+                  {utilityItems.map((item) => {
+                    const active = pathname?.startsWith(item.href);
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsMobileOpen(false)}
+                        className={cn(
+                          "flex items-center gap-4 rounded-xl px-4 py-3 text-[12px] font-bold uppercase tracking-widest transition-all",
                           active
                             ? "bg-primary text-white shadow-lg"
                             : "text-muted-foreground hover:bg-accent hover:text-primary"
@@ -247,17 +318,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   })}
                 </nav>
 
-                <div className="mt-auto pt-8 border-t border-border">
-                  <div className="flex items-center gap-4 mb-6 p-4 rounded-xl bg-accent border border-border">
-                    <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center text-white font-black">
-                      {user?.username?.[0]?.toUpperCase()}
+                <div className="mt-4 pt-4 border-t border-border">
+                  <div className="flex items-center gap-3 mb-4 p-3 rounded-xl bg-accent border border-border">
+                    <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-white font-black text-xs">
+                      {initials}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-foreground truncate">{user?.username}</p>
-                      <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mt-0.5">{user?.role}</p>
+                      <p className="text-sm font-bold text-foreground truncate">{displayName}</p>
+                      <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest mt-0.5">{user?.role}</p>
                     </div>
                   </div>
-                  <Button variant="ghost" className="w-full rounded-xl h-14 bg-destructive/10 text-destructive font-bold uppercase tracking-widest text-[11px] border border-destructive/20" onClick={logout}>
+                  <Button variant="ghost" className="w-full rounded-xl h-12 bg-destructive/10 text-destructive font-bold uppercase tracking-widest text-[11px] border border-destructive/20" onClick={logout}>
                     <LogOut className="h-4 w-4 mr-3" />
                     Logout
                   </Button>

@@ -23,7 +23,9 @@ import {
   LayoutDashboard,
   RefreshCw,
   AlertCircle,
-  TriangleAlert
+  TriangleAlert,
+  ArrowRight,
+  Layers
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -132,7 +134,7 @@ export default function DashboardPage() {
                 <span className="font-display font-black text-3xl text-slate-900 tracking-tight block">Teacher Dashboard</span>
                 <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 mt-1 flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-sm" />
-                  Welcome back, {user?.username}
+                  Welcome back, {user?.fullName || user?.username}
                 </p>
               </div>
             </div>
@@ -433,6 +435,71 @@ export default function DashboardPage() {
                     </Card>
                  </motion.div>
                ))}
+             </div>
+          </div>
+
+          <div className="mt-24 mb-20 relative">
+             <div className="absolute inset-0 bg-primary/5 rounded-[4rem] -mx-8 -my-12 z-0" />
+             <div className="relative z-10">
+                <div className="flex items-center gap-4 mb-10 text-slate-900">
+                   <div className="h-12 w-12 rounded-2xl bg-white shadow-xl flex items-center justify-center border border-slate-200">
+                      <Box className="h-6 w-6 text-primary" />
+                   </div>
+                   <div>
+                      <h3 className="text-2xl font-display font-black tracking-tight">Resources & Applications</h3>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1">Institutional tools and help center</p>
+                   </div>
+                </div>
+
+                <div className="grid gap-8 md:grid-cols-2">
+                   {/* Documentation Card */}
+                   <motion.div whileHover={{ scale: 1.02 }} className="group">
+                      <div className="h-full rounded-[3rem] bg-indigo-600 p-8 text-white shadow-2xl shadow-indigo-200 relative overflow-hidden group-hover:shadow-indigo-300 transition-all">
+                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
+                           <BookOpen className="h-32 w-32" />
+                        </div>
+                        <div className="relative z-10 flex flex-col h-full">
+                           <div className="h-14 w-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-6">
+                              <BookOpen className="h-7 w-7 text-white" />
+                           </div>
+                           <h4 className="text-2xl font-display font-black tracking-tight mb-3">System Documentation</h4>
+                           <p className="text-indigo-100 text-sm font-bold leading-relaxed mb-10 max-w-sm">
+                              Complete guide for teachers and administrators. Includes extraction protocols, report formats, and troubleshooting.
+                           </p>
+                           <Link href="/docs" className="mt-auto">
+                              <Button className="w-full h-14 rounded-2xl bg-white text-indigo-700 hover:bg-indigo-50 font-black text-[11px] tracking-[0.2em] uppercase transition-all shadow-xl">
+                                 OPEN GUIDE
+                                 <ArrowRight className="ml-3 h-4 w-4" />
+                              </Button>
+                           </Link>
+                        </div>
+                      </div>
+                   </motion.div>
+
+                   {/* Smart Edu Hub Card */}
+                   <motion.div whileHover={{ scale: 1.02 }} className="group">
+                      <div className="h-full rounded-[3rem] bg-emerald-600 p-8 text-white shadow-2xl shadow-emerald-200 relative overflow-hidden group-hover:shadow-emerald-300 transition-all">
+                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
+                           <Layers className="h-32 w-32" />
+                        </div>
+                        <div className="relative z-10 flex flex-col h-full">
+                           <div className="h-14 w-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-6">
+                              <Layers className="h-7 w-7 text-white" />
+                           </div>
+                           <h4 className="text-2xl font-display font-black tracking-tight mb-3">Smart Edu Hub</h4>
+                           <p className="text-emerald-100 text-sm font-bold leading-relaxed mb-10 max-w-sm">
+                              College management companion app. Mark attendance, generate defaulter lists, and monitor student performance.
+                           </p>
+                           <Link href="/smarteduhub" className="mt-auto">
+                              <Button className="w-full h-14 rounded-2xl bg-white text-emerald-700 hover:bg-emerald-50 font-black text-[11px] tracking-[0.2em] uppercase transition-all shadow-xl">
+                                 EXPLORE HUB
+                                 <ArrowRight className="ml-3 h-4 w-4" />
+                              </Button>
+                           </Link>
+                        </div>
+                      </div>
+                   </motion.div>
+                </div>
              </div>
           </div>
         </main>

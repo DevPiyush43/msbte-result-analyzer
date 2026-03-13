@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 type User = {
   id: string;
   username: string;
+  fullName: string;
   email: string;
   role: "SYSTEM_ADMIN" | "ADMIN" | "TEACHER";
 };

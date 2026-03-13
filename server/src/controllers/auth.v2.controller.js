@@ -21,6 +21,7 @@ function signToken(user) {
       role: user.role,
       email: user.email,
       username: user.username,
+      fullName: user.fullName || user.username,
     },
     env.JWT_SECRET,
     { expiresIn: env.JWT_EXPIRES_IN }
@@ -62,6 +63,7 @@ export const login = asyncHandler(async (req, res) => {
     user: {
       id: user._id,
       username: user.username,
+      fullName: user.fullName || user.username,
       email: user.email,
       role: user.role,
     },
@@ -74,5 +76,6 @@ export const me = asyncHandler(async (req, res) => {
     return res.status(404).json({ error: { message: "User not found" } });
   }
 
-  return res.json({ user });
+  return res.json({ user: { ...user, fullName: user.fullName || user.username } });
 });
+
