@@ -24,6 +24,7 @@ export function FadeIn({
   );
 }
 
+
 export function HoverLift({
   children,
   className,
@@ -35,5 +36,60 @@ export function HoverLift({
     <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.15 }} className={className}>
       {children}
     </motion.div>
+  );
+}
+
+export function FadeInStagger({
+  children,
+  className,
+  delay = 0,
+  as = "div",
+}: {
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
+  as?: any;
+}) {
+  const Component = motion[as as keyof typeof motion] || motion.div;
+  return (
+    <Component
+      initial="hidden"
+      animate="show"
+      variants={{
+        hidden: {},
+        show: {
+          transition: {
+            staggerChildren: 0.1,
+            delayChildren: delay,
+          },
+        },
+      }}
+      className={className}
+    >
+      {children}
+    </Component>
+  );
+}
+
+export function FadeInStaggerItem({
+  children,
+  className,
+  as = "div",
+}: {
+  children: React.ReactNode;
+  className?: string;
+  as?: any;
+}) {
+  const Component = motion[as as keyof typeof motion] || motion.div;
+  return (
+    <Component
+      variants={{
+        hidden: { opacity: 0, y: 10 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+      }}
+      className={className}
+    >
+      {children}
+    </Component>
   );
 }

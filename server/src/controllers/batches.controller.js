@@ -252,6 +252,8 @@ export const analyticsSummary = asyncHandler(async (req, res) => {
   let totalStudents = 0;
   let pass = 0;
   let fail = 0;
+  let droppedCount = 0;
+  let totalKTs = 0;
 
   const classDist = new Map();
   const subjectAgg = new Map();
@@ -265,6 +267,31 @@ export const analyticsSummary = asyncHandler(async (req, res) => {
       const status = (r.resultStatus || "Unknown").toLowerCase();
       if (status === "pass") pass++;
       if (status === "fail") fail++;
+
+      let studentKts = 0;
+      const sm = r.subjectMarks;
+      if (sm && typeof sm === "object") {
+        for (const [subjectName, entry] of Object.entries(sm)) {
+          const e = entry || {};
+          const totalObt = e.totalObt;
+          if (typeof totalObt === "string" && totalObt.includes("*")) {
+            studentKts++;
+          }
+
+          const obt = typeof e.totalObt === "number" ? e.totalObt : null;
+          const max = typeof e.totalMax === "number" ? e.totalMax : null;
+          if (obt === null || max === null || max <= 0) continue;
+
+          const cur = subjectAgg.get(subjectName) || { sumObt: 0, sumMax: 0, count: 0 };
+          cur.sumObt += obt;
+          cur.sumMax += max;
+          cur.count += 1;
+          subjectAgg.set(subjectName, cur);
+        }
+      }
+
+      totalKTs += studentKts;
+      if (studentKts >= 4) droppedCount++;
 
       const cls = (r.resultClass || r.resultStatus || "Unknown").trim();
       classDist.set(cls, (classDist.get(cls) || 0) + 1);
@@ -280,26 +307,11 @@ export const analyticsSummary = asyncHandler(async (req, res) => {
           };
         }
       }
-
-      const sm = r.subjectMarks;
-      if (sm && typeof sm === "object") {
-        for (const [subjectName, entry] of Object.entries(sm)) {
-          const e = entry || {};
-          const obt = typeof e.totalObt === "number" ? e.totalObt : null;
-          const max = typeof e.totalMax === "number" ? e.totalMax : null;
-          if (obt === null || max === null || max <= 0) continue;
-
-          const cur = subjectAgg.get(subjectName) || { sumObt: 0, sumMax: 0, count: 0 };
-          cur.sumObt += obt;
-          cur.sumMax += max;
-          cur.count += 1;
-          subjectAgg.set(subjectName, cur);
-        }
-      }
     }
   }
 
   const passRate = pass + fail > 0 ? Math.round((pass / (pass + fail)) * 100) : 0;
+  const failRate = pass + fail > 0 ? Math.round((fail / (pass + fail)) * 100) : 0;
 
   const classDistribution = Array.from(classDist.entries())
     .map(([label, value]) => ({ label, value }))
@@ -319,7 +331,10 @@ export const analyticsSummary = asyncHandler(async (req, res) => {
       totalStudents,
       pass,
       fail,
+      dropped: droppedCount,
+      totalKTs,
       passRate,
+      failRate,
     },
     topper,
     classDistribution,

@@ -39,85 +39,98 @@ export default function LoginPage() {
       await login({ username: values.username, password: values.password });
       router.push("/dashboard");
     } catch (err: any) {
-      const message = err?.response?.data?.error?.message || "Login failed";
+      const message = err?.response?.data?.error?.message || "Internal auth system failure";
       setError("root", { message });
     }
   }
 
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center px-4 bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: "url('/login-bg.png')" }}
-    >
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" />
-      
+    <div className="min-h-screen flex items-center justify-center px-4 bg-[#0a0a0a] relative overflow-hidden font-sans">
+      {/* Dynamic Background Elements */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-[-10%] left-[-10%] h-[50rem] w-[50rem] rounded-full bg-primary/20 blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] h-[40rem] w-[40rem] rounded-full bg-indigo-500/10 blur-[100px]" />
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none" />
+      </div>
+
       <div className="relative z-10 w-full max-w-md">
         <FadeIn>
-          <div className="mb-8 text-center bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20">
-            <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-lg">
-              Academy Management
-            </h1>
-            <p className="mt-2 text-slate-100 font-medium">MSBTE Result Portal</p>
+          <div className="mb-10 text-center space-y-4">
+             <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl mb-2">
+                <GraduationCap className="h-8 w-8 text-primary shadow-[0_0_15px_rgba(var(--primary),0.5)]" />
+             </div>
+             <div className="space-y-1">
+                <h1 className="text-4xl font-display font-black tracking-tight text-white">
+                  Quantumsync
+                </h1>
+                <p className="text-[10px] uppercase font-black tracking-[0.4em] text-muted-foreground opacity-50">Advanced Academic Result Node</p>
+             </div>
           </div>
         </FadeIn>
 
-        <HoverLift>
-          <Card className="border-none shadow-2xl bg-white/95 backdrop-blur-sm">
-            <CardHeader className="text-center">
-              <div className="text-xl font-bold text-slate-800 tracking-tight">System Login</div>
-              <div className="text-sm text-slate-500 font-medium italic">Authorize to access dashboard</div>
+        <FadeIn delay={0.1}>
+          <Card className="border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.3)] bg-white/5 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden">
+            <CardHeader className="text-center pt-10 pb-6">
+              <div className="text-lg font-display font-black text-white tracking-tight uppercase tracking-[0.1em]">Authenticator</div>
+              <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-40 mt-1 italic">Secure Administrative Handshake</div>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700 ml-1">Username</label>
-                  <div className="relative">
-                    <GraduationCap className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400" />
+            <CardContent className="px-10 pb-10">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-2">Access Identifier</label>
+                  <div className="relative group">
+                    <div className="pointer-events-none absolute left-4 top-4 h-4 w-4 text-primary/40 group-focus-within:text-primary transition-colors">
+                      <Mail className="h-4 w-4" />
+                    </div>
                     <Input 
-                      className="pl-10 h-11 bg-slate-50/50 border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" 
-                      placeholder="Enter your username" 
+                      className="pl-12 h-14 bg-white/[0.03] border-white/10 text-white font-bold rounded-2xl focus:ring-4 focus:ring-primary/20 focus:bg-white/[0.05] transition-all placeholder:text-white/10" 
+                      placeholder="Operator ID" 
                       {...register("username")} 
                     />
                   </div>
-                  {errors.username?.message ? <p className="text-sm text-red-600 ml-1">{errors.username.message}</p> : null}
+                  {errors.username?.message ? <p className="text-[10px] font-black text-rose-500 ml-2 uppercase tracking-wider">{errors.username.message}</p> : null}
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700 ml-1">Password</label>
-                  <div className="relative">
-                    <Lock className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-2">Security Cipher</label>
+                  <div className="relative group">
+                    <div className="pointer-events-none absolute left-4 top-4 h-4 w-4 text-primary/40 group-focus-within:text-primary transition-colors">
+                      <Lock className="h-4 w-4" />
+                    </div>
                     <Input 
-                      className="pl-10 h-11 bg-slate-50/50 border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" 
+                      className="pl-12 h-14 bg-white/[0.03] border-white/10 text-white font-bold rounded-2xl focus:ring-4 focus:ring-primary/20 focus:bg-white/[0.05] transition-all placeholder:text-white/10" 
                       type="password" 
                       placeholder="••••••••" 
                       {...register("password")} 
                     />
                   </div>
-                  {errors.password?.message ? <p className="text-sm text-red-600 ml-1">{errors.password.message}</p> : null}
+                  {errors.password?.message ? <p className="text-[10px] font-black text-rose-500 ml-2 uppercase tracking-wider">{errors.password.message}</p> : null}
                 </div>
 
                 {errors.root?.message ? (
-                  <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg text-sm text-center font-medium">
-                    {errors.root.message}
-                  </div>
+                  <FadeIn>
+                    <div className="bg-rose-500/10 border border-rose-500/20 text-rose-500 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center animate-shake">
+                      {errors.root.message}
+                    </div>
+                  </FadeIn>
                 ) : null}
 
                 <Button 
                   type="submit" 
-                  className="w-full h-12 text-base font-semibold bg-blue-700 hover:bg-blue-800 shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all" 
+                  className="w-full h-14 text-[10px] font-black uppercase tracking-[0.2em] bg-white text-black hover:bg-primary hover:text-white shadow-2xl transition-all duration-300 rounded-2xl active:scale-[0.98]" 
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Authenticating..." : "Login to System"}
+                  {isSubmitting ? "Syncing Identity..." : "Initiate Protocol"}
                 </Button>
               </form>
             </CardContent>
           </Card>
-        </HoverLift>
+        </FadeIn>
 
-        <FadeIn delay={0.08}>
-          <div className="mt-8 text-center">
-            <Link className="px-6 py-2 rounded-full bg-white/20 hover:bg-white/30 text-white text-sm font-medium backdrop-blur-md transition-all border border-white/10" href="/">
-              ← Home Page
+        <FadeIn delay={0.2}>
+          <div className="mt-10 text-center">
+            <Link className="px-8 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white text-[9px] font-black uppercase tracking-[0.3em] backdrop-blur-md transition-all border border-white/5" href="/">
+              ← Return Home
             </Link>
           </div>
         </FadeIn>
