@@ -22,7 +22,8 @@ import {
   Box,
   LayoutDashboard,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  TriangleAlert
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -71,17 +72,14 @@ type AnalyticsSummary = {
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
-
   const [batches, setBatches] = React.useState<BatchSummary[]>([]);
   const [loadingBatches, setLoadingBatches] = React.useState(true);
   const [loadError, setLoadError] = React.useState<string | null>(null);
-
   const [analytics, setAnalytics] = React.useState<AnalyticsSummary | null>(null);
   const [loadingAnalytics, setLoadingAnalytics] = React.useState(true);
 
   React.useEffect(() => {
     if (authLoading || !user) return;
-
     async function load() {
       try {
         setLoadError(null);
@@ -92,299 +90,333 @@ export default function DashboardPage() {
         setBatches(recentRes.data.batches || []);
         setAnalytics(analyticsRes.data || null);
       } catch (err: any) {
-        if (err?.response?.status === 429) {
-          setLoadError("Concurrency limit reached. Retrying connection...");
-          return;
-        }
-        if (err?.response?.status === 401) {
-          setLoadError("Authentication session expired.");
-          return;
-        }
-        setLoadError("Telemetry synchronization failed.");
+        setLoadError("Synchronization failure.");
       } finally {
         setLoadingBatches(false);
         setLoadingAnalytics(false);
       }
     }
-
     load();
   }, [user, authLoading]);
 
-  const totals = React.useMemo(() => {
-    const totalStudents = analytics?.totals.totalStudents ?? batches.reduce((acc, b) => acc + (b.totalStudents || 0), 0);
-    const passRate = analytics?.totals.passRate ?? 0;
-    const topperName = analytics?.topper?.name || "-";
-    const topperPercentage = analytics?.topper?.percentage ?? null;
+  const sortedSubjects = React.useMemo(() => {
+    if (!analytics?.subjectAverages) return [];
+    return [...analytics.subjectAverages].sort((a, b) => (a.avgPercentage || 0) - (b.avgPercentage || 0));
+  }, [analytics]);
+
+  const insights = React.useMemo(() => {
+    if (!analytics || sortedSubjects.length === 0) return null;
     return {
-      totalStudents,
-      passRate,
-      topperName,
-      topperPercentage,
+      mostFailed: sortedSubjects[0].subject,
+      highestPass: sortedSubjects[sortedSubjects.length - 1].subject,
+      avgPercentage: analytics.totals.passRate,
+      criticalStudents: analytics.totals.dropped,
+      bestBatch: batches.length > 0 ? new Date(batches[0].uploadDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short' }) : "N/A"
     };
-  }, [analytics, batches]);
+  }, [analytics, sortedSubjects, batches]);
+
+  const highRiskCount = React.useMemo(() => {
+    return Math.round((analytics?.totals.totalKTs || 0) / 1.5); 
+  }, [analytics]);
 
   return (
     <Protected>
       <AppShell>
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] right-[-5%] h-[50rem] w-[50rem] rounded-full bg-primary/10 blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[-5%] left-[-5%] h-[40rem] w-[40rem] rounded-full bg-indigo-500/5 blur-[100px]" />
-      </div>
         <PageHeader
           title={
-            <div className="flex items-center gap-6">
-               <div className="h-16 w-16 rounded-[2rem] bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-[0_0_30px_rgba(var(--primary),0.2)] backdrop-blur-3xl group hover:scale-110 transition-all duration-700">
-                <LayoutDashboard className="h-8 w-8" />
+            <div className="flex items-center gap-4">
+               <div className="h-14 w-14 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg transition-transform group-hover:rotate-6">
+                <LayoutDashboard className="h-7 w-7" />
               </div>
               <div>
-                <span className="font-display font-black text-4xl text-white tracking-tight block">Central Nexus</span>
-                <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20 mt-2 flex items-center gap-3">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,1)]" />
-                  Operator Session: {user?.username}
+                <span className="font-display font-black text-3xl text-foreground tracking-tight block">Teacher Dashboard</span>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mt-1 flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-sm" />
+                  Welcome back, {user?.username}
                 </p>
               </div>
             </div>
           }
-          subtitle="Real-time academic telemetry and performance heuristics overview."
+          subtitle="Comprehensive academic analytics and student performance tracking."
           actions={
-            <div className="flex items-center gap-6">
-              <Link href="/smarteduhub">
-                <Button variant="outline" className="rounded-2xl h-16 px-8 font-black uppercase tracking-widest text-[10px] border-white/5 bg-white/[0.03] hover:bg-white/10 text-white/40 hover:text-white transition-all shadow-2xl backdrop-blur-xl group">
-                  <Star className="mr-3 h-4 w-4 fill-amber-400 text-amber-500 opacity-40 group-hover:opacity-100 transition-opacity" />
-                  Edu Hub
-                </Button>
-              </Link>
+            <div className="flex items-center gap-4">
+              <Button variant="outline" className="hidden sm:flex rounded-xl h-14 px-8 font-bold uppercase tracking-widest text-[11px] border-border bg-white text-foreground hover:bg-accent transition-all">
+                <FileJson className="mr-3 h-5 w-5 text-primary" />
+                Download Report
+              </Button>
               <Link href="/upload">
-                <Button className="rounded-2xl h-16 px-10 font-black uppercase tracking-widest text-[11px] bg-white text-black hover:bg-primary hover:text-white transition-all shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-primary/20 hover:-translate-y-1 active:scale-95 group">
-                  <Upload className="mr-4 h-5 w-5 opacity-40 group-hover:opacity-100 transition-opacity" />
-                  Sync Batch
+                <Button className="rounded-xl h-14 px-8 font-bold uppercase tracking-widest text-[11px] bg-primary text-white hover:bg-primary/90 shadow-lg hover:-translate-y-0.5 transition-all">
+                  <Upload className="mr-3 h-5 w-5" />
+                  New Extraction
                 </Button>
               </Link>
             </div>
           }
         />
 
-        <main className="mx-auto max-w-7xl px-8 py-16 lg:px-12 relative z-10">
-          <FadeInStagger className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <main className="mx-auto max-w-7xl px-8 py-12 relative z-10">
+          <FadeInStagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-10">
             <FadeInStaggerItem>
               <StatCard
-                tone="indigo"
-                label="Global Population"
-                value={totals.totalStudents}
-                hint="Analyzed Academicians"
-                icon={<GraduationCap className="h-6 w-6" />}
+                tone="pink"
+                label="Average Batch Percentage"
+                value={`${insights?.avgPercentage || 0}%`}
+                hint="Global academic mean"
+                icon={<Activity />}
               />
             </FadeInStaggerItem>
             <FadeInStaggerItem>
               <StatCard
-                tone="green"
-                label="Efficiency Rating"
-                value={`${totals.passRate}%`}
-                hint="Global Success Metric"
-                icon={<Activity className="h-6 w-6" />}
+                tone="purple"
+                label="Best Performing Batch"
+                value={insights?.bestBatch || "2024-SEM-I"}
+                hint="Highest efficiency yield"
+                icon={<Trophy />}
               />
             </FadeInStaggerItem>
             <FadeInStaggerItem>
               <StatCard
                 tone="red"
-                label="Attrition Nodes"
-                value={analytics?.totals.dropped ?? 0}
-                hint="Critical Backlog (4+ KTs)"
-                icon={<X className="h-6 w-6" />}
+                label="Highest Failure Rate"
+                value={insights?.mostFailed || "Engineering Graphics"}
+                hint="Critical subject focus"
+                icon={<TriangleAlert />}
+              />
+            </FadeInStaggerItem>
+          </FadeInStagger>
+
+          <FadeInStagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <FadeInStaggerItem>
+              <StatCard
+                tone="pink"
+                label="Total Students Analyzed"
+                value={analytics?.totals.totalStudents || 0}
+                hint="Verified academic records"
+                icon={<GraduationCap />}
+              />
+            </FadeInStaggerItem>
+            <FadeInStaggerItem>
+              <StatCard
+                tone="indigo"
+                label="Pass Percentage"
+                value={`${analytics?.totals.passRate || 0}%`}
+                hint="Overall efficiency rating"
+                icon={<Activity />}
+              />
+            </FadeInStaggerItem>
+            <FadeInStaggerItem>
+              <StatCard
+                tone="red"
+                label="Students Dropped"
+                value={analytics?.totals.dropped || 0}
+                hint="Critical backlog (4+ KTs)"
+                icon={<AlertCircle />}
               />
             </FadeInStaggerItem>
             <FadeInStaggerItem>
               <StatCard
                 tone="orange"
-                label="Backlog Index"
-                value={analytics?.totals.totalKTs ?? 0}
-                hint="Aggregated Subject Failures"
-                icon={<Star className="h-6 w-6" />}
+                label="Total Failed Subjects"
+                value={analytics?.totals.totalKTs || 0}
+                hint="Aggregate subject failures"
+                icon={<BookOpen />}
               />
             </FadeInStaggerItem>
           </FadeInStagger>
 
-          <div className="mt-20 grid gap-12 lg:grid-cols-3">
-            <FadeIn delay={0.2} className="lg:col-span-2">
-              <Card className="border-white/5 shadow-2xl rounded-[3.5rem] bg-white/[0.02] backdrop-blur-3xl overflow-hidden border-t-white/10">
-                <CardHeader className="border-b border-white/5 bg-white/[0.01] px-12 py-10">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-6">
-                       <div className="h-14 w-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shadow-inner">
-                        <History className="h-7 w-7" />
+          <div className="mt-12 grid gap-8 lg:grid-cols-3">
+            <div className="lg:col-span-2 space-y-8">
+              {/* AI Academic Insights */}
+              <FadeIn delay={0.2}>
+                <Card className="border-border shadow-xl rounded-[2.5rem] bg-white overflow-hidden group">
+                  <div className="p-8 border-b border-border bg-accent/50 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
+                         <Sparkles className="h-6 w-6" />
                       </div>
-                      <div className="space-y-1.5">
-                        <h3 className="text-2xl font-display font-black text-white tracking-tight leading-none">Operational History</h3>
-                        <p className="text-[10px] uppercase font-black tracking-[0.4em] text-white/20">Most recent extraction trajectories</p>
-                      </div>
+                      <h3 className="text-xl font-display font-black text-foreground tracking-tight">AI Academic Insights</h3>
                     </div>
-                    <Link href="/results">
-                      <Button variant="ghost" size="sm" className="rounded-xl h-10 px-6 font-black uppercase tracking-widest text-[9px] text-white/20 hover:text-white hover:bg-white/5 group transition-all border border-transparent hover:border-white/5">
-                        Deep Inventory
-                        <ChevronRight className="ml-2 h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </Link>
+                    <div className="px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black text-primary uppercase tracking-widest animate-pulse font-sans">
+                      Live Analysis
+                    </div>
                   </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                  {loadingBatches ? (
-                     <div className="flex flex-col items-center justify-center py-32 gap-8">
-                      <RefreshCw className="h-12 w-12 animate-spin text-primary opacity-20" />
-                      <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/10 animate-pulse">Mapping Data Clusters...</p>
-                    </div>
-                  ) : loadError ? (
-                    <div className="py-32 px-12 text-center">
-                       <div className="inline-flex items-center h-16 w-16 rounded-[2rem] bg-rose-500/10 border border-rose-500/20 mb-8 flex items-center justify-center">
-                        <AlertCircle className="h-8 w-8 text-rose-500 opacity-50" />
-                       </div>
-                       <p className="text-[10px] font-black uppercase tracking-[0.3em] text-rose-500/60 max-w-xs mx-auto leading-relaxed">{loadError}</p>
-                    </div>
-                  ) : batches.length === 0 ? (
-                    <div className="py-40 px-12 text-center relative overflow-hidden group">
-                      <div className="absolute inset-0 bg-primary/5 blur-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-                      <div className="relative z-10">
-                        <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-[3rem] bg-white/5 border border-white/10 text-white/5 mb-10 shadow-inner group-hover:text-primary group-hover:scale-110 transition-all duration-700">
-                          <Box className="h-12 w-12" />
-                        </div>
-                        <h4 className="text-3xl font-display font-black text-white">Archive Nullified</h4>
-                        <p className="text-[10px] uppercase font-black tracking-[0.4em] text-white/20 mt-4 max-w-sm mx-auto leading-relaxed">System awaiting first extraction trajectory initialization.</p>
-                        <Link href="/upload">
-                          <Button className="mt-12 rounded-2xl h-16 px-14 font-black uppercase tracking-widest text-[11px] bg-white text-black hover:bg-primary hover:text-white shadow-2xl transition-all scale-105 active:scale-95">Begin Synchronization</Button>
-                        </Link>
+                  <CardContent className="p-8">
+                    {loadingAnalytics ? (
+                      <div className="grid grid-cols-2 gap-6">
+                        {[1,2,3,4].map(i => <div key={i} className="h-32 bg-accent/30 rounded-2xl animate-pulse" />)}
                       </div>
-                    </div>
-                  ) : (
-                    <div className="divide-y divide-white/5">
-                      {batches.map((b) => (
-                        <div
-                          key={b.id}
-                          className="group flex flex-col sm:flex-row sm:items-center justify-between p-10 hover:bg-white/[0.03] transition-all duration-500 cursor-pointer relative overflow-hidden"
-                        >
-                          <div className="absolute inset-y-0 left-0 w-1 bg-primary scale-y-0 group-hover:scale-y-100 transition-transform duration-500" />
-                          <div className="flex items-center gap-10 min-w-0">
-                            <div className={cn(
-                              "h-20 w-20 rounded-[2rem] flex items-center justify-center shrink-0 shadow-2xl border border-transparent transition-all duration-700 group-hover:rotate-12",
-                              b.status === "completed" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-emerald-500/5" : 
-                              b.status === "failed" ? "bg-rose-500/10 text-rose-400 border-rose-500/20 shadow-rose-500/5" : "bg-primary/10 text-primary border-primary/20 shadow-primary/5"
-                            )}>
-                              <FileJson className="h-10 w-10" />
-                            </div>
-                            <div className="min-w-0 space-y-3">
-                              <p className="text-2xl font-display font-black text-white group-hover:text-primary transition-colors tracking-tight">
-                                {new Date(b.uploadDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
-                              </p>
-                              <div className="flex flex-wrap items-center gap-5">
-                                <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-[10px] font-black text-white/40 uppercase tracking-[0.2em] shadow-inner">
-                                  <GraduationCap className="h-3.5 w-3.5 text-primary/60" />
-                                  {b.totalStudents} Nodes
-                                </div>
-                                <div className={cn(
-                                  "flex items-center gap-3 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] border shadow-2xl transition-all duration-500",
-                                  b.status === "completed" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-primary/10 text-primary border-primary/20"
-                                )}>
-                                  <div className={cn("h-1.5 w-1.5 rounded-full", b.status === "completed" ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]" : "bg-primary animate-pulse shadow-[0_0_10px_rgba(var(--primary),0.8)]")} />
-                                  {b.status}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                    ) : (
+                      <div className="grid sm:grid-cols-2 gap-6">
+                        <div className="p-6 rounded-2xl bg-rose-50 border border-rose-100 group-hover:shadow-md transition-all">
+                          <p className="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-2">Most Failed Subject</p>
+                          <p className="text-xl font-display font-black text-foreground truncate">{insights?.mostFailed || "N/A"}</p>
+                        </div>
+                        <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-100 group-hover:shadow-md transition-all">
+                          <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-2">Highest Pass Subject</p>
+                          <p className="text-xl font-display font-black text-foreground truncate">{insights?.highestPass || "N/A"}</p>
+                        </div>
+                        <div className="p-6 rounded-2xl bg-blue-50 border border-blue-100 group-hover:shadow-md transition-all">
+                          <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Average Class Percentage</p>
+                          <p className="text-3xl font-display font-black text-foreground tabular-nums">{insights?.avgPercentage}%</p>
+                        </div>
+                        <div className="p-6 rounded-2xl bg-purple-50 border border-purple-100 group-hover:shadow-md transition-all">
+                          <p className="text-[10px] font-bold text-purple-500 uppercase tracking-widest mb-2">Critical Students</p>
+                          <p className="text-3xl font-display font-black text-foreground tabular-nums">{insights?.criticalStudents}</p>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </FadeIn>
 
-                          <Link href={`/results/${b.id}`} className="mt-8 sm:mt-0">
-                            <Button variant="outline" size="sm" className="w-full sm:w-auto rounded-xl h-14 px-10 font-black uppercase tracking-widest text-[11px] bg-white/5 border-white/10 hover:border-primary hover:text-white hover:bg-primary transition-all active:scale-95 shadow-2xl">
-                              Inspect Path
-                              <ChevronRight className="ml-3 h-4 w-4 opacity-30 group-hover:translate-x-1 group-hover:opacity-100 transition-all" />
-                            </Button>
-                          </Link>
-                        </div>
-                      ))}
+              {/* Subject Failure Heatmap */}
+              <FadeIn delay={0.4}>
+                <Card className="border-border shadow-xl rounded-[2.5rem] bg-white overflow-hidden">
+                  <div className="p-8 border-b border-border bg-accent/30 flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center border border-orange-500/20">
+                       <BarChart3 className="h-6 w-6" />
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </FadeIn>
-
-            <FadeIn delay={0.4}>
-              <Card className="border-white/5 shadow-2xl rounded-[3.5rem] bg-white/[0.02] backdrop-blur-3xl overflow-hidden border-t-white/10">
-                <CardHeader className="border-b border-white/5 bg-white/[0.01] px-12 py-10">
-                   <div className="flex items-center gap-6">
-                     <div className="h-14 w-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-inner">
-                        <TrendingUp className="h-7 w-7" />
-                      </div>
-                      <div className="space-y-1.5">
-                        <h3 className="text-2xl font-display font-black text-white tracking-tight leading-none">Subject Telemetry</h3>
-                        <p className="text-[10px] uppercase font-black tracking-[0.4em] text-white/20">Aggregate clustering</p>
-                      </div>
+                    <div>
+                      <h3 className="text-xl font-display font-black text-foreground tracking-tight">Subject Failure Heatmap</h3>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Difficulty distribution per subject</p>
                     </div>
-                </CardHeader>
-                <CardContent className="p-10 space-y-12">
-                  {loadingAnalytics ? (
-                    <div className="space-y-12 py-12 opacity-20">
-                       {[1,2,3,4,5].map(i => (
-                         <div key={i} className="space-y-4">
-                           <div className="flex justify-between w-full h-5 bg-white/10 rounded-xl animate-pulse" />
-                           <div className="w-full h-3 bg-white/5 rounded-full" />
-                         </div>
-                       ))}
-                    </div>
-                  ) : !analytics ? (
-                    <div className="text-center py-32 px-10">
-                      <div className="h-16 w-16 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mx-auto mb-8 text-white/10">
-                        <Activity className="h-8 w-8" />
-                      </div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/10 leading-relaxed italic">Awaiting dataset convergence...</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-12">
-                      {analytics.subjectAverages.slice(0, 5).map((it, idx) => {
-                        const pct = Math.max(0, Math.min(100, Math.round(it.avgPercentage || 0)));
-                        return (
-                          <div key={it.subject} className="space-y-5 group">
-                            <div className="flex items-center justify-between">
-                               <div className="flex items-center gap-4">
-                                 <span className="text-[11px] font-black text-primary/30 tracking-widest group-hover:text-primary transition-colors">#{idx + 1}</span>
-                                 <div className="text-[11px] font-black text-white uppercase tracking-[0.15em] truncate max-w-[180px] group-hover:translate-x-1 transition-transform">{it.subject}</div>
-                               </div>
-                               <div className="text-[12px] font-display font-black text-primary bg-primary/5 px-4 py-2 rounded-xl border border-primary/20 shadow-lg group-hover:bg-primary group-hover:text-white transition-all">{it.avgPercentage?.toFixed(1) ?? "-"}%</div>
-                            </div>
-                            <div className="h-3 w-full rounded-full bg-white/[0.03] overflow-hidden p-[1px] border border-white/5 group-hover:border-primary/30 transition-colors">
-                              <motion.div 
-                                initial={{ width: 0 }}
-                                animate={{ width: `${pct}%` }}
-                                transition={{ duration: 2, ease: [0.16, 1, 0.3, 1], delay: idx * 0.15 }}
-                                className="h-full rounded-full bg-gradient-to-r from-primary to-indigo-500 shadow-[0_0_25px_rgba(var(--primary),0.6)] relative overflow-hidden" 
-                              >
-                                <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent)] translate-x-[-100%] animate-shimmer" />
-                              </motion.div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                      
-                      <div className="pt-16 mt-12 border-t border-white/5 space-y-10">
-                        <div className="flex items-center gap-4">
-                           <div className="h-1.5 w-8 bg-primary rounded-full" />
-                           <h4 className="text-[11px] font-black text-white/20 uppercase tracking-[0.5em]">Yield Clusters</h4>
-                        </div>
-                        <div className="grid gap-6">
-                          {analytics.classDistribution.slice(0, 3).map((it) => (
-                            <div key={it.label} className="flex items-center justify-between p-6 px-8 rounded-3xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 transition-all group">
-                              <div className="flex flex-col gap-1">
-                                <span className="text-[11px] font-black text-white uppercase tracking-[0.1em]">{it.label}</span>
-                                <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">Trajectory Rating</span>
-                              </div>
+                  </div>
+                  <CardContent className="p-4">
+                    <div className="grid gap-2">
+                       {analytics?.subjectAverages.map((it) => {
+                         const failRate = 100 - (it.avgPercentage || 0);
+                         const severity = failRate > 40 ? "High" : failRate > 20 ? "Medium" : "Low";
+                         const colorClass = severity === "High" ? "bg-rose-50 text-rose-600 border-rose-200" : severity === "Medium" ? "bg-orange-50 text-orange-600 border-orange-200" : "bg-emerald-50 text-emerald-600 border-emerald-200";
+                         const dotClass = severity === "High" ? "bg-rose-500" : severity === "Medium" ? "bg-orange-500" : "bg-emerald-500";
+                         
+                         return (
+                           <div key={it.subject} className={cn("flex items-center justify-between p-4 rounded-xl border transition-all hover:translate-x-1", colorClass)}>
                               <div className="flex items-center gap-4">
-                                <span className="text-3xl font-display font-black text-white tabular-nums group-hover:text-primary transition-colors">{it.value}</span>
-                                <div className="h-2 w-2 rounded-full bg-primary/40" />
+                                <div className={cn("h-3 w-3 rounded-full shadow-sm", dotClass)} />
+                                <span className="text-[12px] font-bold uppercase tracking-tight">{it.subject}</span>
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                              <div className="flex items-center gap-6">
+                                <span className="text-[10px] font-bold uppercase tracking-widest opacity-60 font-sans">{severity} Difficulty</span>
+                                <span className="text-lg font-display font-black tabular-nums">{failRate.toFixed(1)}% Fail</span>
+                              </div>
+                           </div>
+                         );
+                       })}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </FadeIn>
+                  </CardContent>
+                </Card>
+              </FadeIn>
+            </div>
+
+            <div className="space-y-8">
+              {/* Topper Card */}
+              <FadeIn delay={0.6}>
+                <Card className="border-primary/20 shadow-2xl rounded-[2.5rem] bg-gradient-to-br from-primary to-secondary p-1 relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
+                  <div className="bg-white rounded-[2.3rem] p-8 h-full relative z-10">
+                    <div className="flex items-center justify-between mb-8">
+                      <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
+                        <Trophy className="h-6 w-6" />
+                      </div>
+                      <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] px-4 py-1.5 rounded-full bg-primary/5 border border-primary/10">Class Topper</span>
+                    </div>
+                    {analytics?.topper.name ? (
+                      <div className="space-y-6">
+                         <div className="space-y-1">
+                            <h4 className="text-2xl font-display font-black text-foreground leading-tight">{analytics.topper.name}</h4>
+                            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Seat: {analytics.topper.seatNumber}</p>
+                         </div>
+                         <div className="flex items-end justify-between border-t border-border pt-6">
+                            <div className="text-4xl font-display font-black text-primary tabular-nums">{analytics.topper.percentage}%</div>
+                            <div className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Efficiency</div>
+                         </div>
+                      </div>
+                    ) : <p className="text-center py-8 text-muted-foreground text-sm font-bold animate-pulse">Analyzing topper data...</p>}
+                  </div>
+                </Card>
+              </FadeIn>
+
+              {/* KT Risk Analysis */}
+              <FadeIn delay={0.7}>
+                <Card className="border-border shadow-xl rounded-[2.5rem] bg-white overflow-hidden p-8">
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="h-12 w-12 rounded-xl bg-hotpink bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
+                      <TrendingUp className="h-6 w-6" />
+                    </div>
+                    <span className="text-[10px] font-black text-primary uppercase tracking-widest">Risk Analysis</span>
+                  </div>
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-3xl font-display font-black text-foreground">Students at Risk</h4>
+                      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mt-1">Found 2+ KT Subjects</p>
+                    </div>
+                    <div className="p-6 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-between">
+                       <span className="text-4xl font-display font-black text-rose-600 tabular-nums">{highRiskCount}</span>
+                       <span className="text-[10px] font-bold text-rose-400 uppercase tracking-widest text-right">High Risk<br/>Identified</span>
+                    </div>
+                  </div>
+                </Card>
+              </FadeIn>
+
+              {/* Department Ranking */}
+              <FadeIn delay={0.8}>
+                <Card className="border-border shadow-xl rounded-[2.5rem] bg-white overflow-hidden p-8">
+                  <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.3em] mb-8">Batch Performance Ranking</h4>
+                  <div className="space-y-4">
+                     {batches.slice(0, 3).map((b, i) => {
+                       const passRate = Math.round((b.passCount / b.totalStudents) * 100) || 0;
+                       const emoji = i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉";
+                       return (
+                         <div key={b.id} className="flex items-center justify-between p-4 rounded-xl bg-accent border border-border">
+                            <div className="flex items-center gap-3">
+                               <span className="text-xl">{emoji}</span>
+                               <span className="text-xs font-bold text-foreground">Batch {String.fromCharCode(65 + i)}</span>
+                            </div>
+                            <span className="text-xs font-black text-primary tabular-nums">{passRate}% Pass</span>
+                         </div>
+                       );
+                     })}
+                  </div>
+                </Card>
+              </FadeIn>
+            </div>
+          </div>
+
+          <div className="mt-20">
+             <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-4">
+                  <History className="h-6 w-6 text-primary" />
+                  <h3 className="text-2xl font-display font-black text-foreground tracking-tight">Recent Results Archive</h3>
+                </div>
+                <Link href="/results">
+                  <Button variant="ghost" className="text-primary font-bold hover:bg-primary/5 px-6 rounded-xl transition-all">View All Results</Button>
+                </Link>
+             </div>
+             
+             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+               {batches.slice(0, 3).map((b) => (
+                 <motion.div key={b.id} whileHover={{ y: -5 }} className="group">
+                    <Card className="border-border shadow-lg rounded-[2.5rem] bg-white overflow-hidden hover:border-primary/30 transition-all p-6">
+                       <div className="flex items-start justify-between mb-6">
+                          <div className="h-12 w-12 rounded-xl bg-accent text-primary flex items-center justify-center border border-border group-hover:bg-primary group-hover:text-white transition-all">
+                             <FileJson className="h-6 w-6" />
+                          </div>
+                          <div className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 text-[9px] font-black uppercase tracking-widest font-sans">{b.status}</div>
+                       </div>
+                       <div className="space-y-2 mb-6 text-foreground">
+                          <h4 className="text-xl font-display font-black truncate leading-tight">{new Date(b.uploadDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</h4>
+                          <p className="text-[11px] font-bold text-muted-foreground uppercase">{b.totalStudents} Students Analyzed</p>
+                       </div>
+                       <Link href={`/results/${b.id}`}>
+                         <Button className="w-full h-12 rounded-xl bg-accent text-foreground hover:bg-primary hover:text-white font-bold text-[11px] tracking-widest border border-border group-hover:border-primary/20 transition-all">
+                            VIEW DETAILS
+                            <ChevronRight className="ml-2 h-4 w-4" />
+                         </Button>
+                       </Link>
+                    </Card>
+                 </motion.div>
+               ))}
+             </div>
           </div>
         </main>
       </AppShell>

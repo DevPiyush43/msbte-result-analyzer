@@ -471,23 +471,23 @@ export default function ResultsPage() {
                 <Database className="h-8 w-8" />
               </div>
               <div className="flex flex-col">
-                <span className="font-display font-black text-4xl text-white tracking-tight">Extraction Node</span>
-                <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20 mt-2 flex items-center gap-3">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,1)]" />
-                  Registry Segment Active
+                <span className="font-display font-black text-4xl text-foreground tracking-tight">Batch Details</span>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-2 flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-sm" />
+                  Live Extraction View
                 </p>
               </div>
             </div>
           }
-          subtitle={`Dataset Registry: ${batchId}`}
+          subtitle={`Dataset ID: ${batchId}`}
           backHref="/results"
           actions={
             <div className="flex items-center gap-6">
                <div className="hidden md:flex flex-col items-end">
-                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Data Uplink</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Extraction Status</span>
                   <div className="flex gap-1 mt-1">
                     {[1,2,3,4,5,6,7].map(i => (
-                      <div key={i} className={cn("h-1 w-3 rounded-full", i < 6 ? "bg-primary/40" : "bg-white/5")} />
+                      <div key={i} className={cn("h-1 w-3 rounded-full", i < 6 ? "bg-primary/40" : "bg-muted")} />
                     ))}
                   </div>
                </div>
@@ -496,19 +496,19 @@ export default function ResultsPage() {
                 size="sm" 
                 onClick={refreshAll} 
                 disabled={busy !== null}
-                className="h-14 rounded-2xl px-8 font-black uppercase tracking-widest text-[9px] border-white/5 bg-white/[0.03] hover:bg-white/10 text-white transition-all shadow-xl backdrop-blur-xl group"
+                className="h-14 rounded-2xl px-8 font-bold uppercase tracking-widest text-[9px] border-border bg-white hover:bg-accent text-foreground transition-all shadow-sm group"
               >
                 <RefreshCw className={cn("mr-3 h-4 w-4 text-primary group-hover:rotate-180 transition-transform duration-700", busy === "refresh" && "animate-spin")} />
-                Sync Node
+                Refresh Data
               </Button>
               <Button 
                 size="sm" 
                 onClick={downloadExcel} 
                 disabled={busy !== null}
-                className="h-14 rounded-2xl px-10 font-black uppercase tracking-widest text-[10px] bg-white text-black hover:bg-primary hover:text-white transition-all shadow-[0_20px_40px_rgba(255,255,255,0.05)] active:scale-95 group"
+                className="h-14 rounded-2xl px-10 font-bold uppercase tracking-widest text-[10px] bg-primary text-white hover:bg-primary/90 transition-all shadow-lg active:scale-95 group"
               >
-                <Download className="mr-3 h-4 w-4 group-hover:-translate-y-1 transition-transform" />
-                {busy === "download" ? "Pipelining..." : "Export Excel"}
+                <Download className="mr-3 h-4 w-4" />
+                {busy === "download" ? "Downloading..." : "Export Excel"}
               </Button>
             </div>
           }
@@ -527,43 +527,40 @@ export default function ResultsPage() {
             <div className="grid gap-12">
               {(isSubmitting || isJobActive) && (
                 <FadeIn>
-                  <div className="relative overflow-hidden rounded-[3.5rem] border border-white/10 bg-white/[0.03] p-16 backdrop-blur-3xl shadow-2xl group">
-                    <div className="absolute top-[-20%] right-[-10%] h-[30rem] w-[30rem] bg-primary/10 blur-[120px] pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02]" />
+                  <div className="relative overflow-hidden rounded-[3rem] border border-border bg-white p-12 shadow-xl group">
+                    <div className="absolute top-[-10%] right-[-10%] h-[20rem] w-[20rem] bg-primary/5 blur-[80px] pointer-events-none" />
                     
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-12 mb-14 relative z-10">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-12 mb-10 relative z-10">
                       <div className="flex items-center gap-8">
-                        <div className="flex h-20 w-20 items-center justify-center rounded-[2.5rem] bg-primary/10 border border-primary/20 text-primary shadow-[0_0_30px_rgba(var(--primary),0.2)] group-hover:rotate-12 transition-transform duration-500">
-                          <Zap className={cn("h-10 w-10", (isSubmitting || isJobActive) && "animate-pulse")} />
+                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-white shadow-lg group-hover:rotate-6 transition-transform duration-500">
+                          <Zap className={cn("h-8 w-8", (isSubmitting || isJobActive) && "animate-pulse")} />
                         </div>
-                        <div className="space-y-2">
-                          <h3 className="text-3xl font-display font-black text-white tracking-tight leading-none">
-                            {isSubmitting ? "Initialising Protocol..." : "Portal Automation Active"}
+                        <div className="space-y-1">
+                          <h3 className="text-2xl font-display font-black text-foreground tracking-tight">
+                            {isSubmitting ? "Starting Extraction..." : "Extraction in Progress"}
                           </h3>
-                          <p className="text-[10px] uppercase font-black tracking-[0.4em] text-white/20 italic">Injecting heuristics into MSBTE verification layers</p>
+                          <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Communicating with MSBTE Servers</p>
                         </div>
                       </div>
                       <div className="text-right flex flex-col items-end">
-                        <span className="text-6xl font-display font-black text-primary tabular-nums tracking-tighter leading-none shadow-primary/20">
+                        <span className="text-5xl font-display font-black text-primary tabular-nums tracking-tighter leading-none">
                           {Math.round((doneCount / (batch?.totalStudents || 1)) * 100)}%
                         </span>
-                        <div className="mt-4 flex items-center gap-3 px-6 py-2 rounded-full bg-white/[0.03] border border-white/5">
+                        <div className="mt-4 flex items-center gap-3 px-4 py-1.5 rounded-full bg-accent text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                            <Activity className="h-4 w-4 text-emerald-500 animate-pulse" />
-                           <span className="text-[11px] font-black uppercase tracking-widest text-white/40">
-                            {doneCount} <span className="text-primary">/</span> {batch?.totalStudents || 0} Nodes Resolved
+                           <span>
+                            {doneCount} / {batch?.totalStudents || 0} Students Processed
                            </span>
                         </div>
                       </div>
                     </div>
-                    <div className="h-4 w-full overflow-hidden rounded-full bg-white/[0.02] border border-white/5 p-[2px] relative z-10">
+                    <div className="h-3 w-full overflow-hidden rounded-full bg-accent border border-border p-[1px] relative z-10">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${Math.round((doneCount / (batch?.totalStudents || 1)) * 100)}%` }}
                         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                        className="h-full rounded-full bg-gradient-to-r from-primary via-indigo-400 to-primary shadow-[0_0_40px_rgba(var(--primary),0.8)] relative overflow-hidden"
-                      >
-                         <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent)] translate-x-[-100%] animate-shimmer" />
-                      </motion.div>
+                        className="h-full rounded-full bg-primary shadow-[0_0_20px_rgba(var(--primary),0.4)]"
+                      />
                     </div>
                   </div>
                 </FadeIn>
@@ -571,181 +568,171 @@ export default function ResultsPage() {
 
               {error && (
                 <FadeIn>
-                  <div className="p-10 rounded-[2.5rem] border border-rose-500/20 bg-rose-500/5 text-rose-500 font-black uppercase tracking-widest text-[11px] flex items-center gap-6 shadow-2xl animate-shake">
-                    <div className="h-12 w-12 rounded-xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20 shrink-0">
+                  <div className="p-8 rounded-2xl border border-rose-100 bg-rose-50 text-rose-600 font-bold uppercase tracking-widest text-[11px] flex items-center gap-6 shadow-md">
+                    <div className="h-12 w-12 rounded-xl bg-rose-500 text-white flex items-center justify-center shrink-0">
                       <AlertCircle className="h-6 w-6" />
                     </div>
-                    <div className="space-y-1">
-                       <p className="text-rose-500/60">System Fault Detected</p>
-                       <p className="text-white/80">{error}</p>
+                    <div>
+                       <p className="opacity-60 mb-1">System Error</p>
+                       <p className="text-foreground">{error}</p>
                     </div>
                   </div>
                 </FadeIn>
               )}
 
               <div className="grid gap-12 lg:grid-cols-3">
-                <Card className="lg:col-span-2 border-white/5 shadow-2xl rounded-[3.5rem] bg-white/[0.02] backdrop-blur-3xl overflow-hidden border-t-white/10 group">
-                  <CardHeader className="border-b border-white/5 bg-white/[0.01] px-12 py-10">
+                <Card className="lg:col-span-2 border-border shadow-2xl rounded-[3rem] bg-white overflow-hidden group">
+                  <CardHeader className="border-b border-border bg-accent/30 px-10 py-8">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-6">
-                         <div className="h-14 w-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                          <Terminal className="h-7 w-7 text-indigo-400" />
+                         <div className="h-12 w-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-500">
+                          <Terminal className="h-6 w-6" />
                         </div>
-                        <div className="space-y-1.5">
-                          <h3 className="text-2xl font-display font-black text-white tracking-tight">Control Interface</h3>
-                          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Manage automation directives and data persistence</p>
+                        <div className="space-y-0.5">
+                          <h3 className="text-xl font-display font-black text-foreground tracking-tight">Extraction Management</h3>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Manage automation and data integrity</p>
                         </div>
                       </div>
-                      <div className="h-10 px-5 rounded-xl border border-white/5 bg-white/[0.02] flex items-center gap-3">
-                         <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                         <span className="text-[9px] font-black uppercase tracking-widest text-white/20">Uplink: Primary</span>
+                      <div className="h-8 px-4 rounded-lg border border-border bg-white flex items-center gap-2">
+                         <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                         <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Connected</span>
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="p-12">
-                    <div className="grid gap-12 md:grid-cols-2">
-                       <div className="space-y-10">
-                        <div className="p-10 rounded-[3rem] border border-white/5 bg-white/[0.01] shadow-2xl relative overflow-hidden group/status-card">
-                          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover/status-card:opacity-100 transition-opacity" />
+                  <CardContent className="p-10">
+                    <div className="grid gap-10 md:grid-cols-2">
+                       <div className="space-y-8">
+                        <div className="p-8 rounded-3xl border border-border bg-accent/20 shadow-sm relative overflow-hidden group/status-card">
                           <div className="relative z-10">
-                            <div className="text-[10px] uppercase font-black text-white/20 tracking-[0.5em] mb-6 flex items-center gap-4">
+                            <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-6 flex items-center gap-3">
                               <Activity className="h-4 w-4 text-primary" />
-                              Protocol Executive
+                              Process Status
                             </div>
-                            <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-5">
                               <div className={cn(
-                                "h-5 w-5 rounded-full shadow-[0_0_20px]",
-                                state?.status === "completed" ? "bg-emerald-500 shadow-emerald-500/50" : 
-                                state?.status === "failed" ? "bg-rose-500 shadow-rose-500/50" : 
-                                state?.status === "ready_for_captcha" ? "bg-amber-500 shadow-amber-500/50 animate-pulse" :
-                                "bg-primary shadow-primary/50 animate-pulse"
+                                "h-4 w-4 rounded-full shadow-sm",
+                                state?.status === "completed" ? "bg-emerald-500" : 
+                                state?.status === "failed" ? "bg-rose-500" : 
+                                state?.status === "ready_for_captcha" ? "bg-amber-500 animate-pulse" :
+                                "bg-primary animate-pulse"
                               )} />
-                              <span className="text-2xl font-display font-black text-white uppercase tracking-[0.1em] leading-none">{state?.status?.replace(/_/g, " ") || "Idle"}</span>
+                              <span className="text-xl font-display font-black text-foreground uppercase tracking-wider leading-none">{state?.status?.replace(/_/g, " ") || "Idle"}</span>
                             </div>
                             {state?.currentEnrollment && (
-                              <div className="mt-8 flex items-center gap-4 text-[10px] font-black text-white/40 px-6 py-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5 shadow-inner">
-                                <Search className="h-4 w-4 text-primary opacity-40 group-hover/status-card:scale-110 transition-transform" />
-                                <span className="uppercase tracking-[0.2em] opacity-40 shrink-0">Target Vector:</span>
-                                <span className="text-white font-mono tracking-normal truncate">{state.currentEnrollment}</span>
+                              <div className="mt-8 flex items-center gap-4 text-[10px] font-bold text-muted-foreground px-5 py-3 rounded-xl bg-white border border-border">
+                                <Search className="h-4 w-4 text-primary opacity-50" />
+                                <span className="uppercase tracking-widest opacity-60">Scanning:</span>
+                                <span className="text-foreground font-mono">{state.currentEnrollment}</span>
                               </div>
                             )}
                           </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row gap-6">
+                        <div className="flex flex-col sm:flex-row gap-4">
                           <Button 
                             onClick={start} 
                             disabled={busy !== null || isJobActive}
                             size="lg"
-                            className="h-20 rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] px-12 bg-white text-black hover:bg-primary hover:text-white transition-all shadow-[0_20px_40px_rgba(255,255,255,0.05)] hover:shadow-primary/20 hover:-translate-y-1 active:scale-95 group flex-1"
+                            className="h-16 rounded-2xl font-bold uppercase tracking-widest text-[11px] px-8 bg-primary text-white hover:bg-primary/90 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95 group flex-1"
                           >
-                            <Play className="mr-4 h-5 w-5 fill-current opacity-40 group-hover:opacity-100 transition-opacity" />
-                            {busy === "start" ? "Initialising..." : "Execute Protocol"}
+                            <Play className="mr-3 h-4 w-4 fill-current" />
+                            {busy === "start" ? "Starting..." : "Start Extraction"}
                           </Button>
                           <Button 
                             variant="outline" 
                             onClick={stop} 
                             disabled={busy !== null || !isJobActive}
                             size="lg"
-                            className="h-20 rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] px-10 border-white/5 bg-white/[0.03] text-white hover:bg-rose-500 hover:text-white hover:border-transparent transition-all active:scale-95 shadow-xl hover:shadow-rose-500/20"
+                            className="h-16 rounded-2xl font-bold uppercase tracking-widest text-[11px] px-8 border-border bg-white text-rose-600 hover:bg-rose-50 transition-all active:scale-95"
                           >
-                            <Square className="mr-4 h-4 w-4 fill-current opacity-40 group-hover:opacity-100 transition-opacity" />
-                            Terminate
+                            <Square className="mr-3 h-4 w-4 fill-current" />
+                            Stop
                           </Button>
                         </div>
                       </div>
 
-                      <div className="space-y-10">
-                        <div className="p-10 rounded-[3rem] border border-white/5 bg-white/[0.01] shadow-2xl relative overflow-hidden group/persist">
-                          <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 to-transparent opacity-0 group-hover/persist:opacity-100 transition-opacity" />
-                          <div className="text-[10px] uppercase font-black text-white/20 tracking-[0.5em] mb-8 flex items-center gap-4">
-                            <History className="h-4 w-4 text-indigo-400" />
-                            Persistence Log
+                      <div className="space-y-8">
+                        <div className="p-8 rounded-3xl border border-border bg-accent/20 shadow-sm relative overflow-hidden group/persist">
+                          <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-6 flex items-center gap-3">
+                            <History className="h-4 w-4 text-primary" />
+                            History Actions
                           </div>
-                          <div className="flex flex-col gap-4">
+                          <div className="flex flex-col gap-3">
                             <Button 
                               variant="ghost" 
                               size="sm" 
                               onClick={reparse} 
                               disabled={busy !== null} 
-                              className="rounded-[1.25rem] h-14 px-8 text-[10px] font-black uppercase tracking-widest justify-start hover:bg-white/10 text-white/40 hover:text-white transition-all border border-transparent hover:border-white/10 group/btn"
+                              className="rounded-xl h-12 px-6 text-[10px] font-bold uppercase tracking-widest justify-start hover:bg-white text-muted-foreground hover:text-primary transition-all border border-transparent hover:border-border group/btn"
                             >
-                              <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center mr-5 group-hover/btn:bg-primary/20 transition-colors">
-                                <RotateCcw className={cn("h-4 w-4 transition-all group-hover/btn:rotate-180 duration-700", busy === "reparse" && "animate-spin")} />
+                              <div className="h-7 w-7 rounded-lg bg-primary/5 flex items-center justify-center mr-4 group-hover/btn:bg-primary/10 transition-colors">
+                                <RotateCcw className={cn("h-4 w-4 transition-transform group-hover/btn:rotate-180 duration-500", busy === "reparse" && "animate-spin")} />
                               </div>
-                              Reparse Registry
+                              Reparse Results
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
                               onClick={resetFailedUnknown} 
                               disabled={busy !== null} 
-                              className="rounded-[1.25rem] h-14 px-8 text-[10px] font-black uppercase tracking-widest justify-start hover:bg-white/10 text-white/40 hover:text-white transition-all border border-transparent hover:border-white/10 group/btn"
+                              className="rounded-xl h-12 px-6 text-[10px] font-bold uppercase tracking-widest justify-start hover:bg-white text-muted-foreground hover:text-primary transition-all border border-transparent hover:border-border group/btn"
                             >
-                               <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center mr-5 group-hover/btn:bg-rose-500/20 transition-colors">
-                                <RefreshCw className={cn("h-4 w-4 transition-all group-hover/btn:rotate-180 duration-700", busy === "reset" && "animate-spin")} />
+                               <div className="h-7 w-7 rounded-lg bg-primary/5 flex items-center justify-center mr-4 group-hover/btn:bg-primary/10 transition-colors">
+                                <RefreshCw className={cn("h-4 w-4 transition-transform group-hover/btn:rotate-180 duration-500", busy === "reset" && "animate-spin")} />
                               </div>
-                              Retry Faulty Nodes
+                              Retry Failed Students
                             </Button>
                           </div>
                         </div>
-                        <div className="p-8 rounded-[2rem] bg-white text-black flex items-start gap-6 shadow-2xl group hover:scale-[1.02] transition-transform duration-500">
-                           <IdCard className="h-8 w-8 text-primary shrink-0 mt-0.5 group-hover:rotate-12 transition-transform" />
-                           <div className="space-y-2">
-                              <h6 className="text-[11px] font-black uppercase tracking-widest text-primary italic">Standard Directive</h6>
-                              <p className="text-[12px] text-black/50 leading-relaxed font-bold">Protocols should only be re-initialized if portal entropy increases or seat identifiers remain nullified.</p>
+                        <div className="p-6 rounded-2xl bg-primary/5 border border-primary/10 flex items-start gap-5">
+                           <IdCard className="h-6 w-6 text-primary shrink-0 mt-0.5" />
+                           <div className="space-y-1">
+                              <h6 className="text-[11px] font-black uppercase tracking-widest text-primary">Teacher Directives</h6>
+                              <p className="text-[11px] text-muted-foreground leading-relaxed font-bold">Only restart the extraction if you notice missing student percentages or seat numbers.</p>
                            </div>
                         </div>
                       </div>
                     </div>
 
                     {state?.status === "ready_for_captcha" && (
-                      <FadeIn className="mt-16 pt-16 border-t border-white/5">
-                        <div className="rounded-[3.5rem] border border-primary/20 bg-primary/10 p-16 backdrop-blur-3xl shadow-[0_40px_100px_rgba(var(--primary),0.15)] relative overflow-hidden group/captcha">
-                          <div className="absolute top-[-20%] right-[-10%] h-[30rem] w-[30rem] bg-primary/20 blur-[120px] pointer-events-none group-hover/captcha:scale-110 transition-transform duration-1000" />
-                          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.05]" />
-                          
-                          <div className="flex flex-col lg:flex-row gap-20 items-center relative z-10">
-                            <div className="flex-1 space-y-10">
-                              <div className="flex items-center gap-8">
-                                 <div className="h-20 w-20 rounded-[2.5rem] bg-white text-black flex items-center justify-center shadow-2xl group-hover/captcha:-rotate-6 transition-transform">
-                                  <Lock className="h-10 w-10 text-primary" />
+                      <FadeIn className="mt-12 pt-12 border-t border-border">
+                        <div className="rounded-[3rem] border border-primary/20 bg-primary/5 p-12 shadow-inner relative overflow-hidden group/captcha">
+                          <div className="flex flex-col lg:flex-row gap-16 items-center relative z-10">
+                            <div className="flex-1 space-y-8">
+                              <div className="flex items-center gap-6">
+                                 <div className="h-16 w-16 rounded-2xl bg-white flex items-center justify-center shadow-md">
+                                  <Lock className="h-8 w-8 text-primary" />
                                 </div>
-                                <div className="space-y-2">
-                                  <h4 className="text-3xl font-display font-black text-white tracking-tight uppercase tracking-[0.05em]">Solve CAPTCHA Directive</h4>
-                                  <p className="text-[11px] text-white/30 font-black uppercase tracking-[0.2em] leading-relaxed max-w-lg">
-                                    Manual verification required to bypass portal entropy protection and establish secure data handshake.
+                                <div className="space-y-1">
+                                  <h4 className="text-2xl font-display font-black text-foreground tracking-tight uppercase">CAPTCHA Verification</h4>
+                                  <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest leading-relaxed max-w-lg">
+                                    Manual verification required to bypass security checks and continue.
                                   </p>
                                 </div>
                               </div>
                               
-                              <div className="flex flex-col sm:flex-row items-center gap-6">
+                              <div className="flex flex-col sm:flex-row items-center gap-4">
                                 <div className="relative flex-1 w-full">
                                   <input
                                     value={captchaText}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCaptchaText(e.target.value)}
-                                    placeholder="Input Identity Token..."
-                                    className="h-20 w-full rounded-[2rem] border border-white/10 bg-white/[0.05] px-10 text-lg font-black tracking-[0.4em] uppercase focus:outline-none focus:ring-4 focus:ring-primary/20 shadow-inner transition-all placeholder:tracking-normal placeholder:font-black placeholder:text-white/10 text-white"
+                                    placeholder="Enter CAPTCHA Code..."
+                                    className="h-16 w-full rounded-xl border border-border bg-white px-8 text-lg font-black tracking-widest uppercase focus:outline-none focus:ring-4 focus:ring-primary/10 shadow-sm transition-all text-foreground"
                                     autoFocus
                                   />
-                                  <div className="absolute right-6 top-1/2 -translate-y-1/2 flex gap-2">
-                                     <div className="h-2 w-2 rounded-full bg-primary/20" />
-                                     <div className="h-2 w-2 rounded-full bg-primary/40" />
-                                     <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                                  </div>
                                 </div>
                                 <Button 
                                   onClick={cont} 
                                   disabled={busy !== null || !captchaText.trim()}
-                                  className="h-20 w-full sm:w-auto rounded-[2rem] px-16 font-black uppercase tracking-widest text-[12px] bg-white text-black hover:bg-primary hover:text-white shadow-2xl transition-all hover:-translate-y-1 active:scale-95 group/submit"
+                                  className="h-16 w-full sm:w-auto rounded-xl px-12 font-bold uppercase tracking-widest text-[12px] bg-primary text-white hover:bg-primary/90 shadow-lg transition-all active:scale-95"
                                 >
-                                  Engage Bridge
-                                  <ChevronRight className="ml-4 h-5 w-5 group-hover:translate-x-2 transition-transform" />
+                                  Submit Code
+                                  <ChevronRight className="ml-3 h-4 w-4" />
                                 </Button>
                               </div>
                               {captchaError && (
                                 <FadeIn>
-                                  <div className="p-6 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-4 animate-shake">
+                                  <div className="p-4 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 text-[10px] font-bold uppercase tracking-widest flex items-center gap-3">
                                     <AlertCircle className="h-5 w-5" />
                                     {captchaError}
                                   </div>
@@ -753,22 +740,20 @@ export default function ResultsPage() {
                               )}
                             </div>
 
-                            <div className="shrink-0 group/img-wrap relative">
-                                <div className="absolute -inset-10 bg-primary/20 blur-[60px] opacity-0 group-hover/img-wrap:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                            <div className="shrink-0 relative">
                                 {captchaPngBase64 ? (
-                                  <div className="relative p-8 bg-white rounded-[3.5rem] border border-white/20 shadow-[0_50px_100px_rgba(0,0,0,0.5)] group-hover/img-wrap:scale-110 transition-all duration-700 group-hover/img-wrap:rotate-2">
+                                  <div className="relative p-6 bg-white rounded-3xl border border-border shadow-md">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                       alt="captcha"
                                       src={`data:image/png;base64,${captchaPngBase64}`}
-                                      className="h-28 w-auto rounded-2xl select-none filter contrast-125 saturate-150 relative z-10"
+                                      className="h-20 w-auto rounded-lg select-none"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent rounded-[3.5rem]" />
                                   </div>
                                 ) : (
-                                  <div className="h-44 w-80 bg-white/5 animate-pulse rounded-[3.5rem] flex flex-col items-center justify-center gap-4 border border-white/10">
-                                    <RefreshCw className="h-8 w-8 text-white/10 animate-spin" />
-                                    <p className="text-[10px] text-white/10 uppercase font-black tracking-[0.5em]">Decoding Stream...</p>
+                                  <div className="h-32 w-64 bg-accent/50 animate-pulse rounded-3xl flex flex-col items-center justify-center gap-3 border border-border">
+                                    <RefreshCw className="h-6 w-6 text-primary opacity-20 animate-spin" />
+                                    <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest">Loading CAPTCHA...</p>
                                   </div>
                                 )}
                                 <Button
@@ -776,9 +761,9 @@ export default function ResultsPage() {
                                   size="icon"
                                   onClick={() => loadCaptcha({ refresh: true })}
                                   disabled={busy !== null}
-                                  className="absolute -top-6 -right-6 h-16 w-16 rounded-full bg-white text-black border border-white/20 shadow-2xl hover:bg-primary hover:text-white transition-all active:scale-90 group/refresh-btn z-20"
+                                  className="absolute -top-4 -right-4 h-12 w-12 rounded-full bg-white text-foreground border border-border shadow-lg hover:bg-accent transition-all active:scale-90"
                                 >
-                                  <RefreshCw className={cn("h-7 w-7 transition-transform duration-700 group-hover/refresh-btn:rotate-180", busy === "refresh" && "animate-spin")} />
+                                  <RefreshCw className={cn("h-5 w-5", busy === "refresh" && "animate-spin")} />
                                 </Button>
                             </div>
                           </div>
@@ -788,59 +773,58 @@ export default function ResultsPage() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-white/5 shadow-2xl rounded-[3.5rem] bg-white/[0.02] backdrop-blur-3xl overflow-hidden h-full border-t-white/10 group">
-                  <CardHeader className="border-b border-white/5 bg-white/[0.01] px-12 py-10">
+                <Card className="border-border shadow-2xl rounded-[3rem] bg-white overflow-hidden h-full group">
+                  <CardHeader className="border-b border-border bg-accent/30 px-10 py-8">
                     <div className="flex items-center gap-6">
-                       <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-500">
-                        <BarChart3 className="h-7 w-7" />
+                       <div className="h-12 w-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-500">
+                        <BarChart3 className="h-6 w-6" />
                       </div>
-                      <div className="space-y-1.5">
-                        <h3 className="text-2xl font-display font-black text-white tracking-tight">Snap Telemetry</h3>
-                        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 italic">Pulse extraction datasets</p>
+                      <div className="space-y-0.5">
+                        <h3 className="text-xl font-display font-black text-foreground tracking-tight">Batch Statistics</h3>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-1">Real-time performance metrics</p>
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="p-12">
+                  <CardContent className="p-10">
                     {loadingAnalytics ? (
-                      <div className="space-y-10">
-                        {[1, 2, 3].map(i => <div key={i} className="h-32 bg-white/[0.02] border border-white/5 animate-pulse rounded-[2.5rem]" />)}
+                      <div className="space-y-8">
+                        {[1, 2, 3].map(i => <div key={i} className="h-28 bg-accent/20 border border-border animate-pulse rounded-[2rem]" />)}
                       </div>
                     ) : !analytics ? (
-                      <div className="py-40 text-center flex flex-col items-center justify-center gap-10 opacity-30">
-                         <div className="h-24 w-24 rounded-[2.5rem] border border-white/10 flex items-center justify-center">
-                           <Box className="h-12 w-12 text-white/10" />
+                      <div className="py-20 text-center flex flex-col items-center justify-center gap-8 opacity-40">
+                         <div className="h-20 w-20 rounded-[2rem] border border-border flex items-center justify-center">
+                           <Box className="h-10 w-10 text-muted-foreground" />
                          </div>
-                         <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20 animate-pulse">Converging Node Metrics...</p>
+                         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground animate-pulse">Calculating Statistics...</p>
                       </div>
                     ) : (
-                      <div className="space-y-10">
+                      <div className="space-y-8">
                         <StatCard
                           tone="indigo"
-                          label="Yield Density"
+                          label="Pass Rate"
                           value={`${analytics.totals.passRate}%`}
-                          hint="Registry Success Parity"
-                          className="p-10 rounded-[3rem] border-white/5 bg-white/[0.02] shadow-2xl backdrop-blur-3xl"
+                          hint="Overall success percentage"
+                          className="p-8 rounded-[2.5rem] border-border bg-accent/10 shadow-sm"
                         />
                         <StatCard
-                          tone="orange"
-                          label="Fault Entries"
+                          tone="rose"
+                          label="KT Count"
                           value={analytics.totals.totalKTs}
-                          hint="Cross-Dataset Backlogs"
-                          className="p-10 rounded-[3rem] border-white/5 bg-white/[0.02] shadow-2xl backdrop-blur-3xl"
+                          hint="Students with failed subjects"
+                          className="p-8 rounded-[2.5rem] border-border bg-accent/10 shadow-sm"
                         />
-                        <div className="pt-14 mt-10 border-t border-white/5">
-                          <div className="text-[10px] uppercase font-black text-white/20 tracking-[0.5em] mb-10 px-4 flex items-center gap-4">
-                             <div className="h-1 w-1 rounded-full bg-primary" />
-                             Class Clusters
+                        <div className="pt-10 mt-6 border-t border-border">
+                          <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-8 px-2 flex items-center gap-3">
+                             <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                             Class Distribution
                           </div>
-                          <div className="space-y-4">
+                          <div className="space-y-3">
                             {analytics.classDistribution.slice(0, 4).map((it) => (
-                              <div key={it.label} className="flex items-center justify-between p-6 px-10 rounded-[2rem] bg-white/[0.02] border border-white/5 hover:bg-white/[0.06] hover:border-white/10 transition-all group/cluster relative overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover/cluster:opacity-100 transition-opacity" />
-                                <span className="text-[11px] font-black uppercase tracking-widest text-white/30 group-hover:text-white relative z-10">{it.label}</span>
-                                <div className="flex items-center gap-4 relative z-10">
-                                  <span className="text-2xl font-display font-black text-white group-hover:text-primary transition-colors">{it.value}</span>
-                                  <span className="text-[9px] text-primary/40 font-black tracking-widest uppercase">Nodes</span>
+                              <div key={it.label} className="flex items-center justify-between p-5 px-8 rounded-2xl bg-accent/10 border border-border hover:bg-white hover:shadow-md transition-all group/cluster">
+                                <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground">{it.label}</span>
+                                <div className="flex items-center gap-4">
+                                  <span className="text-xl font-display font-black text-foreground group-hover:text-primary transition-colors">{it.value}</span>
+                                  <span className="text-[9px] text-primary/60 font-black tracking-widest uppercase">Students</span>
                                 </div>
                               </div>
                             ))}
@@ -854,85 +838,82 @@ export default function ResultsPage() {
 
               {analytics && analytics.topper.name && (
                 <FadeIn delay={0.4} className="mt-12">
-                   <Card className="border-white/5 shadow-2xl rounded-[3.5rem] overflow-hidden bg-gradient-to-br from-indigo-500/20 via-primary/20 to-indigo-900/20 backdrop-blur-3xl relative group border-t-white/10">
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
-                    <div className="absolute top-[-20%] right-[-10%] h-[30rem] w-[30rem] rounded-full bg-primary/20 blur-[100px] group-hover:animate-pulse transition-all duration-700" />
+                   <Card className="border-border shadow-2xl rounded-[3rem] overflow-hidden bg-primary text-white relative group">
+                    <div className="absolute top-[-20%] right-[-10%] h-[30rem] w-[30rem] rounded-full bg-white/10 blur-[100px] transition-all duration-700" />
                     
-                    <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-white/5">
-                      <div className="lg:w-1/3 p-12 relative z-10 flex flex-col justify-center border-b lg:border-b-0 border-white/5">
-                        <div className="flex items-center gap-5 mb-10">
-                           <div className="h-14 w-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center shadow-2xl border border-white/20">
-                            <Trophy className="h-7 w-7 text-amber-500 group-hover:scale-110 transition-transform duration-700" />
+                    <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-white/10">
+                      <div className="lg:w-1/3 p-10 relative z-10 flex flex-col justify-center border-b lg:border-b-0 border-white/10">
+                        <div className="flex items-center gap-5 mb-8">
+                           <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
+                            <Trophy className="h-6 w-6 text-amber-300 group-hover:scale-110 transition-transform duration-700" />
                           </div>
-                          <div className="space-y-1">
-                            <h3 className="text-2xl font-display font-black text-white tracking-tight leading-none">Supreme Merit</h3>
-                            <p className="text-[9px] uppercase font-black tracking-[0.4em] text-white/40">Batch Protocol Rank 01</p>
+                          <div className="space-y-0.5">
+                            <h3 className="text-xl font-display font-black text-white tracking-tight leading-none">Top Performer</h3>
+                            <p className="text-[9px] uppercase font-bold tracking-widest text-white/60">Academic Excellence</p>
                           </div>
                         </div>
                         
                         <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-                          <div className="h-32 w-32 rounded-[3.5rem] bg-white/10 backdrop-blur-xl flex items-center justify-center mb-10 ring-1 ring-white/20 shadow-2xl relative overflow-hidden group/star">
-                             <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/20 to-transparent scale-0 group-hover/star:scale-150 transition-transform duration-1000" />
-                             <Sparkles className="h-16 w-16 text-white group-hover:scale-110 transition-transform duration-700" />
+                          <div className="h-24 w-24 rounded-3xl bg-white/10 backdrop-blur-md flex items-center justify-center mb-8 ring-1 ring-white/20 relative shadow-xl">
+                             <Sparkles className="h-12 w-12 text-white" />
                           </div>
                           
                           <div className="space-y-4 w-full">
-                             <h4 className="text-4xl font-display font-black text-white tracking-tighter leading-[1.1]">{analytics.topper.name}</h4>
-                             <div className="inline-flex items-center px-6 py-3 rounded-[1.25rem] bg-white text-black text-[12px] font-black uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(255,255,255,0.1)] border border-white/20 group-hover:bg-primary group-hover:text-white transition-all duration-500">
-                              {analytics.topper.percentage}% Efficiency Yield
+                             <h4 className="text-3xl font-display font-black text-white tracking-tight leading-tight">{analytics.topper.name}</h4>
+                             <div className="inline-flex items-center px-6 py-2.5 rounded-xl bg-white text-primary text-[11px] font-black uppercase tracking-widest shadow-lg">
+                              {analytics.topper.percentage}% Percentage
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      <div className="lg:w-2/3 p-12 relative z-10">
-                         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3 h-full">
-                            <div className="space-y-8 flex flex-col justify-center">
-                               <div className="p-8 rounded-[2rem] bg-white/5 border border-white/5 backdrop-blur-xl group/node hover:bg-white/10 transition-all">
-                                  <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mb-3 leading-none">Node ID</p>
-                                  <p className="text-lg font-display font-black text-white truncate group-hover:text-primary transition-colors tracking-tight">{analytics.topper.enrollmentNumber || "-"}</p>
+                      <div className="lg:w-2/3 p-10 relative z-10">
+                         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 h-full">
+                            <div className="space-y-6 flex flex-col justify-center">
+                               <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col">
+                                  <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest mb-2 leading-none">Enrollment No.</p>
+                                  <p className="text-lg font-display font-black text-white tracking-tight">{analytics.topper.enrollmentNumber || "-"}</p>
                                </div>
-                               <div className="p-8 rounded-[2rem] bg-white/5 border border-white/5 backdrop-blur-xl group/node hover:bg-white/10 transition-all">
-                                  <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mb-3 leading-none">Registry Point</p>
-                                  <p className="text-lg font-display font-black text-white truncate group-hover:text-primary transition-colors tracking-tight">{analytics.topper.seatNumber || "-"}</p>
+                               <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col">
+                                  <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest mb-2 leading-none">Seat Number</p>
+                                  <p className="text-lg font-display font-black text-white tracking-tight">{analytics.topper.seatNumber || "-"}</p>
                                </div>
                             </div>
 
-                            <div className="lg:col-span-1 flex flex-col justify-center space-y-10 border-white/5 lg:border-l lg:pl-10">
+                            <div className="lg:col-span-1 flex flex-col justify-center space-y-8 border-white/10 lg:border-l lg:pl-8">
                                <div className="space-y-4">
-                                  <h5 className="text-[11px] font-black text-white/20 uppercase tracking-[0.4em]">Yield Categorization</h5>
-                                  <div className="space-y-4">
-                                     {['Quantization: ACCURATE', 'Integrity: VERIFIED', 'Distribution: APEX'].map(it => (
+                                  <h5 className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Status Verification</h5>
+                                  <div className="space-y-3">
+                                     {['Data Quality: Accurate', 'Verification: Complete', 'Performance: Excellent'].map(it => (
                                        <div key={it} className="flex items-center gap-3">
-                                          <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-                                          <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">{it}</span>
+                                          <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                                          <span className="text-[9px] font-bold text-white/60 uppercase tracking-widest">{it}</span>
                                        </div>
                                      ))}
                                   </div>
-                               </div>
+                                </div>
 
-                               <div className="pt-10 border-t border-white/5 flex items-center justify-between">
+                                <div className="pt-8 border-t border-white/10 flex items-center justify-between">
                                   <div className="flex flex-col">
-                                     <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em] mb-1">Rank Vector</span>
-                                     <span className="text-[12px] font-black text-emerald-400 tracking-widest uppercase">POS 01 / {analytics.totals.totalStudents}</span>
+                                     <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Batch Rank</span>
+                                     <span className="text-[11px] font-black text-emerald-300 tracking-widest uppercase">Rank 01 / {analytics.totals.totalStudents}</span>
                                   </div>
                                   <Link href={`/results/${batchId}/students/${analytics.topper.enrollmentNumber}`}>
-                                    <Button variant="ghost" className="h-14 bg-white/5 text-white hover:bg-white/10 rounded-2xl px-6 gap-3 font-black text-[11px] uppercase tracking-[0.2em] transition-all group-hover:translate-x-1 border border-white/5">
-                                        Inspect Node
-                                        <ChevronRight className="h-4 w-4 opacity-40 group-hover:opacity-100" />
+                                    <Button variant="ghost" className="h-12 bg-white/10 text-white hover:bg-white/20 rounded-xl px-6 gap-3 font-bold text-[10px] uppercase tracking-widest transition-all">
+                                        View Profile
+                                        <ChevronRight className="h-4 w-4" />
                                     </Button>
                                   </Link>
-                               </div>
+                                </div>
                             </div>
                             
-                            <div className="hidden lg:flex flex-col items-center justify-center p-10 bg-white/[0.03] border border-white/5 rounded-[3rem] shadow-inner relative overflow-hidden group/viz">
-                               <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/viz:opacity-100 transition-opacity" />
-                               <div className="h-32 w-32 rounded-full border-4 border-white/5 border-t-primary animate-spin duration-3000 relative flex items-center justify-center">
-                                  <div className="h-24 w-24 rounded-full border-4 border-primary/20 border-b-primary animate-spin reverse duration-2000 flex items-center justify-center">
-                                     <Activity className="h-8 w-8 text-primary opacity-40" />
+                            <div className="hidden lg:flex flex-col items-center justify-center p-8 bg-white/5 border border-white/10 rounded-3xl shadow-inner relative overflow-hidden group/viz">
+                               <div className="h-24 w-24 rounded-full border-4 border-white/10 border-t-white animate-spin duration-3000 relative flex items-center justify-center">
+                                  <div className="h-16 w-16 rounded-full border-4 border-white/20 border-b-white animate-spin reverse duration-2000 flex items-center justify-center">
+                                     <Activity className="h-6 w-6 text-white opacity-40" />
                                   </div>
                                </div>
-                               <p className="mt-8 text-[9px] font-black text-white/20 uppercase tracking-[0.4em] text-center">Neural Extraction Layer Active</p>
+                               <p className="mt-6 text-[8px] font-bold text-white/40 uppercase tracking-[0.3em] text-center">Advanced Data Processing</p>
                             </div>
                          </div>
                       </div>
@@ -941,68 +922,67 @@ export default function ResultsPage() {
                 </FadeIn>
               )}
 
-              <Card className="border-white/5 shadow-2xl rounded-[3.5rem] bg-white/[0.02] backdrop-blur-3xl overflow-hidden mt-12 border-t-white/10">
-                <CardHeader className="border-b border-white/5 bg-white/[0.01] px-12 py-10 relative overflow-hidden group/header">
-                  <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/header:opacity-100 transition-opacity duration-1000" />
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 relative z-10">
+              <Card className="border-border shadow-2xl rounded-[3rem] bg-white overflow-hidden mt-12">
+                <CardHeader className="border-b border-border bg-accent/30 px-10 py-8 group/header">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
                     <div className="flex items-center gap-6">
-                       <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-inner group-hover/header:scale-110 transition-transform duration-700">
-                        <FileSearch className="h-7 w-7 text-primary" />
+                       <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-sm group-hover/header:rotate-6 transition-transform duration-500">
+                        <FileSearch className="h-6 w-6 text-primary" />
                       </div>
                       <div>
-                        <h3 className="text-3xl font-display font-black text-white tracking-tight">Student Node Registry</h3>
-                        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mt-1">Verified records and performance telemetry</p>
+                        <h3 className="text-2xl font-display font-black text-foreground tracking-tight">Student Results</h3>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-1">Comprehensive list of processed student data</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-6">
                       <div className="hidden lg:flex flex-col items-end">
-                        <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em]">Dataset Healthy</span>
-                        <div className="h-1.5 w-32 bg-white/5 rounded-full mt-2 overflow-hidden border border-white/5">
+                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Data Quality</span>
+                        <div className="h-1.5 w-32 bg-accent rounded-full mt-2 overflow-hidden border border-border">
                            <div className="h-full w-full bg-emerald-500/40" />
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm" onClick={clearFilters} className="rounded-xl h-12 px-8 font-black text-[10px] uppercase tracking-[0.2em] text-white/40 hover:text-white hover:bg-white/5 transition-all border border-transparent hover:border-white/5 active:scale-95">
-                        Reset Schema
+                      <Button variant="ghost" size="sm" onClick={clearFilters} className="rounded-xl h-12 px-6 font-bold text-[10px] uppercase tracking-widest text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all border border-transparent hover:border-primary/20 active:scale-95">
+                        Clear Filters
                       </Button>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <div className="p-12 bg-white/[0.01] border-b border-white/5 backdrop-blur-3xl relative">
-                    <div className="grid gap-10 md:grid-cols-4 lg:grid-cols-6 items-end">
+                  <div className="p-10 bg-accent/10 border-b border-border relative">
+                    <div className="grid gap-8 md:grid-cols-4 lg:grid-cols-6 items-end">
                       <div className="md:col-span-2 lg:col-span-3 relative group/input">
-                        <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2 mb-3 block">Query Search</label>
-                        <Search className="absolute left-6 bottom-5 h-5 w-5 text-white/20 group-focus-within/input:text-primary transition-colors z-10" />
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-2 mb-3 block">Search Student</label>
+                        <Search className="absolute left-6 bottom-5 h-5 w-5 text-muted-foreground group-focus-within/input:text-primary transition-colors z-10" />
                         <input
                           value={query}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
-                          placeholder="Search identity or seat identifier..."
-                          className="w-full h-16 pl-16 pr-6 rounded-[2rem] border border-white/5 bg-white/[0.02] text-sm font-black uppercase tracking-widest placeholder:text-white/10 text-white focus:outline-none focus:ring-4 focus:ring-primary/5 transition-all shadow-2xl hover:bg-white/[0.04]"
+                          placeholder="Search enrollment or seat number..."
+                          className="w-full h-16 pl-16 pr-6 rounded-2xl border border-border bg-white text-sm font-bold uppercase tracking-widest placeholder:text-muted-foreground/40 text-foreground focus:outline-none focus:ring-4 focus:ring-primary/5 transition-all shadow-sm"
                         />
                       </div>
                       <div className="relative group/filter">
-                        <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2 mb-3 block">Condition</label>
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-2 mb-3 block">Status</label>
                         <select
                           value={statusFilter}
                           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value as any)}
-                          className="w-full h-16 rounded-[2rem] border border-white/5 bg-white/[0.02] px-8 text-[11px] font-black uppercase tracking-widest text-white/60 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-2xl cursor-pointer appearance-none transition-all hover:bg-white/[0.05]"
+                          className="w-full h-16 rounded-2xl border border-border bg-white px-8 text-[11px] font-bold uppercase tracking-widest text-muted-foreground focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm cursor-pointer appearance-none transition-all hover:border-primary/20"
                         >
-                          <option value="all" className="bg-slate-900">Protocol: All</option>
-                          <option value="Pass" className="bg-slate-900">Status: Pass</option>
-                          <option value="Fail" className="bg-slate-900">Status: Fail</option>
-                          <option value="Unknown" className="bg-slate-900">Status: Unknown</option>
-                          <option value="Error" className="bg-slate-900">Status: Fault</option>
+                          <option value="all">All Results</option>
+                          <option value="Pass">Pass</option>
+                          <option value="Fail">Fail</option>
+                          <option value="Unknown">Unknown</option>
+                          <option value="Error">Faulty</option>
                         </select>
-                        <ChevronDown className="absolute right-8 bottom-6 h-4 w-4 text-white/20 pointer-events-none group-hover/filter:text-primary transition-colors" />
+                        <ChevronDown className="absolute right-8 bottom-6 h-4 w-4 text-muted-foreground pointer-events-none" />
                       </div>
                       <div className="relative group/sort md:col-span-1 lg:col-span-2">
-                         <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2 mb-3 block">Sort Vector</label>
+                         <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-2 mb-3 block">Sort By</label>
                         <select
                           value={sortKey}
                           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSortKey(e.target.value as any)}
-                          className="w-full h-16 rounded-[2rem] border border-white/5 bg-white/[0.02] px-8 text-[11px] font-black uppercase tracking-widest text-white/60 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-2xl cursor-pointer appearance-none transition-all hover:bg-white/[0.05]"
+                          className="w-full h-16 rounded-2xl border border-border bg-white px-8 text-[11px] font-bold uppercase tracking-widest text-muted-foreground focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm cursor-pointer appearance-none transition-all hover:border-primary/20"
                         >
-                          <option value="enrollment" className="bg-slate-900">Identifier: Seat Sequence</option>
+                          <option value="enrollment">Enrollment Number</option>
                           <option value="percentage_desc" className="bg-slate-900">Yield: High → Low</option>
                           <option value="percentage_asc" className="bg-slate-900">Yield: Low → High</option>
                         </select>
@@ -1017,23 +997,23 @@ export default function ResultsPage() {
                       <thead>
                         <tr className="bg-white/[0.01] border-b border-white/5">
                           <th className="px-10 py-6 text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">Validated Identity</th>
-                          <th className="px-10 py-6 text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">Efficiency Yield</th>
-                          <th className="px-10 py-6 text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">Protocol Status</th>
-                          <th className="px-10 py-6 text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">Sync Timestamp</th>
-                          <th className="px-10 py-6 text-[9px] font-black text-white/20 uppercase tracking-[0.3em] text-right">Directives</th>
+                          <th className="px-10 py-6 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Percentage</th>
+                          <th className="px-10 py-6 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Result Status</th>
+                          <th className="px-10 py-6 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Date Fetched</th>
+                          <th className="px-10 py-6 text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-right">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/5">
+                      <tbody className="divide-y divide-border">
                         {filteredResults.length === 0 && (
                           <tr>
                             <td colSpan={5} className="py-40 text-center">
                               <div className="flex flex-col items-center gap-6">
-                                <div className="h-20 w-20 rounded-[2rem] bg-white/5 flex items-center justify-center border border-white/10 text-white/10 shadow-inner">
+                                <div className="h-20 w-20 rounded-[2rem] bg-accent/50 flex items-center justify-center border border-border text-primary/20 shadow-inner">
                                   <Search className="h-10 w-10" />
                                 </div>
-                                <div className="space-y-2">
-                                  <p className="text-xl font-display font-black text-white">No matches found in registry</p>
-                                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Adjust your filtration parameters and retry</p>
+                                <div className="space-y-1">
+                                  <p className="text-xl font-display font-black text-foreground">No student results found</p>
+                                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Try adjusting your search or filters</p>
                                 </div>
                               </div>
                             </td>
@@ -1041,7 +1021,7 @@ export default function ResultsPage() {
                         )}
                       </tbody>
                       {filteredResults.length > 0 && (
-                        <FadeInStagger as="tbody" className="divide-y divide-white/5">
+                        <FadeInStagger as="tbody" className="divide-y divide-border">
                             {filteredResults.map((r) => {
                               const isOpen = expanded === r.enrollmentNumber;
                               const showPercent =
@@ -1053,56 +1033,56 @@ export default function ResultsPage() {
 
                               return (
                                 <FadeInStaggerItem key={r.enrollmentNumber} as="tr" className={cn(
-                                  "group border-t border-white/5 transition-all duration-500",
-                                  isOpen ? "bg-primary/[0.05]" : "hover:bg-white/[0.02]"
+                                  "group border-t border-border transition-all duration-500",
+                                  isOpen ? "bg-primary/[0.03]" : "hover:bg-accent/10"
                                 )}>
                                     <td className="px-10 py-8">
                                       <div className="flex items-center gap-6">
-                                        <div className="h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center font-display font-black text-white/20 shrink-0 tabular-nums text-xs group-hover:bg-primary/10 group-hover:text-primary transition-all border border-white/5 group-hover:border-primary/20">
+                                        <div className="h-14 w-14 rounded-2xl bg-accent flex items-center justify-center font-display font-black text-muted-foreground shrink-0 tabular-nums text-xs group-hover:bg-primary/10 group-hover:text-primary transition-all border border-border group-hover:border-primary/20">
                                           {r.enrollmentNumber.slice(-3)}
                                         </div>
                                         <div className="min-w-0">
-                                          <div className="font-display font-black text-white text-lg group-hover:text-primary transition-colors tracking-tight">
-                                            {r.name || "Awaiting Node Data..."}
+                                          <div className="font-display font-black text-foreground text-lg group-hover:text-primary transition-colors tracking-tight">
+                                            {r.name || "Awaiting Result Data..."}
                                           </div>
-                                          <div className="flex items-center gap-4 mt-2 text-[10px] font-black text-white/20 uppercase tracking-widest">
+                                          <div className="flex items-center gap-4 mt-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                                             <span>Seat: {r.enrollmentNumber}</span>
-                                            <div className="w-1 h-1 rounded-full bg-white/10" />
-                                            <span className="opacity-60 italic">EN: {r.marksheetEnrollmentNumber || "N/A"}</span>
+                                            <div className="w-1 h-1 rounded-full bg-border" />
+                                            <span className="opacity-60">EN: {r.marksheetEnrollmentNumber || "N/A"}</span>
                                           </div>
                                         </div>
                                       </div>
                                     </td>
                                     <td className="px-10 py-8">
-                                      <div className="font-display font-black text-2xl text-white tracking-tighter">{showPercent}</div>
-                                      <div className="text-[9px] font-black uppercase text-white/30 tracking-[0.2em] mt-1">{r.resultClass || "Pending Analysis"}</div>
+                                      <div className="font-display font-black text-2xl text-foreground tracking-tighter">{showPercent}</div>
+                                      <div className="text-[9px] font-bold uppercase text-muted-foreground tracking-widest mt-0.5">{r.resultClass || "Processing..."}</div>
                                     </td>
                                     <td className="px-10 py-8">
                                       {(() => {
                                         const label = r.errorMessage ? "Error" : r.resultStatus || "Unknown";
                                         return (
                                           <span className={cn(
-                                            "inline-flex items-center px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border shadow-2xl transition-all",
-                                            label === "Pass" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-emerald-500/5" :
-                                            label === "Fail" ? "bg-rose-500/10 text-rose-400 border-rose-500/20 shadow-rose-500/5" :
-                                            label === "Error" ? "bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-amber-500/5" :
-                                            "bg-white/5 text-white/40 border-white/10"
+                                            "inline-flex items-center px-4 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-widest border transition-all",
+                                            label === "Pass" ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                                            label === "Fail" ? "bg-rose-50 text-rose-600 border-rose-100" :
+                                            label === "Error" ? "bg-amber-50 text-amber-600 border-amber-100" :
+                                            "bg-accent text-muted-foreground border-border"
                                           )}>
                                             <div className={cn(
                                               "h-1.5 w-1.5 rounded-full mr-2",
-                                              label === "Pass" ? "bg-emerald-500 shadow-[0_0_8px_rgba(var(--emerald-500),0.8)]" :
-                                              label === "Fail" ? "bg-rose-500 shadow-[0_0_8px_rgba(var(--rose-500),0.8)]" :
-                                              label === "Error" ? "bg-amber-500 shadow-[0_0_8px_rgba(var(--amber-500),0.8)]" : "bg-white/20"
+                                              label === "Pass" ? "bg-emerald-500" :
+                                              label === "Fail" ? "bg-rose-500" :
+                                              label === "Error" ? "bg-amber-500" : "bg-muted-foreground"
                                             )} />
                                             {label}
                                           </span>
                                         );
                                       })()}
                                     </td>
-                                    <td className="px-10 py-8 text-[10px] font-black text-white/20 uppercase tracking-widest tabular-nums">
+                                    <td className="px-10 py-8 text-[10px] font-bold text-muted-foreground uppercase tracking-widest tabular-nums">
                                       {r.fetchedAt ? (
-                                        <div className="flex flex-col gap-1">
-                                          <span className="text-white/40">{new Date(r.fetchedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                                        <div className="flex flex-col gap-0.5">
+                                          <span className="text-foreground/60">{new Date(r.fetchedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
                                           <span>{new Date(r.fetchedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                         </div>
                                       ) : "Queueing..."}
@@ -1110,7 +1090,7 @@ export default function ResultsPage() {
                                     <td className="px-10 py-8 text-right">
                                       <div className="flex items-center justify-end gap-3">
                                         <Link href={`/results/${batchId}/students/${encodeURIComponent(r.enrollmentNumber)}`}>
-                                          <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl border border-white/5 bg-white/5 shadow-2xl text-white/40 hover:text-primary hover:bg-primary/10 hover:border-primary/20 transition-all active:scale-90">
+                                          <Button variant="ghost" size="icon" className="h-11 w-11 rounded-xl border border-border bg-white text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all active:scale-95">
                                             <IdCard className="h-5 w-5" />
                                           </Button>
                                         </Link>
@@ -1122,19 +1102,19 @@ export default function ResultsPage() {
                                           }
                                           disabled={!r.subjectMarks}
                                           className={cn(
-                                            "h-12 rounded-2xl px-6 font-black text-[9px] uppercase tracking-[0.2em] active:scale-95 transition-all shadow-2xl",
-                                            isOpen ? "bg-primary text-white border-transparent" : "bg-white/5 border-white/10 text-white group-hover:bg-white group-hover:text-black group-hover:border-transparent"
+                                            "h-11 rounded-xl px-6 font-bold text-[9px] uppercase tracking-widest active:scale-95 transition-all",
+                                            isOpen ? "bg-primary text-white border-transparent" : "bg-white border-border text-foreground hover:bg-accent"
                                           )}
                                         >
-                                          {isOpen ? "Collapse" : "Inspect Node"}
+                                          {isOpen ? "Collapse" : "Quick View"}
                                         </Button>
                                       </div>
                                     </td>
                                 </FadeInStaggerItem>
                               );
                             })}
-                          </FadeInStagger>
-                        )}
+                        </FadeInStagger>
+                      )}
                     </table>
                   </div>
 
@@ -1144,72 +1124,72 @@ export default function ResultsPage() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="overflow-hidden bg-white/[0.01] border-t border-white/5"
+                        className="overflow-hidden bg-accent/10 border-t border-border"
                       >
-                         <div className="p-12">
+                         <div className="p-10">
                             {(() => {
                                const r = batch?.results.find(x => x.enrollmentNumber === expanded);
                                if (!r) return null;
                                const subjects = r.subjectMarks ? Object.entries(r.subjectMarks) : [];
                                return (
-                                  <div className="rounded-[2.5rem] border border-white/5 bg-white/[0.02] shadow-2xl overflow-hidden backdrop-blur-3xl">
-                                     <div className="flex items-center justify-between p-10 border-b border-white/5 bg-white/[0.01]">
+                                  <div className="rounded-[2.5rem] border border-border bg-white shadow-xl overflow-hidden">
+                                     <div className="flex items-center justify-between p-10 border-b border-border bg-accent/20">
                                         <div>
-                                          <div className="flex items-center gap-3 mb-2">
+                                          <div className="flex items-center gap-3 mb-3">
                                             <Activity className="h-4 w-4 text-primary" />
-                                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30">Detailed Telemetry</span>
+                                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Subject Analysis</span>
                                           </div>
-                                          <h4 className="text-2xl font-display font-black text-white tracking-tight">Node Analytics: {r.name}</h4>
-                                          <p className="text-[10px] text-white/20 font-black uppercase tracking-widest mt-1">Component Mapping Vector</p>
+                                          <h4 className="text-2xl font-display font-black text-foreground tracking-tight">Performance Overview: {r.name}</h4>
+                                          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Subject-wise Marks Distribution</p>
                                         </div>
                                         <div className="text-right">
-                                          <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] mb-2">Efficiency Index</p>
-                                          <p className="text-4xl font-display font-black text-primary tracking-tighter">{r.percentage}%</p>
+                                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Total Score</p>
+                                          <p className="text-4xl font-display font-black text-primary tracking-tighter tabular-nums leading-none">{r.percentage}%</p>
                                         </div>
                                       </div>
 
                                       <div className="overflow-x-auto">
                                         <table className="w-full text-left text-xs">
                                           <thead>
-                                            <tr className="bg-white/[0.01] border-b border-white/5">
-                                              <th className="px-10 py-6 font-black text-white/20 uppercase tracking-[0.3em] text-[9px]">Logical Subject Identifier</th>
-                                              <th className="px-10 py-6 font-black text-white/20 uppercase tracking-[0.3em] text-[9px]">Net Score</th>
-                                              <th className="px-10 py-6 font-black text-white/20 uppercase tracking-[0.3em] text-[9px]">Int. (FA)</th>
-                                              <th className="px-10 py-6 font-black text-white/20 uppercase tracking-[0.3em] text-[9px]">Ext. (SA)</th>
-                                              <th className="px-10 py-6 font-black text-white/20 uppercase tracking-[0.3em] text-[9px]">SLA Logic</th>
-                                              <th className="px-10 py-6 font-black text-white/20 uppercase tracking-[0.3em] text-[9px]">Logic Value</th>
+                                            <tr className="bg-accent/5 border-b border-border">
+                                              <th className="px-10 py-5 font-bold text-muted-foreground uppercase tracking-widest text-[9px]">Subject Name</th>
+                                              <th className="px-10 py-5 font-bold text-muted-foreground uppercase tracking-widest text-[9px]">Total Marks</th>
+                                              <th className="px-10 py-5 font-bold text-muted-foreground uppercase tracking-widest text-[9px]">Int. (FA)</th>
+                                              <th className="px-10 py-5 font-bold text-muted-foreground uppercase tracking-widest text-[9px]">Ext. (SA)</th>
+                                              <th className="px-10 py-5 font-bold text-muted-foreground uppercase tracking-widest text-[9px]">SLA Marks</th>
+                                              <th className="px-10 py-5 font-bold text-muted-foreground uppercase tracking-widest text-[9px] text-right">Credits</th>
                                             </tr>
                                           </thead>
-                                          <tbody className="divide-y divide-white/5">
+                                          <tbody className="divide-y divide-border">
                                             {subjects.map(([sub, m]) => (
-                                              <tr key={sub} className="hover:bg-white/[0.02] transition-all group/row">
+                                              <tr key={sub} className="hover:bg-accent/5 transition-all group/row">
                                                 <td className="px-10 py-6">
-                                                  <div className="font-black text-white text-sm group-hover/row:text-primary transition-colors uppercase tracking-widest">{sub}</div>
+                                                  <div className="font-bold text-foreground text-sm group-hover/row:text-primary transition-colors uppercase tracking-widest">{sub}</div>
                                                 </td>
                                                 <td className="px-10 py-6">
                                                   <div className="flex items-center gap-3">
-                                                    <span className="font-display font-black text-white text-base">{m.totalObt ?? "0"}</span>
-                                                    <span className="text-white/10">/</span>
-                                                    <span className="text-white/40 font-black text-[10px]">{m.totalMax ?? "0"}</span>
+                                                    <span className="font-display font-black text-foreground text-base">{m.totalObt ?? "0"}</span>
+                                                    <span className="text-muted-foreground/30">/</span>
+                                                    <span className="text-muted-foreground/60 font-bold text-[10px]">{m.totalMax ?? "0"}</span>
                                                   </div>
                                                 </td>
                                                 <td className="px-10 py-6">
-                                                  <div className="space-y-2 font-mono text-[10px] text-white/40">
-                                                    <p className="font-black uppercase tracking-widest">TH: <span className="text-indigo-400">{m.faThObt ?? "0"}</span>/{m.faThMax ?? "0"}</p>
-                                                    <p className="font-black uppercase tracking-widest">PR: <span className="text-indigo-400">{m.faPrObt ?? "0"}</span>/{m.faPrMax ?? "0"}</p>
+                                                  <div className="space-y-1.5 font-mono text-[10px] text-muted-foreground">
+                                                    <p className="font-bold uppercase tracking-widest">TH: <span className="text-indigo-600">{m.faThObt ?? "0"}</span>/{m.faThMax ?? "0"}</p>
+                                                    <p className="font-bold uppercase tracking-widest">PR: <span className="text-indigo-600">{m.faPrObt ?? "0"}</span>/{m.faPrMax ?? "0"}</p>
                                                   </div>
                                                 </td>
                                                 <td className="px-10 py-6">
-                                                  <div className="space-y-2 font-mono text-[10px] text-white/40">
-                                                    <p className="font-black uppercase tracking-widest">TH: <span className="text-primary">{m.saThObt ?? "0"}</span>/{m.saThMax ?? "0"}</p>
-                                                    <p className="font-black uppercase tracking-widest">PR: <span className="text-primary">{m.saPrObt ?? "0"}</span>/{m.saPrMax ?? "0"}</p>
+                                                  <div className="space-y-1.5 font-mono text-[10px] text-muted-foreground">
+                                                    <p className="font-bold uppercase tracking-widest">TH: <span className="text-primary">{m.saThObt ?? "0"}</span>/{m.saThMax ?? "0"}</p>
+                                                    <p className="font-bold uppercase tracking-widest">PR: <span className="text-primary">{m.saPrObt ?? "0"}</span>/{m.saPrMax ?? "0"}</p>
                                                   </div>
                                                 </td>
-                                                <td className="px-10 py-6 text-white/40 font-black tracking-widest tabular-nums text-[10px]">
-                                                  {m.slaObt ?? "0"}<span className="text-white/10 mx-2">/</span>{m.slaMax ?? "0"}
+                                                <td className="px-10 py-6 text-muted-foreground/60 font-bold tracking-widest tabular-nums text-[10px]">
+                                                  {m.slaObt ?? "0"}<span className="text-muted-foreground/20 mx-2">/</span>{m.slaMax ?? "0"}
                                                 </td>
-                                                <td className="px-10 py-6">
-                                                  <div className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-black text-primary shadow-2xl text-[10px]">
+                                                <td className="px-10 py-6 text-right">
+                                                  <div className="inline-flex h-9 w-9 rounded-xl bg-primary/10 border border-primary/20 items-center justify-center font-black text-primary shadow-sm text-[10px]">
                                                     {m.credits ?? "0"}
                                                   </div>
                                                 </td>

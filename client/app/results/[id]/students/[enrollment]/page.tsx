@@ -117,27 +117,27 @@ export default function StudentDetailPage() {
         <PageHeader
           title={
             <div className="flex items-center gap-4">
-               <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-[0_0_20px_rgba(var(--primary),0.1)]">
-                <IdCard className="h-6 w-6 text-primary" />
+               <div className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
+                <GraduationCap className="h-7 w-7 text-white" />
               </div>
               <div>
-                <span className="font-display font-black text-3xl text-white tracking-tight block">Node Profile</span>
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mt-1">Personnel Authentication Registry</p>
+                <span className="font-display font-black text-3xl text-foreground tracking-tight block">Student Profile</span>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-1">Individual Academic Record</p>
               </div>
             </div>
           }
           subtitle={
-            <div className="flex items-center gap-3 text-white/40 mt-1">
-              <span className="text-[10px] font-black uppercase tracking-widest">Primary Vector:</span>
-              <span className="font-mono text-sm font-black text-primary px-3 py-1 rounded-xl bg-primary/5 border border-primary/10 shadow-inner">{enrollment || "UNA_VOID_ID"}</span>
+            <div className="flex items-center gap-3 text-muted-foreground mt-1">
+              <span className="text-[10px] font-bold uppercase tracking-widest">Enrollment No:</span>
+              <span className="font-mono text-sm font-bold text-primary px-3 py-1 rounded-xl bg-primary/5 border border-primary/10">{enrollment || "N/A"}</span>
             </div>
           }
           backHref={`/results/${batchId}`}
-          backLabel="Batch Registry"
+          backLabel="Back to Batch"
           actions={
-             <Button variant="outline" className="h-12 rounded-2xl font-black uppercase tracking-widest text-[10px] border-white/10 bg-white/5 text-white hover:bg-white hover:text-black hover:border-transparent transition-all shadow-2xl px-8">
+             <Button variant="outline" className="h-12 rounded-xl font-bold uppercase tracking-widest text-[10px] border-border bg-white text-foreground hover:bg-primary hover:text-white transition-all shadow-sm px-8">
                 <Sparkles className="mr-3 h-4 w-4 text-amber-500" />
-                Export Profile
+                Download Result
              </Button>
           }
         />
@@ -148,91 +148,91 @@ export default function StudentDetailPage() {
                 <div className="relative">
                   <Activity className="h-16 w-16 animate-spin text-primary opacity-20" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="h-2 w-2 rounded-full bg-primary shadow-[0_0_15px_rgba(var(--primary),1)]" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-primary" />
                   </div>
                 </div>
-                <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20 animate-pulse">Syncing Student Telemetry...</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground animate-pulse">Loading Performance Data...</p>
              </div>
           ) : error ? (
-            <FadeIn className="p-20 text-center rounded-[3rem] border border-white/5 bg-white/[0.02] backdrop-blur-3xl shadow-2xl max-w-2xl mx-auto">
-               <div className="h-20 w-20 rounded-[2rem] bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mx-auto mb-8">
+            <FadeIn className="p-20 text-center rounded-[3rem] border border-border bg-white shadow-xl max-w-2xl mx-auto">
+               <div className="h-20 w-20 rounded-[2rem] bg-rose-50 border border-rose-100 flex items-center justify-center mx-auto mb-8">
                 <Shield className="h-10 w-10 text-rose-500 opacity-50" />
                </div>
-               <h3 className="text-xl font-display font-black text-white mb-3 uppercase tracking-tight">Handshake Failed</h3>
-               <p className="text-sm font-black text-rose-500/60 uppercase tracking-widest leading-relaxed">{error}</p>
-               <Button variant="outline" className="mt-10 rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[11px] border-white/10 bg-white/5 text-white hover:bg-white hover:text-black transition-all" onClick={() => window.location.reload()}>Retry Protocol</Button>
+               <h3 className="text-xl font-display font-black text-foreground mb-3 uppercase tracking-tight">Access Denied</h3>
+               <p className="text-sm font-bold text-rose-600/60 uppercase tracking-widest leading-relaxed">{error}</p>
+               <Button variant="outline" className="mt-10 rounded-xl h-14 px-10 font-bold uppercase tracking-widest text-[11px] border-border bg-white text-foreground hover:bg-accent transition-all" onClick={() => window.location.reload()}>Retry Connection</Button>
             </FadeIn>
           ) : !student ? (
-            <div className="p-40 text-center text-white/10 font-black uppercase tracking-[0.5em]">No node data converged.</div>
+            <div className="p-40 text-center text-muted-foreground/30 font-bold uppercase tracking-widest">No student data found.</div>
           ) : (
-            <div className="space-y-16">
-              <FadeInStagger className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="space-y-12">
+              <FadeInStagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
                 <FadeInStaggerItem>
                   <StatCard
                     tone="blue"
-                    label="FullName / Alias"
+                    label="Full Name"
                     value={<span className="text-lg truncate block font-display font-black tracking-tight">{student.name || "-"}</span>}
                     icon={<User className="h-5 w-5" />}
-                    className="p-8 rounded-[2rem] border-white/5 bg-white/[0.02] shadow-2xl"
+                    className="p-8"
                   />
                 </FadeInStaggerItem>
                 <FadeInStaggerItem>
                   <StatCard
                     tone="indigo"
-                    label="Seat Registry"
+                    label="Seat Number"
                     value={student.enrollmentNumber || "-"}
                     icon={<Hash className="h-5 w-5" />}
-                    className="p-8 rounded-[2rem] border-white/5 bg-white/[0.02] shadow-2xl"
+                    className="p-8"
                   />
                 </FadeInStaggerItem>
                 <FadeInStaggerItem>
                    <StatCard
-                    tone="purple"
+                    tone="pink"
                     label="Enrollment ID"
                     value={student.marksheetEnrollmentNumber || "-"}
                     icon={<IdCard className="h-5 w-5" />}
-                    className="p-8 rounded-[2rem] border-white/5 bg-white/[0.02] shadow-2xl"
+                    className="p-8"
                   />
                 </FadeInStaggerItem>
                 <FadeInStaggerItem>
                   <StatCard
                     tone={student.resultStatus === "Pass" ? "green" : "red"}
-                    label="Efficiency Yield"
+                    label="Percentage"
                     value={typeof student.percentage === "number" ? `${student.percentage}%` : "-"}
-                    hint={<span className="uppercase font-black tracking-[0.3em] text-[9px] text-white/30">{student.resultClass || "-"}</span>}
+                    hint={<span className="uppercase font-bold tracking-widest text-[9px] text-muted-foreground">{student.resultClass || "-"}</span>}
                     icon={<BadgePercent className="h-5 w-5" />}
-                    className="p-8 rounded-[2rem] border-white/5 bg-white/[0.02] shadow-2xl"
+                    className="p-8"
                   />
                 </FadeInStaggerItem>
                 <FadeInStaggerItem>
                   <StatCard
                     tone={student.errorMessage ? "red" : student.resultStatus === "Pass" ? "green" : "indigo"}
-                    label="Protocol Status"
+                    label="Overall Status"
                     value={student.errorMessage ? "Error" : student.resultStatus || "Unknown"}
-                    hint={<span className="uppercase font-black tracking-widest text-[9px] text-white/30">{student.errorMessage ? "Fault Detected" : "Operational"}</span>}
+                    hint={<span className="uppercase font-bold tracking-widest text-[9px] text-muted-foreground">{student.errorMessage ? "Fault Detected" : "Verified"}</span>}
                     icon={<Shield className="h-5 w-5" />}
-                    className="p-8 rounded-[2rem] border-white/5 bg-white/[0.02] shadow-2xl"
+                    className="p-8"
                   />
                 </FadeInStaggerItem>
               </FadeInStagger>
 
               <FadeIn delay={0.2}>
-                <Card className="border-white/5 shadow-2xl rounded-[3rem] bg-white/[0.02] backdrop-blur-3xl overflow-hidden border-t-white/10">
-                  <CardHeader className="border-b border-white/5 bg-white/[0.01] px-12 py-10">
+                <Card className="border-border shadow-xl rounded-[3rem] bg-white overflow-hidden">
+                  <CardHeader className="border-b border-border bg-accent/20 px-12 py-10">
                     <div className="flex items-center justify-between">
                        <div className="flex items-center gap-6">
-                        <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-[0_0_20px_rgba(var(--primary),0.05)]">
+                        <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
                           <BookOpen className="h-7 w-7 text-primary" />
                         </div>
                         <div>
-                          <h3 className="text-2xl font-display font-black text-white tracking-tight">Subject-wise Analytics</h3>
-                          <p className="text-[10px] text-white/20 font-black uppercase tracking-[0.4em] mt-1">Parsed academic statement breakdown</p>
+                          <h3 className="text-2xl font-display font-black text-foreground tracking-tight">Subject-wise Analysis</h3>
+                          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Detailed breakdown of academic performance</p>
                         </div>
                       </div>
-                      <div className="h-16 w-16 rounded-[2rem] bg-white/[0.02] border border-white/5 flex items-center justify-center shadow-inner group/trophy">
+                      <div className="h-16 w-16 rounded-[2rem] bg-accent/50 border border-border flex items-center justify-center">
                          <Trophy className={cn(
                            "h-8 w-8 transition-all duration-500", 
-                           student.resultStatus === "Pass" ? "text-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)] scale-110" : "text-white/10 grayscale"
+                           student.resultStatus === "Pass" ? "text-amber-500 drop-shadow-md scale-110" : "text-muted-foreground/20 grayscale"
                          )} />
                       </div>
                     </div>
@@ -240,54 +240,54 @@ export default function StudentDetailPage() {
                   <CardContent className="p-0">
                   {subjects.length === 0 ? (
                     <div className="p-40 text-center flex flex-col items-center justify-center gap-6">
-                       <BookOpen className="h-16 w-16 text-white/10" />
-                       <p className="text-[11px] font-black uppercase tracking-[0.5em] text-white/20">No subject marks parsed for this node.</p>
+                       <BookOpen className="h-16 w-16 text-muted-foreground/20" />
+                       <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">No subject marks available.</p>
                     </div>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-sm border-collapse">
                         <thead>
-                          <tr className="bg-white/[0.01] border-b border-white/5">
-                            <th className="px-12 py-8 text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">Logical Subject</th>
-                            <th className="px-12 py-8 text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">Net Score</th>
-                            <th className="px-12 py-8 text-[12px] font-black text-white/20 uppercase tracking-[0.3em] font-mono">FA-TH</th>
-                            <th className="px-12 py-8 text-[12px] font-black text-white/20 uppercase tracking-[0.3em] font-mono">SA-TH</th>
-                            <th className="px-12 py-8 text-[12px] font-black text-white/20 uppercase tracking-[0.3em] font-mono">FA-PR</th>
-                            <th className="px-12 py-8 text-[12px] font-black text-white/20 uppercase tracking-[0.3em] font-mono">SA-PR</th>
-                            <th className="px-12 py-8 text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">SLA Index</th>
-                            <th className="px-12 py-8 text-[9px] font-black text-white/20 uppercase tracking-[0.3em] text-right">Value</th>
+                          <tr className="bg-accent/5 border-b border-border">
+                            <th className="px-12 py-8 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Subject Name</th>
+                            <th className="px-12 py-8 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Total Marks</th>
+                            <th className="px-12 py-8 text-[11px] font-bold text-muted-foreground uppercase tracking-widest font-mono">FA-TH</th>
+                            <th className="px-12 py-8 text-[11px] font-bold text-muted-foreground uppercase tracking-widest font-mono">SA-TH</th>
+                            <th className="px-12 py-8 text-[11px] font-bold text-muted-foreground uppercase tracking-widest font-mono">FA-PR</th>
+                            <th className="px-12 py-8 text-[11px] font-bold text-muted-foreground uppercase tracking-widest font-mono">SA-PR</th>
+                            <th className="px-12 py-8 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">SLA Marks</th>
+                            <th className="px-12 py-8 text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-right">Credits</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-border">
                           {subjects.map(([sub, m]) => (
-                            <tr key={sub} className="group hover:bg-white/[0.02] transition-all duration-500">
+                            <tr key={sub} className="group hover:bg-accent/5 transition-all duration-500">
                               <td className="px-12 py-8">
-                                <span className="font-display font-black text-white text-base group-hover:text-primary transition-colors tracking-tight uppercase whitespace-pre-wrap">{sub}</span>
+                                <span className="font-display font-black text-foreground text-base group-hover:text-primary transition-colors tracking-tight uppercase whitespace-pre-wrap">{sub}</span>
                               </td>
                               <td className="px-12 py-8">
                                 <div className="flex items-center gap-4">
-                                   <span className="font-display font-black text-2xl text-white tracking-tighter tabular-nums">{fmt(m.totalObt)}</span>
-                                   <span className="text-white/10 text-xl">/</span>
-                                   <span className="text-white/40 font-black text-sm tracking-tighter tabular-nums">{fmt(m.totalMax)}</span>
+                                   <span className="font-display font-black text-2xl text-foreground tracking-tighter tabular-nums leading-none">{fmt(m.totalObt)}</span>
+                                   <span className="text-muted-foreground/20 text-xl font-light">/</span>
+                                   <span className="text-muted-foreground/60 font-bold text-sm tracking-tighter tabular-nums">{fmt(m.totalMax)}</span>
                                 </div>
                               </td>
-                              <td className="px-12 py-8 text-white/40 font-mono text-xs tabular-nums group-hover:text-indigo-400 transition-colors">
-                                <span className="font-black">{fmt(m.faThObt)}</span> <span className="text-[10px] opacity-30">PT</span>
+                              <td className="px-12 py-8 text-muted-foreground/60 font-mono text-xs tabular-nums group-hover/row:text-primary transition-colors">
+                                <span className="font-bold text-indigo-600">{fmt(m.faThObt)}</span> <span className="text-[10px] opacity-50">PT</span>
                               </td>
-                              <td className="px-12 py-8 text-white/40 font-mono text-xs tabular-nums group-hover:text-primary transition-colors">
-                                <span className="font-black">{fmt(m.saThObt)}</span> <span className="text-[10px] opacity-30">PT</span>
+                              <td className="px-12 py-8 text-muted-foreground/60 font-mono text-xs tabular-nums group-hover/row:text-primary transition-colors">
+                                <span className="font-bold text-primary">{fmt(m.saThObt)}</span> <span className="text-[10px] opacity-50">PT</span>
                               </td>
-                              <td className="px-12 py-8 text-white/40 font-mono text-xs tabular-nums group-hover:text-indigo-400 transition-colors">
-                                <span className="font-black">{fmt(m.faPrObt)}</span> <span className="text-[10px] opacity-30">PT</span>
+                              <td className="px-12 py-8 text-muted-foreground/60 font-mono text-xs tabular-nums group-hover/row:text-primary transition-colors">
+                                <span className="font-bold text-indigo-600">{fmt(m.faPrObt)}</span> <span className="text-[10px] opacity-50">PT</span>
                               </td>
-                              <td className="px-12 py-8 text-white/40 font-mono text-xs tabular-nums group-hover:text-primary transition-colors">
-                                <span className="font-black">{fmt(m.saPrObt)}</span> <span className="text-[10px] opacity-30">PT</span>
+                              <td className="px-12 py-8 text-muted-foreground/60 font-mono text-xs tabular-nums group-hover/row:text-primary transition-colors">
+                                <span className="font-bold text-primary">{fmt(m.saPrObt)}</span> <span className="text-[10px] opacity-50">PT</span>
                               </td>
-                              <td className="px-12 py-8 text-white/40 font-mono text-xs tabular-nums">
-                                <span className="font-black text-white/60">{fmt(m.slaObt)}</span> <span className="opacity-20 text-[10px]">/</span> <span className="opacity-30">{fmt(m.slaMax)}</span>
+                              <td className="px-12 py-8 text-muted-foreground/60 font-mono text-xs tabular-nums">
+                                <span className="font-bold text-foreground/80">{fmt(m.slaObt)}</span> <span className="opacity-20 text-[10px]">/</span> <span className="opacity-40">{fmt(m.slaMax)}</span>
                               </td>
                               <td className="px-12 py-8 text-right">
-                                <div className="inline-flex h-12 w-12 rounded-2xl bg-white/5 border border-white/5 group-hover:border-primary/20 items-center justify-center font-black text-sm text-primary shadow-2xl transition-all">
+                                <div className="inline-flex h-11 w-11 rounded-xl bg-primary/5 border border-primary/10 group-hover:border-primary/30 items-center justify-center font-bold text-xs text-primary shadow-sm transition-all">
                                   {fmt(m.credits)}
                                 </div>
                               </td>
@@ -303,35 +303,35 @@ export default function StudentDetailPage() {
 
               <div className="grid gap-12 md:grid-cols-2">
                 <FadeIn delay={0.3}>
-                  <Card className="border-white/5 shadow-2xl rounded-[3rem] bg-white/[0.02] backdrop-blur-3xl overflow-hidden h-full border-t-white/10">
-                    <CardHeader className="border-b border-white/5 bg-white/[0.01] px-10 py-8">
+                  <Card className="border-border shadow-xl rounded-[3rem] bg-white overflow-hidden h-full">
+                    <CardHeader className="border-b border-border bg-accent/10 px-10 py-8">
                       <div className="flex items-center gap-4">
                          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
                           <Clock className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-display font-black text-white">Trace Telemetry</h3>
-                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mt-0.5">Global ingress pulse data</p>
+                          <h3 className="text-lg font-display font-black text-foreground">Result Details</h3>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-0.5">Academic capture timestamps</p>
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent className="p-10 space-y-6">
-                      <div className="flex items-center justify-between p-6 rounded-3xl bg-white/[0.02] border border-white/5 group transition-all hover:bg-white/[0.04]">
-                        <span className="text-[10px] text-white/20 font-black uppercase tracking-[0.3em] group-hover:text-white/40 transition-colors">Global Ingress</span>
-                        <span className="text-[11px] font-black text-white/60 uppercase tracking-widest tabular-nums">
+                      <div className="flex items-center justify-between p-6 rounded-3xl bg-accent/20 border border-border group transition-all hover:bg-accent/30">
+                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest transition-colors">Captured On</span>
+                        <span className="text-[11px] font-bold text-foreground/70 uppercase tracking-widest tabular-nums">
                           {student.fetchedAt ? new Date(student.fetchedAt).toLocaleString() : "Never Synced"}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between p-6 rounded-3xl bg-white/[0.02] border border-white/5 group transition-all hover:bg-white/[0.04]">
-                        <span className="text-[10px] text-white/20 font-black uppercase tracking-[0.3em] group-hover:text-white/40 transition-colors">Aggregated Raw Score</span>
+                      <div className="flex items-center justify-between p-6 rounded-3xl bg-accent/20 border border-border group transition-all hover:bg-accent/30">
+                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest transition-colors">Total Aggregated Marks</span>
                         <span className="text-2xl font-display font-black text-primary tracking-tighter">
                           {typeof student.totalMarks === "number" ? student.totalMarks : "N/A"}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between p-6 rounded-3xl bg-white/[0.02] border border-white/5 group transition-all hover:bg-white/[0.04]">
-                        <span className="text-[10px] text-white/20 font-black uppercase tracking-[0.3em] group-hover:text-white/40 transition-colors">Logical Partition</span>
-                        <span className="text-sm font-black text-white/80 uppercase tracking-widest truncate max-w-[180px]">
-                           {student.resultClass || "Default Class"}
+                      <div className="flex items-center justify-between p-6 rounded-3xl bg-accent/20 border border-border group transition-all hover:bg-accent/30">
+                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest transition-colors">Result Class</span>
+                        <span className="text-sm font-bold text-foreground uppercase tracking-widest truncate max-w-[180px]">
+                           {student.resultClass || "REGULAR"}
                         </span>
                       </div>
                     </CardContent>
@@ -339,39 +339,39 @@ export default function StudentDetailPage() {
                 </FadeIn>
 
                 <FadeIn delay={0.4}>
-                  <Card className="border-white/5 shadow-2xl rounded-[3rem] bg-white/[0.02] backdrop-blur-3xl overflow-hidden h-full border-t-white/10">
-                    <CardHeader className="border-b border-white/5 bg-white/[0.01] px-10 py-8">
+                  <Card className="border-border shadow-xl rounded-[3rem] bg-white overflow-hidden h-full">
+                    <CardHeader className="border-b border-border bg-accent/10 px-10 py-8">
                       <div className="flex items-center gap-4">
-                         <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
-                          <Database className="h-5 w-5 text-emerald-500" />
+                         <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center border border-emerald-100">
+                          <Database className="h-5 w-5 text-emerald-600" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-display font-black text-white">Cohort Context</h3>
-                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mt-0.5">Node relationship mapping</p>
+                          <h3 className="text-lg font-display font-black text-foreground">Batch Context</h3>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-0.5">Parent dataset relationship</p>
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent className="p-10 space-y-6">
-                      <div className="flex items-center justify-between p-6 rounded-3xl bg-white/[0.02] border border-white/5 group transition-all hover:bg-white/[0.04]">
-                        <span className="text-[10px] text-white/20 font-black uppercase tracking-[0.3em] group-hover:text-white/40 transition-colors">Batch Status</span>
+                      <div className="flex items-center justify-between p-6 rounded-3xl bg-accent/20 border border-border group transition-all hover:bg-accent/30">
+                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest transition-colors">Batch Status</span>
                         <span className={cn(
-                          "text-[10px] font-black uppercase tracking-[0.4em] px-4 py-2 rounded-xl border transition-all",
-                          data?.batch?.status === "completed" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]" : "bg-primary/10 text-primary border-primary/20"
+                          "text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-xl border transition-all",
+                          data?.batch?.status === "completed" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-primary/5 text-primary border-primary/10"
                         )}>
                           {data?.batch?.status || "Unknown"}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between p-6 rounded-3xl bg-white/[0.02] border border-white/5 group transition-all hover:bg-white/[0.04]">
-                        <span className="text-[10px] text-white/20 font-black uppercase tracking-[0.3em] group-hover:text-white/40 transition-colors">Cluster Created</span>
-                        <span className="text-xs font-black text-white/60 uppercase tracking-widest">
+                      <div className="flex items-center justify-between p-6 rounded-3xl bg-accent/20 border border-border group transition-all hover:bg-accent/30">
+                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest transition-colors">Batch Processed Date</span>
+                        <span className="text-xs font-bold text-foreground/70 uppercase tracking-widest">
                            {data?.batch?.uploadDate ? new Date(data.batch.uploadDate).toLocaleDateString(undefined, { dateStyle: 'medium' }) : "-"}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between p-6 rounded-3xl bg-white/[0.02] border border-white/5 group transition-all hover:bg-white/[0.04]">
-                        <span className="text-[10px] text-white/20 font-black uppercase tracking-[0.3em] group-hover:text-white/40 transition-colors">Population Density</span>
-                        <span className="text-sm font-black text-white/80 uppercase tracking-[0.2em] flex items-center gap-3">
+                      <div className="flex items-center justify-between p-6 rounded-3xl bg-accent/20 border border-border group transition-all hover:bg-accent/30">
+                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest transition-colors">Batch Size</span>
+                        <span className="text-sm font-bold text-foreground uppercase tracking-widest flex items-center gap-3">
                            <GraduationCap className="h-4 w-4 text-primary" />
-                           {data?.batch?.totalStudents || 0} Nodes
+                           {data?.batch?.totalStudents || 0} Students
                         </span>
                       </div>
                     </CardContent>

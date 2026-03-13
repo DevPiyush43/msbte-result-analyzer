@@ -20,8 +20,12 @@ import {
   YAxis, 
   Tooltip, 
   ResponsiveContainer, 
-  Cell 
+  Cell,
+  AreaChart,
+  Area,
+  CartesianGrid
 } from "recharts";
+import { AlertCircle } from "lucide-react";
 
 import { Protected } from "@/components/Protected";
 import { AppShell } from "@/components/AppShell";
@@ -56,10 +60,18 @@ type AnalyticsSummary = {
   subjectAverages: Array<{ subject: string; avgPercentage: number | null; samples: number }>;
 };
 
-const CLASS_COLORS = ["#4f46e5", "#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981"];
+const CLASS_COLORS = ["#ec4899", "#8b5cf6", "#6366f1", "#4f46e5", "#10b981", "#f59e0b"];
+
+
+type BatchHistory = {
+  id: string;
+  uploadDate: string;
+  passRate: number;
+};
 
 export default function AnalyticsPage() {
   const [analytics, setAnalytics] = React.useState<AnalyticsSummary | null>(null);
+  const [batchHistory, setBatchHistory] = React.useState<BatchHistory[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -68,311 +80,254 @@ export default function AnalyticsPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await api.get("/batches/analytics/summary");
-        setAnalytics(res.data || null);
+        const [analyticsRes, recentRes] = await Promise.all([
+          api.get("/batches/analytics/summary"),
+          api.get("/batches/recent")
+        ]);
+        setAnalytics(analyticsRes.data || null);
+        
+        const history = (recentRes.data.batches || [])
+          .map((b: any) => ({
+            id: b.id,
+            uploadDate: new Date(b.uploadDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+            passRate: Math.round((b.passCount / b.totalStudents) * 100) || 0
+          }))
+          .reverse();
+        setBatchHistory(history);
       } catch (err: any) {
-        const message = err?.response?.data?.error?.message || "Failed to load analytics";
-        setError(message);
-        setAnalytics(null);
+        setError(err?.response?.data?.error?.message || "Failed to load analytics");
       } finally {
         setLoading(false);
       }
     }
-
     load();
   }, []);
 
   return (
     <Protected>
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-5%] right-[-10%] h-[60rem] w-[60rem] rounded-full bg-primary/20 blur-[150px] animate-pulse" />
-        <div className="absolute bottom-[-10%] left-[-10%] h-[50rem] w-[50rem] rounded-full bg-indigo-500/10 blur-[120px]" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]" />
-      </div>
-
       <AppShell>
         <PageHeader 
           title={
-            <div className="flex items-center gap-6">
-               <div className="h-16 w-16 rounded-[2rem] bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-[0_0_30px_rgba(var(--primary),0.2)] backdrop-blur-3xl group hover:scale-110 transition-all duration-700">
-                <TrendingUp className="h-8 w-8" />
+            <div className="flex items-center gap-4">
+               <div className="h-14 w-14 rounded-2xl bg-secondary text-white flex items-center justify-center shadow-lg">
+                <TrendingUp className="h-7 w-7" />
               </div>
               <div>
-                <span className="font-display font-black text-4xl text-white tracking-tight block">Analytics Engine</span>
-                <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20 mt-2 flex items-center gap-3">
-                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,1)]" />
-                   Live Telemetry Stream
-                </p>
+                <span className="font-display font-black text-3xl text-foreground tracking-tight block">Analytics Node</span>
+                <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mt-1">Advanced Performance Metrics</p>
               </div>
             </div>
           }
-          subtitle="Holistic insights across all academic cohorts and subject departments." 
-          actions={
-            <div className="flex items-center gap-6">
-                <div className="hidden md:flex flex-col items-end">
-                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Data Integrity</span>
-                  <div className="flex gap-1 mt-1">
-                    {[1,2,3,4,5,6,7,8,9,10].map(i => (
-                      <div key={i} className={cn("h-1 w-2 rounded-full", i < 9 ? "bg-primary/40" : "bg-white/5")} />
-                    ))}
-                  </div>
-                </div>
-                <Button variant="outline" className="rounded-2xl h-14 px-8 font-black uppercase tracking-widest text-[9px] border-white/5 bg-white/[0.03] hover:bg-white/10 text-white transition-all shadow-xl backdrop-blur-xl group">
-                  <Sparkles className="mr-3 h-4 w-4 text-primary group-hover:animate-pulse" />
-                  Neural Patterns: ON
-                </Button>
-            </div>
-          }
+          subtitle="Deep analytical insights and merit distribution across all institutional batches." 
         />
 
-        <main className="mx-auto max-w-7xl px-8 py-16 lg:px-12 relative z-10">
+        <main className="mx-auto max-w-7xl px-8 py-12 relative z-10">
           {loading ? (
              <div className="space-y-12">
-                <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                  {[1, 2, 3, 4].map(i => <div key={i} className="h-36 bg-white/[0.02] border border-white/5 animate-pulse rounded-[2.5rem]" />)}
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                  {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-accent/30 animate-pulse rounded-[2.5rem]" />)}
                 </div>
-                <div className="grid gap-12 lg:grid-cols-3">
-                  <div className="lg:col-span-2 h-[500px] bg-white/[0.02] border border-white/5 animate-pulse rounded-[3.5rem]" />
-                  <div className="h-[500px] bg-white/[0.02] border border-white/5 animate-pulse rounded-[3.5rem]" />
+                <div className="grid gap-8 lg:grid-cols-3">
+                  <div className="lg:col-span-2 h-[450px] bg-accent/30 animate-pulse rounded-[3.5rem]" />
+                  <div className="h-[450px] bg-accent/30 animate-pulse rounded-[3.5rem]" />
                 </div>
              </div>
           ) : error ? (
-            <FadeIn>
-              <div className="py-40 text-center rounded-[3.5rem] bg-rose-500/5 border border-rose-500/20 backdrop-blur-3xl shadow-2xl">
-                 <X className="h-16 w-16 mx-auto mb-8 text-rose-500/40" />
-                 <h3 className="text-2xl font-display font-black text-rose-500 uppercase tracking-widest">Analytics Disruption</h3>
-                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 mt-4 max-w-sm mx-auto leading-relaxed">{error}</p>
-                 <Button className="mt-12 rounded-2xl px-10 h-14 bg-white text-black font-black uppercase tracking-widest text-[11px] hover:bg-rose-500 hover:text-white transition-all">Reconnect uplink</Button>
-              </div>
-            </FadeIn>
-          ) : !analytics ? (
-            <FadeIn>
-              <div className="py-40 text-center rounded-[3.5rem] bg-white/[0.01] border border-white/5 backdrop-blur-3xl shadow-2xl opacity-40">
-                 <Activity className="h-16 w-16 mx-auto mb-8 text-white/10" />
-                 <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20">No historical data converged for analysis.</p>
-              </div>
-            </FadeIn>
+            <div className="py-20 text-center">
+               <AlertCircle className="h-12 w-12 text-rose-500 mx-auto mb-4" />
+               <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">{error}</p>
+            </div>
           ) : (
             <FadeInStagger className="space-y-12">
-              <FadeInStaggerItem>
-                <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                  <StatCard
-                    tone="indigo"
-                    label="Active Population"
-                    value={analytics.totals.totalStudents}
-                    icon={<GraduationCap className="h-6 w-6" />}
-                    trend={{ value: 8.5, isUp: true }}
-                    className="p-10 rounded-[3rem] bg-white/[0.02] border-white/5 shadow-2xl backdrop-blur-3xl"
-                  />
-                  <StatCard
-                    tone="green"
-                    label="Efficiency Rating"
-                    value={`${analytics.totals.passRate}%`}
-                    icon={<Activity className="h-6 w-6" />}
-                    trend={{ value: 2.1, isUp: true }}
-                    className="p-10 rounded-[3rem] bg-white/[0.02] border-white/5 shadow-2xl backdrop-blur-3xl"
-                  />
-                  <StatCard
-                    tone="red"
-                    label="Attrition nodes"
-                    value={analytics.totals.dropped}
-                    icon={<X className="h-6 w-6" />}
-                    hint="High KT count impact"
-                    className="p-10 rounded-[3rem] bg-white/[0.02] border-white/5 shadow-2xl backdrop-blur-3xl"
-                  />
-                  <StatCard
-                    tone="orange"
-                    label="Aggregated KTs"
-                    value={analytics.totals.totalKTs}
-                    icon={<Star className="h-6 w-6" />}
-                    hint="Cross-subject failure index"
-                    className="p-10 rounded-[3rem] bg-white/[0.02] border-white/5 shadow-2xl backdrop-blur-3xl"
-                  />
-                </div>
-              </FadeInStaggerItem>
-
-              <div className="grid gap-12 lg:grid-cols-3">
-                <FadeInStaggerItem className="lg:col-span-2">
-                  <Card className="border-white/5 shadow-2xl rounded-[3.5rem] bg-white/[0.02] backdrop-blur-3xl overflow-hidden h-full border-t-white/10">
-                    <CardHeader className="border-b border-white/5 bg-white/[0.01] px-12 py-10 flex flex-row items-center justify-between">
-                      <div className="flex items-center gap-6">
-                        <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-inner">
-                           <BarChart3 className="h-7 w-7 text-primary" />
-                        </div>
-                        <div className="space-y-1.5">
-                          <h3 className="text-2xl font-display font-black text-white tracking-tight">Subject Excellence Cluster</h3>
-                          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Highest average performance distribution</p>
-                        </div>
-                      </div>
-                      <div className="text-[11px] font-black uppercase tracking-[0.3em] text-white/10 hidden sm:block">Apex 08 Modules</div>
-                    </CardHeader>
-                    <CardContent className="p-12">
-                      <div className="h-[400px]">
-                        <BarChart
-                          data={analytics.subjectAverages
-                            .filter((s) => typeof s.avgPercentage === "number")
-                            .slice(0, 8)
-                            .map((s) => ({ label: s.subject, value: Number(s.avgPercentage || 0) }))}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </FadeInStaggerItem>
-
-                <FadeInStaggerItem>
-                  <Card className="border-white/5 shadow-2xl rounded-[3.5rem] overflow-hidden h-full bg-gradient-to-br from-indigo-500/20 via-primary/20 to-indigo-900/20 backdrop-blur-3xl relative group border-t-white/10">
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
-                    <div className="absolute top-[-20%] right-[-10%] h-[30rem] w-[30rem] rounded-full bg-primary/20 blur-[100px] group-hover:animate-pulse transition-all duration-700" />
-                    
-                    <CardHeader className="px-12 pt-12 pb-8 relative z-10 border-b border-white/5">
-                      <div className="flex items-center gap-5">
-                         <div className="h-14 w-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center shadow-2xl border border-white/20">
-                          <Trophy className="h-7 w-7 text-amber-500 group-hover:scale-110 transition-transform duration-700" />
-                        </div>
-                        <div className="space-y-1">
-                          <h3 className="text-2xl font-display font-black text-white tracking-tight">Supreme Merit</h3>
-                          <p className="text-[9px] uppercase font-black tracking-[0.4em] text-white/40">Top Protocol Rank</p>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-12 relative z-10">
-                      <div className="flex flex-col items-center text-center">
-                        <div className="h-32 w-32 rounded-[3rem] bg-white/10 backdrop-blur-xl flex items-center justify-center mb-10 ring-1 ring-white/20 shadow-2xl relative overflow-hidden group/star">
-                           <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/20 to-transparent scale-0 group-hover/star:scale-150 transition-transform duration-1000" />
-                           <Sparkles className="h-16 w-16 text-white group-hover:scale-110 transition-transform duration-700" />
-                        </div>
-                        
-                        <div className="space-y-6 w-full">
-                           <h4 className="text-4xl font-display font-black text-white tracking-tighter leading-[1.1]">{analytics.topper.name || "N/A"}</h4>
-                           <div className="inline-flex items-center px-6 py-3 rounded-[1.25rem] bg-white text-black text-[12px] font-black uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(255,255,255,0.1)] border border-white/20 group-hover:bg-primary group-hover:text-white transition-all duration-500">
-                            {analytics.topper.percentage}% Efficiency Yield
-                          </div>
-                        </div>
-
-                        <div className="mt-14 grid grid-cols-2 gap-6 w-full">
-                          <div className="text-left bg-white/5 backdrop-blur-xl p-6 rounded-[1.5rem] border border-white/10 shadow-xl group/node hover:bg-white/10 transition-all">
-                            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em] mb-3">Index ID</p>
-                            <p className="text-sm font-black text-white truncate font-mono tracking-normal group-hover:text-primary transition-colors">{analytics.topper.enrollmentNumber || "-"}</p>
-                          </div>
-                          <div className="text-left bg-white/5 backdrop-blur-xl p-6 rounded-[1.5rem] border border-white/10 shadow-xl group/node hover:bg-white/10 transition-all">
-                            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em] mb-3">Node Registry</p>
-                            <p className="text-sm font-black text-white truncate font-mono tracking-normal group-hover:text-primary transition-colors">{analytics.topper.seatNumber || "-"}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="mt-14 pt-10 border-t border-white/5 w-full flex items-center justify-between">
-                           <div className="flex flex-col items-start gap-1">
-                              <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em]">Protocol Rank</span>
-                              <span className="text-[11px] font-black text-emerald-400 uppercase tracking-widest">TOP 0.01%</span>
-                           </div>
-                           <Button variant="ghost" className="h-14 text-white hover:bg-white/10 rounded-2xl px-6 gap-3 font-black text-[11px] uppercase tracking-[0.2em] transition-all group-hover:translate-x-1">
-                              Review Node
-                              <ChevronRight className="h-4 w-4 opacity-40 group-hover:opacity-100" />
-                           </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </FadeInStaggerItem>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <StatCard
+                  tone="pink"
+                  label="Total Students"
+                  value={analytics?.totals.totalStudents || 0}
+                  icon={<GraduationCap />}
+                />
+                <StatCard
+                  tone="purple"
+                  label="Pass Percentage"
+                  value={`${analytics?.totals.passRate || 0}%`}
+                  icon={<Percent />}
+                />
+                <StatCard
+                  tone="red"
+                  label="Critical Dropouts"
+                  value={analytics?.totals.dropped || 0}
+                  icon={<X />}
+                  hint="4+ KTs identified"
+                />
+                <StatCard
+                  tone="orange"
+                  label="KT Failures"
+                  value={analytics?.totals.totalKTs || 0}
+                  icon={<Star />}
+                  hint="Aggregate backlog index"
+                />
               </div>
 
-              <div className="grid gap-12 lg:grid-cols-2">
-                <FadeInStaggerItem>
-                  <Card className="border-white/5 shadow-2xl rounded-[3.5rem] bg-white/[0.02] backdrop-blur-3xl overflow-hidden h-full border-t-white/10">
-                    <CardHeader className="border-b border-white/5 bg-white/[0.01] px-12 py-10 flex flex-row items-center justify-between">
-                      <div className="flex items-center gap-6">
-                         <div className="h-14 w-14 rounded-2xl bg-orange-500/10 flex items-center justify-center shadow-inner border border-orange-500/20">
-                          <Percent className="h-7 w-7 text-orange-500" />
-                        </div>
-                        <div className="space-y-1.5">
-                          <h3 className="text-2xl font-display font-black text-white tracking-tight">Partition Mapping</h3>
-                          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Categorizing yield into merit classes</p>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-12">
-                      <div className="h-96">
-                         <ResponsiveContainer width="100%" height="100%">
-                            <RechartsBarChart
-                              data={analytics.classDistribution.slice(0, 6)}
-                              layout="vertical"
-                              margin={{ top: 0, right: 30, left: 40, bottom: 0 }}
-                            >
-                               <defs>
-                                {CLASS_COLORS.map((color, i) => (
-                                  <linearGradient key={i} id={`colorGradient-${i}`} x1="0" y1="0" x2="1" y2="0">
-                                    <stop offset="0%" stopColor={color} stopOpacity={0.4} />
-                                    <stop offset="100%" stopColor={color} stopOpacity={1} />
-                                  </linearGradient>
-                                ))}
+              <div className="grid gap-8 lg:grid-cols-3">
+                {/* Result Trend Graph */}
+                <FadeIn className="lg:col-span-2">
+                  <Card className="border-border shadow-xl rounded-[2.5rem] bg-white overflow-hidden">
+                    <div className="p-8 border-b border-border bg-accent/30 flex items-center justify-between">
+                       <div className="flex items-center gap-4">
+                         <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
+                            <Activity className="h-6 w-6" />
+                         </div>
+                         <div>
+                            <h3 className="text-xl font-display font-black text-foreground tracking-tight">Academic Performance Trend</h3>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Pass % across recent batches</p>
+                         </div>
+                       </div>
+                    </div>
+                    <CardContent className="p-8">
+                       <div className="h-[350px] w-full">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={batchHistory}>
+                              <defs>
+                                <linearGradient id="colorPass" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#EC4899" stopOpacity={0.3}/>
+                                  <stop offset="95%" stopColor="#EC4899" stopOpacity={0}/>
+                                </linearGradient>
                               </defs>
-                              <XAxis type="number" hide />
-                              <YAxis 
-                                type="category" 
-                                dataKey="label" 
-                                tick={{ fontSize: 9, fontWeight: 900, fill: "white", opacity: 0.3 }} 
-                                width={140}
+                              <XAxis 
+                                dataKey="uploadDate" 
+                                stroke="#94a3b8" 
+                                fontSize={10} 
+                                fontWeight={700}
                                 axisLine={false}
                                 tickLine={false}
                               />
-                              <Tooltip
-                                cursor={{ fill: "rgba(255,255,255,0.03)", radius: 16 }}
-                                content={({ active, payload }) => {
-                                  if (active && payload && payload.length) {
-                                    return (
-                                      <div className="bg-white/10 backdrop-blur-3xl p-6 border border-white/10 rounded-[2rem] shadow-2xl">
-                                        <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em] mb-2">{payload[0].payload.label}</p>
-                                        <p className="text-2xl font-display font-black text-primary">{payload[0].value} <span className="text-[10px] text-white/20 font-black uppercase">Nodes Map</span></p>
-                                      </div>
-                                    );
-                                  }
-                                  return null;
-                                }}
+                              <YAxis 
+                                stroke="#94a3b8" 
+                                fontSize={10} 
+                                fontWeight={700}
+                                axisLine={false}
+                                tickLine={false}
+                                tickFormatter={(v) => `${v}%`}
                               />
-                              <Bar 
-                                dataKey="value" 
-                                radius={[0, 16, 16, 0]} 
-                                barSize={40}
-                              >
-                                {analytics.classDistribution.slice(0, 6).map((_, idx) => (
-                                  <Cell key={`cell-${idx}`} fill={`url(#colorGradient-${idx % CLASS_COLORS.length})`} />
-                                ))}
-                              </Bar>
-                            </RechartsBarChart>
+                              <Tooltip 
+                                contentStyle={{ 
+                                  backgroundColor: 'white', 
+                                  borderRadius: '1rem', 
+                                  border: '1px solid #e2e8f0',
+                                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                                }}
+                                labelStyle={{ fontWeight: 900, fontSize: '12px' }}
+                              />
+                              <Area 
+                                type="monotone" 
+                                dataKey="passRate" 
+                                stroke="#EC4899" 
+                                strokeWidth={4}
+                                fillOpacity={1} 
+                                fill="url(#colorPass)" 
+                              />
+                            </AreaChart>
                           </ResponsiveContainer>
-                      </div>
+                       </div>
                     </CardContent>
                   </Card>
-                </FadeInStaggerItem>
+                </FadeIn>
 
-                <FadeInStaggerItem>
-                  <Card className="border-white/5 shadow-2xl rounded-[3.5rem] bg-white/[0.02] backdrop-blur-3xl overflow-hidden h-full border-t-white/10">
-                    <CardHeader className="border-b border-white/5 bg-white/[0.01] px-12 py-10 flex flex-row items-center justify-between">
-                      <div className="flex items-center gap-6">
-                        <div className="h-14 w-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center shadow-inner border border-emerald-500/20">
-                          <Activity className="h-7 w-7 text-emerald-500" />
-                        </div>
-                        <div className="space-y-1.5">
-                          <h3 className="text-2xl font-display font-black text-white tracking-tight">Global Outcome Vectors</h3>
-                          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Global success vs failure parity</p>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-12">
-                      <div className="h-96 flex items-center justify-center relative">
-                         <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(var(--primary),0.05)_0%,transparent_70%)] animate-pulse" />
-                         <div className="relative z-10 w-full h-full">
-                           <PieChart
-                            data={[
-                              { label: "Successful", value: analytics.totals.pass, color: "#10b981" },
-                              { label: "Unsuccessful", value: analytics.totals.fail, color: "#ef4444" },
-                            ]}
-                          />
-                         </div>
-                      </div>
-                    </CardContent>
+                {/* Supreme Merit */}
+                <FadeIn delay={0.2}>
+                  <Card className="border-primary/20 shadow-2xl rounded-[3.5rem] bg-gradient-to-br from-primary to-secondary p-1 overflow-hidden h-full group">
+                    <div className="bg-white rounded-[3.3rem] p-10 h-full relative overflow-hidden">
+                       <div className="absolute top-0 right-0 p-8 opacity-5">
+                          <Trophy className="h-32 w-32 rotate-12" />
+                       </div>
+                       
+                       <div className="relative z-10 space-y-10">
+                          <div className="flex items-center gap-4">
+                             <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
+                                <Trophy className="h-6 w-6" />
+                             </div>
+                             <h3 className="text-xl font-display font-black text-foreground">Highest Achievement</h3>
+                          </div>
+
+                          <div className="text-center py-6">
+                             <h4 className="text-3xl font-display font-black text-foreground leading-tight px-4">{analytics?.topper.name || "N/A"}</h4>
+                             <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mt-3">Batch Performance Lead</p>
+                          </div>
+
+                          <div className="p-8 rounded-[2rem] bg-accent border border-border flex flex-col items-center gap-2">
+                             <span className="text-5xl font-display font-black text-primary tabular-nums">{analytics?.topper.percentage}%</span>
+                             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Calculated Merit</span>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                             <div className="p-4 rounded-xl bg-accent border border-border">
+                                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Index ID</p>
+                                <p className="text-xs font-black text-foreground truncate">{analytics?.topper.enrollmentNumber || "-"}</p>
+                             </div>
+                             <div className="p-4 rounded-xl bg-accent border border-border">
+                                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Registry</p>
+                                <p className="text-xs font-black text-foreground truncate">{analytics?.topper.seatNumber || "-"}</p>
+                             </div>
+                          </div>
+                       </div>
+                    </div>
                   </Card>
-                </FadeInStaggerItem>
+                </FadeIn>
+              </div>
+
+              <div className="grid gap-8 lg:grid-cols-2">
+                {/* Subject Performance */}
+                <Card className="border-border shadow-xl rounded-[2.5rem] bg-white overflow-hidden">
+                  <div className="p-8 border-b border-border bg-accent/30 flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                      <BarChart3 className="h-6 w-6" />
+                    </div>
+                    <h3 className="text-xl font-display font-black text-foreground">Subject Excellence</h3>
+                  </div>
+                  <CardContent className="p-8">
+                    <div className="h-80">
+                      <BarChart
+                        data={analytics?.subjectAverages
+                          .filter((s) => typeof s.avgPercentage === "number")
+                          .slice(0, 6)
+                          .map((s) => ({ label: s.subject, value: Number(s.avgPercentage || 0) })) || []}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Merit Distribution */}
+                <Card className="border-border shadow-xl rounded-[2.5rem] bg-white overflow-hidden">
+                  <div className="p-8 border-b border-border bg-accent/30 flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100">
+                      <Percent className="h-6 w-6" />
+                    </div>
+                    <h3 className="text-xl font-display font-black text-foreground">Merit Partitioning</h3>
+                  </div>
+                  <CardContent className="p-8">
+                     <div className="h-80">
+                       <ResponsiveContainer width="100%" height="100%">
+                         <RechartsBarChart data={analytics?.classDistribution.slice(0, 5) || []} layout="vertical">
+                           <XAxis type="number" hide />
+                           <YAxis 
+                            type="category" 
+                            dataKey="label" 
+                            tick={{ fontSize: 9, fontWeight: 800, fill: "#64748b" }} 
+                            width={120}
+                            axisLine={false}
+                            tickLine={false}
+                           />
+                           <Tooltip cursor={{ fill: '#f1f5f9' }} />
+                           <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={32}>
+                             {(analytics?.classDistribution || []).map((entry, index) => (
+                               <Cell key={`cell-${index}`} fill={CLASS_COLORS[index % CLASS_COLORS.length]} />
+                             ))}
+                           </Bar>
+                         </RechartsBarChart>
+                       </ResponsiveContainer>
+                     </div>
+                  </CardContent>
+                </Card>
               </div>
             </FadeInStagger>
           )}
