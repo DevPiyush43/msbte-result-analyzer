@@ -104,7 +104,7 @@ export default function ResultsPage() {
   const params = useParams<{ id: string }>();
   const batchId = params.id;
 
-  const { teacher, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const [batch, setBatch] = React.useState<Batch | null>(null);
   const [state, setState] = React.useState<FetchState | null>(null);
@@ -270,7 +270,7 @@ export default function ResultsPage() {
     async function init() {
       try {
         setLoading(true);
-        if (!authLoading && teacher) {
+        if (!authLoading && user) {
           await Promise.all([loadBatch(), loadState()]);
         }
       } finally {
@@ -279,10 +279,10 @@ export default function ResultsPage() {
     }
     init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [batchId, authLoading, teacher]);
+  }, [batchId, authLoading, user]);
 
   React.useEffect(() => {
-    if (authLoading || !teacher) return;
+    if (authLoading || !user) return;
 
     let cancelled = false;
     let consecutive429 = 0;
@@ -332,16 +332,16 @@ export default function ResultsPage() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [batchId, authLoading, teacher, state?.status]);
+  }, [batchId, authLoading, user, state?.status]);
 
   React.useEffect(() => {
-    if (authLoading || !teacher) return;
+    if (authLoading || !user) return;
     loadAnalytics().catch(() => null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [batchId, authLoading, teacher]);
+  }, [batchId, authLoading, user]);
 
   React.useEffect(() => {
-    if (authLoading || !teacher) return;
+    if (authLoading || !user) return;
     if (state?.status === "ready_for_captcha") {
       loadCaptcha({ refresh: true }).catch(() => null);
     } else {
@@ -350,7 +350,7 @@ export default function ResultsPage() {
       setCaptchaError(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state?.status, authLoading, teacher, batchId]);
+  }, [state?.status, authLoading, user, batchId]);
 
   async function start() {
     setError(null);

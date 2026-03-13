@@ -22,7 +22,7 @@ const nav: NavItem[] = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { teacher, logout } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-[radial-gradient(1200px_circle_at_20%_0%,rgba(37,99,235,0.14),transparent_55%),radial-gradient(900px_circle_at_90%_20%,rgba(124,58,237,0.10),transparent_55%),linear-gradient(to_bottom,#f8fafc,#ffffff_60%,#ffffff)]">
@@ -35,7 +35,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </div>
               <div className="min-w-0">
                 <div className="truncate text-sm font-semibold text-slate-900">MSBTE Result Analyzer</div>
-                <div className="truncate text-xs text-slate-600">Teacher Dashboard</div>
+                <div className="truncate text-xs text-slate-600">{user?.role === 'TEACHER' ? 'Teacher Dashboard' : 'Admin Dashboard'}</div>
               </div>
             </div>
 
@@ -64,8 +64,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="mt-auto border-t border-slate-200 px-5 py-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="truncate text-sm font-medium text-slate-900">{teacher?.name || "Teacher"}</div>
-                  <div className="truncate text-xs text-slate-600">{teacher?.email || ""}</div>
+                  <div className="truncate text-sm font-medium text-slate-900">{user?.username || "User"}</div>
+                  <div className="truncate text-xs text-slate-600">{user?.email || ""}</div>
                 </div>
                 <Button variant="secondary" size="sm" onClick={logout}>
                   Logout

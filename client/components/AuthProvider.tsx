@@ -4,25 +4,18 @@ import * as React from "react";
 
 import { api } from "@/lib/api";
 
-type Teacher = {
+type User = {
   id: string;
-  name: string;
+  username: string;
   email: string;
-  role: "teacher";
+  role: "SYSTEM_ADMIN" | "ADMIN" | "TEACHER";
 };
 
 type AuthContextValue = {
-  teacher: Teacher | null;
+  user: User | null;
   token: string | null;
   loading: boolean;
-  login: (input: { email: string; password: string }) => Promise<void>;
-  register: (input: {
-    name: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-    role: "teacher";
-  }) => Promise<any>;
+  login: (input: { username?: string; email?: string; password: string }) => Promise<void>;
   logout: () => void;
 };
 
@@ -32,7 +25,7 @@ const TOKEN_KEY = "msbte_rm_token";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = React.useState<string | null>(null);
-  const [teacher, setTeacher] = React.useState<Teacher | null>(null);
+  const [user, setUser] = React.useState<User | null>(null);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -54,53 +47,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     async function hydrate() {
       if (!token) {
-        setTeacher(null);
+        setUser(null);
         return;
       }
 
       try {
-        const res = await api.get("/auth/me");
-        setTeacher(res.data.teacher);
+        const res = await api.get("/v2/auth/me");
+        setUser(res.data.user);
       } catch {
         localStorage.removeItem(TOKEN_KEY);
         setToken(null);
-        setTeacher(null);
+        setUser(null);
       }
     }
 
     hydrate();
   }, [token]);
 
-  async function login(input: { email: string; password: string }) {
-    const res = await api.post("/auth/login", input);
+  async function login(input: { username?: string; email?: string; password: string }) {
+    const res = await api.post("/v2/auth/login", input);
     localStorage.setItem(TOKEN_KEY, res.data.token);
     setToken(res.data.token);
-    setTeacher(res.data.teacher);
-  }
-
-  async function register(input: {
-    name: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-    role: "teacher";
-  }): Promise<any> {
-    const res = await api.post("/auth/register", input);
-    return res.data;
+    setUser(res.data.user);
   }
 
   function logout() {
     localStorage.removeItem(TOKEN_KEY);
     setToken(null);
-    setTeacher(null);
+    setUser(null);
   }
 
   const value: AuthContextValue = {
-    teacher,
+    user,
     token,
     loading,
     login,
-    register,
     logout,
   };
 

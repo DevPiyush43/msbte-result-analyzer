@@ -45,7 +45,7 @@ type AnalyticsSummary = {
 };
 
 export default function DashboardPage() {
-  const { teacher, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const [batches, setBatches] = React.useState<BatchSummary[]>([]);
   const [loadingBatches, setLoadingBatches] = React.useState(true);
@@ -55,7 +55,7 @@ export default function DashboardPage() {
   const [loadingAnalytics, setLoadingAnalytics] = React.useState(true);
 
   React.useEffect(() => {
-    if (authLoading || !teacher) return;
+    if (authLoading || !user) return;
 
     async function load() {
       try {
@@ -83,7 +83,7 @@ export default function DashboardPage() {
     }
 
     load();
-  }, [teacher, authLoading]);
+  }, [user, authLoading]);
 
   const totals = React.useMemo(() => {
     const totalStudents = analytics?.totals.totalStudents ?? batches.reduce((acc, b) => acc + (b.totalStudents || 0), 0);
@@ -108,7 +108,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-violet-700" />
               <span>
-                Welcome back, <span className="font-semibold">{teacher?.name}</span>
+                Welcome back, <span className="font-semibold">{user?.username}</span>
               </span>
             </div>
           }

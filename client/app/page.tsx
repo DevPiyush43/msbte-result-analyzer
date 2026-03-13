@@ -30,10 +30,7 @@ export default function Home() {
 
         <div className="flex items-center gap-2">
           <Link href="/login">
-            <Button variant="secondary">Login</Button>
-          </Link>
-          <Link href="/register">
-            <Button>Register</Button>
+            <Button>Login</Button>
           </Link>
         </div>
       </header>
@@ -58,14 +55,9 @@ export default function Home() {
               </p>
 
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <Link href="/register">
-                  <Button size="lg" className="w-full sm:w-auto">
-                    Get Started
-                  </Button>
-                </Link>
                 <Link href="/login">
-                  <Button size="lg" variant="secondary" className="w-full sm:w-auto">
-                    Open Dashboard
+                  <Button size="lg" className="w-full sm:w-auto">
+                    Go to Dashboard
                   </Button>
                 </Link>
               </div>

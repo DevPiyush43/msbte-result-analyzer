@@ -7,16 +7,16 @@ import { useAuth } from "@/components/AuthProvider";
 
 export function Protected({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { teacher, loading } = useAuth();
+  const { user, loading } = useAuth();
 
   React.useEffect(() => {
-    if (!loading && !teacher) {
+    if (!loading && !user) {
       router.replace("/login");
     }
-  }, [loading, teacher, router]);
+  }, [loading, user, router]);
 
   if (loading) return null;
-  if (!teacher) return null;
+  if (!user) return null;
 
   return <>{children}</>;
 }
