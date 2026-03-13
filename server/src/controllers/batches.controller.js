@@ -10,6 +10,9 @@ import * as cheerio from "cheerio";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import { generateReports } from "../services/report.service.js";
+import { ActivityLog } from "../models/ActivityLog.js";
+
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -1134,6 +1137,56 @@ export const recentBatches = asyncHandler(async (req, res) => {
       status: b.status,
     })),
   });
+});
+
+export const generateRange = asyncHandler(async (req, res) => {
+  const { start, end, prefix = "" } = req.body;
+  if (!start || !end) {
+    return res.status(400).json({ error: { message: "Start and end numbers are required" } });
+  }
+
+  const s = parseInt(start);
+  const e = parseInt(end);
+  
+  if (isNaN(s) || isNaN(e)) {
+    return res.status(400).json({ error: { message: "Invalid range numbers" } });
+  }
+
+  const enrollments = [];
+  for (let i = s; i <= e; i++) {
+    enrollments.push(`${prefix}${i}`);
+  }
+
+  return res.json({ enrollments });
+});
+
+export const exportBatchReports = asyncHandler(async (req, res) => {
+  const batch = await ResultBatch.findOne({ _id: req.params.id, teacherId: req.user.sub });
+  if (!batch) {
+    return res.status(404).json({ error: { message: "Batch not found" } });
+  }
+
+  const reports = await generateReports(batch);
+
+  // Log the export activity
+  await ActivityLog.create({
+    userId: req.user.sub,
+    actionType: "REPORT_EXPORT",
+    description: `Exported analytical reports for batch ${batch._id}. Total students: ${batch.results.length}`
+  });
+
+  // Since we need to return 4 files, we can either:
+  // 1. Return a zip (requires adm-zip or similar)
+  // 2. Return them as base64 in a JSON (easier for this environment)
+  // 3. Just return the requested one (less ideal based on prompt "generate four Excel reports automatically")
+  
+  // The prompt says "generate four Excel reports automatically". I'll return them as base64 in JSON for the frontend to download.
+  const base64Reports = {};
+  for (const [name, buffer] of Object.entries(reports)) {
+    base64Reports[name] = buffer.toString('base64');
+  }
+
+  return res.json({ reports: base64Reports });
 });
 
 export const getBatch = asyncHandler(async (req, res) => {

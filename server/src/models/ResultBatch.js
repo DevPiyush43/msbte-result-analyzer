@@ -14,13 +14,14 @@ const studentResultSchema = new mongoose.Schema(
     rawHtml: { type: String },
     fetchedAt: { type: Date },
     errorMessage: { type: String },
+    retryAttempts: { type: Number, default: 0 },
   },
   { _id: false }
 );
 
 const resultBatchSchema = new mongoose.Schema(
   {
-    teacherId: { type: mongoose.Schema.Types.ObjectId, ref: "Teacher", required: true, index: true },
+    teacherId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
     uploadDate: { type: Date, default: Date.now, index: true },
     totalStudents: { type: Number, default: 0 },
     passCount: { type: Number, default: 0 },
@@ -28,7 +29,8 @@ const resultBatchSchema = new mongoose.Schema(
     topperName: { type: String, trim: true },
     topperPercentage: { type: Number },
     results: { type: [studentResultSchema], default: [] },
-    status: { type: String, enum: ["created", "fetching", "completed", "failed"], default: "created" },
+    failedQueue: { type: [String], default: [] }, // Enrollment/Seat numbers that failed
+    status: { type: String, enum: ["created", "fetching", "completed", "failed", "retrying"], default: "created" },
     errors: { type: [String], default: [] },
   },
   { timestamps: true }

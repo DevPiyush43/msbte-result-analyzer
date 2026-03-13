@@ -4,6 +4,7 @@ import { env } from "./config/env.js";
 
 async function bootstrap() {
   await connectDb();
+  await (await import("./config/seed.js")).seedSystemAdmin();
 
   const app = createApp();
 

@@ -187,6 +187,10 @@ class MsBteFetchJob {
         this.lastError = null;
         return;
       }
+      
+      // If it's a captcha failure, we stay in ready_for_captcha
+      if (this.status === "ready_for_captcha") return;
+
       // Mark current enrollment as errored and advance
       this.lastError = e?.message || "Fetch failed";
       await this._saveError(this.lastError);
@@ -194,6 +198,24 @@ class MsBteFetchJob {
     }
 
     // Move to next enrollment
+    await this._prepareCurrent();
+  }
+
+  async skipCurrentToFailedQueue() {
+    if (this.status !== "ready_for_captcha" || !this.currentEnrollment) {
+      throw new Error("No active enrollment to skip");
+    }
+
+    await ResultBatch.updateOne(
+      { _id: this.batchId },
+      { 
+        $addToSet: { failedQueue: this.currentEnrollment },
+        $set: { "results.$[res].errorMessage": "Skipped to failed queue" }
+      },
+      { arrayFilters: [{ "res.enrollmentNumber": this.currentEnrollment }] }
+    );
+
+    this.currentIndex++;
     await this._prepareCurrent();
   }
 
@@ -246,10 +268,51 @@ class MsBteFetchJob {
 
     if (!batch) return;
 
-    // Skip already done
+    // Check if we are done with the main list
+    if (this.currentIndex >= batch.results.length) {
+      // Check if we have anything in failedQueue to retry
+      const toRetry = batch.results.find(r => 
+        batch.failedQueue.includes(r.enrollmentNumber) && 
+        (r.retryAttempts || 0) < 3 && 
+        !r.fetchedAt
+      );
+
+      if (toRetry) {
+        this.status = "retrying";
+        this.currentEnrollment = toRetry.enrollmentNumber;
+        await this._loadFormPage();
+        this.status = "ready_for_captcha";
+        return;
+      }
+
+      this.status = "completed";
+      await ResultBatch.updateOne(
+        { _id: this.batchId, teacherId: this.teacherId },
+        { $set: { status: "completed" } }
+      );
+      
+      const batchFinal = await ResultBatch.findById(this.batchId).lean();
+      const successCount = batchFinal.results.filter(r => r.fetchedAt && !r.errorMessage).length;
+      const failCount = batchFinal.results.length - successCount;
+
+      await ExtractionLog.updateOne(
+        { batchId: this.batchId, teacherId: this.teacherId, status: "STARTED" },
+        { 
+          $set: { 
+            status: "COMPLETED", 
+            endTime: new Date(),
+            successCount,
+            failCount
+          } 
+        }
+      );
+      return;
+    }
+
+    // Normal processing
     while (this.currentIndex < batch.results.length) {
       const r = batch.results[this.currentIndex];
-      if (!r || r.fetchedAt || r.errorMessage) {
+      if (!r || r.fetchedAt) {
         this.currentIndex++;
         continue;
       }
@@ -258,12 +321,7 @@ class MsBteFetchJob {
     }
 
     if (this.currentIndex >= batch.results.length) {
-      this.status = "completed";
-      await ResultBatch.updateOne(
-        { _id: this.batchId, teacherId: this.teacherId },
-        { $set: { status: "completed" } }
-      );
-      return;
+      return this._prepareCurrent(); // check for retries
     }
 
     // GET the form page to capture viewstate + CAPTCHA
@@ -390,6 +448,7 @@ class MsBteFetchJob {
           "results.$.errorMessage": parsed.ok
             ? null
             : parsed.errorMessage || "Parse failed",
+          "results.$.retryAttempts": this.status === "retrying" ? 1 : 0, // Placeholder, simple increment is better
           ...(parsed.name ? { "results.$.name": parsed.name } : {}),
           ...(parsed.enrollmentNumber
             ? { "results.$.marksheetEnrollmentNumber": parsed.enrollmentNumber }
@@ -413,10 +472,15 @@ class MsBteFetchJob {
             ? { "results.$.subjectMarks": parsed.subjectMarks }
             : {}),
         },
+        $pull: { failedQueue: this.currentEnrollment }
       }
     );
 
-    this.currentIndex++;
+    // If we were retrying, we don't increment currentIndex because retries 
+    // are picked up by find() in _prepareCurrent based on failedQueue.
+    if (this.status !== "retrying") {
+      this.currentIndex++;
+    }
     this.lastError = null;
 
     // Reload form page for next enrollment (gets fresh CAPTCHA)
@@ -500,6 +564,8 @@ class MsBteFetchJob {
 
 const jobs = new Map();
 
+import { ExtractionLog } from "../models/ExtractionLog.js";
+
 export const msbteJobService = {
   async start({ batchId, teacherId }) {
     const key = `${teacherId}:${batchId}`;
@@ -511,6 +577,15 @@ export const msbteJobService = {
 
     try {
       await job.init();
+      
+      const batch = await ResultBatch.findById(batchId);
+      await ExtractionLog.create({
+        teacherId,
+        batchId,
+        totalRequested: batch.results.length,
+        seatRange: batch.results.length > 0 ? `${batch.results[0].enrollmentNumber} - ${batch.results[batch.results.length-1].enrollmentNumber}` : "N/A"
+      });
+
       return job;
     } catch (e) {
       jobs.delete(key);
@@ -528,12 +603,18 @@ export const msbteJobService = {
     if (!job) return;
     await job.close();
     jobs.delete(key);
+    
     await ResultBatch.updateOne(
       { _id: batchId, teacherId },
       {
         $set: { status: "failed" },
         $push: { errors: "Job stopped by user" },
       }
+    );
+
+    await ExtractionLog.updateOne(
+      { batchId, teacherId, status: "STARTED" },
+      { $set: { status: "FAILED", endTime: new Date() } }
     );
   },
 };

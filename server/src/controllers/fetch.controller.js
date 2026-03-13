@@ -50,6 +50,16 @@ export const getCaptcha = asyncHandler(async (req, res) => {
   return res.json({ pngBase64 });
 });
 
+export const skipFetch = asyncHandler(async (req, res) => {
+  const job = msbteJobService.get({ batchId: req.params.id, teacherId: req.user.sub });
+  if (!job) {
+    return res.status(400).json({ error: { message: "Job not started" } });
+  }
+
+  await job.skipCurrentToFailedQueue();
+  return res.json({ state: job.getState() });
+});
+
 export const stopFetch = asyncHandler(async (req, res) => {
   await msbteJobService.stop({ batchId: req.params.id, teacherId: req.user.sub });
   return res.json({ ok: true });
