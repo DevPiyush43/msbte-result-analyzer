@@ -1,7 +1,11 @@
 @import "tailwindcss";
 
+html {
+  font-size: 14px;
+}
+
 :root {
-  --background: 327 73% 97%;
+  --background: 210 40% 98%;
   --foreground: 222.2 84% 4.9%;
 
   --card: 0 0% 100%;
@@ -10,27 +14,27 @@
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
  
-  --primary: 330 81% 60%;
-  --primary-hover: 330 81% 50%;
+  --primary: 221 83% 53%;
+  --primary-hover: 221 83% 43%;
   --primary-foreground: 210 40% 98%;
  
-  --secondary: 270 91% 65%;
+  --secondary: 217 91% 60%;
   --secondary-foreground: 210 40% 98%;
  
-  --muted: 327 73% 94%;
-  --muted-foreground: 327 20% 46.9%;
+  --muted: 210 40% 95%;
+  --muted-foreground: 215.4 16.3% 46.9%;
  
-  --accent: 330 81% 95%;
-  --accent-foreground: 330 81% 40%;
+  --accent: 210 40% 95%;
+  --accent-foreground: 221 83% 40%;
  
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 327 30% 91.4%;
-  --input: 327 30% 91.4%;
-  --ring: 330 81% 60%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 221 83% 53%;
  
-  --radius: 1rem;
+  --radius: 0.75rem;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui;
   --font-display: var(--font-poppins), var(--font-inter), ui-sans-serif;
@@ -46,24 +50,24 @@
   --popover: 222 47% 11%;
   --popover-foreground: 210 40% 98%;
  
-  --primary: 330 81% 60%;
+  --primary: 217 91% 60%;
   --primary-foreground: 210 40% 98%;
  
-  --secondary: 270 91% 65%;
+  --secondary: 217 91% 60%;
   --secondary-foreground: 210 40% 98%;
  
   --muted: 217.2 32.6% 17.5%;
   --muted-foreground: 215 20.2% 65.1%;
  
-  --accent: 330 81% 20%;
-  --accent-foreground: 330 81% 90%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
  
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 98%;
  
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
-  --ring: 330 81% 60%;
+  --ring: 217 91% 60%;
 }
 
 @theme inline {

@@ -117,12 +117,12 @@ export default function StudentDetailPage() {
         <PageHeader
           title={
             <div className="flex items-center gap-4">
-               <div className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
-                <GraduationCap className="h-7 w-7 text-white" />
+               <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center shadow-lg">
+                <GraduationCap className="h-6 w-6 text-white" />
               </div>
               <div>
-                <span className="font-display font-black text-3xl text-foreground tracking-tight block">Student Profile</span>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-1">Individual Academic Record</p>
+                <span className="font-display font-black text-2xl text-foreground tracking-tight block">Student Profile</span>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-1">Academic Record</p>
               </div>
             </div>
           }
@@ -135,7 +135,11 @@ export default function StudentDetailPage() {
           backHref={`/results/${batchId}`}
           backLabel="Back to Batch"
           actions={
-             <Button variant="outline" className="h-12 rounded-xl font-bold uppercase tracking-widest text-[10px] border-border bg-white text-foreground hover:bg-primary hover:text-white transition-all shadow-sm px-8">
+             <Button 
+               variant="outline" 
+               className="h-10 rounded-xl font-bold uppercase tracking-widest text-[9px] border-border bg-white text-foreground hover:bg-primary hover:text-white transition-all shadow-sm px-6"
+               onClick={() => window.print()}
+             >
                 <Sparkles className="mr-3 h-4 w-4 text-amber-500" />
                 Download Result
              </Button>

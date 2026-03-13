@@ -48,31 +48,31 @@ const tones: Record<NonNullable<StatCardProps["tone"]>, { card: string; icon: st
     accent: "bg-indigo-500/10",
   },
   pink: {
-    card: "hover:border-pink-500/30",
-    icon: "bg-pink-500/10 text-pink-500 border-pink-500/20",
-    accent: "bg-pink-500/10",
+    card: "hover:border-blue-500/30",
+    icon: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+    accent: "bg-blue-500/10",
   },
 };
 
-export function StatCard({ label, value, hint, icon, trend, tone = "pink", className }: StatCardProps) {
+export function StatCard({ label, value, hint, icon, trend, tone = "blue", className }: StatCardProps) {
   const t = tones[tone];
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      whileHover={{ y: -8, scale: 1.02 }}
+      whileHover={{ y: -4, scale: 1.01 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className={cn("h-full", className)}
     >
       <Card className={cn(
-        "h-full p-8 border border-border bg-card shadow-lg transition-all duration-500 rounded-[2rem] relative overflow-hidden group",
+        "h-full p-6 border border-border bg-card shadow-md transition-all duration-500 rounded-2xl relative overflow-hidden group",
         t.card
       )}>
-        <div className={cn("absolute -top-24 -right-24 w-48 h-48 rounded-full blur-3xl opacity-20 transition-opacity group-hover:opacity-40", t.accent)} />
+        <div className={cn("absolute -top-16 -right-16 w-32 h-32 rounded-full blur-2xl opacity-10 transition-opacity group-hover:opacity-30", t.accent)} />
         
         <div className="flex flex-col h-full relative z-10">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-6">
             <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground group-hover:text-foreground transition-colors">{label}</span>
             {icon && (
               <div className={cn("flex h-12 w-12 items-center justify-center rounded-2xl border transition-all duration-500 shadow-sm group-hover:scale-110", t.icon)}>
@@ -82,7 +82,7 @@ export function StatCard({ label, value, hint, icon, trend, tone = "pink", class
           </div>
           
           <div className="flex-1 space-y-4">
-            <div className="text-4xl font-display font-black tracking-tight text-foreground tabular-nums">{value}</div>
+            <div className="text-3xl font-display font-black tracking-tight text-foreground tabular-nums">{value}</div>
             
             {(hint || trend) && (
               <div className="flex items-center gap-3">

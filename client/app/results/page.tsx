@@ -93,49 +93,46 @@ export default function ResultsIndexPage() {
       <AppShell>
         <PageHeader
           title={
-            <div className="flex items-center gap-6">
-                <div className="h-16 w-16 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg transition-transform group-hover:rotate-6">
-                <FileText className="h-8 w-8" />
+            <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg transition-transform group-hover:rotate-6">
+                <FileText className="h-6 w-6" />
               </div>
               <div>
-                <span className="font-display font-black text-4xl text-foreground tracking-tight block">Results History</span>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-2 flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-primary" />
-                  Management Portal
-                </p>
+                <span className="font-display font-black text-2xl text-foreground tracking-tight block">Results History</span>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mt-0.5">Academic Record Management</p>
               </div>
             </div>
           }
-          subtitle="Comprehensive chronological record of extracted student performance data."
+          subtitle="Comprehensive record of extracted student performance data."
           actions={
             <Link href="/upload">
-              <Button size="lg" className="rounded-2xl h-16 px-10 font-bold uppercase tracking-widest text-[11px] bg-primary text-white hover:bg-primary/90 transition-all shadow-lg hover:-translate-y-1 active:scale-95 group">
-                <Upload className="mr-4 h-5 w-5" />
-                New Results
+              <Button className="rounded-xl h-12 px-6 font-bold uppercase tracking-widest text-[9px] bg-primary text-white hover:bg-primary/90 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95 group">
+                <Upload className="mr-3 h-4 w-4" />
+                New Extraction
               </Button>
             </Link>
           }
         />
 
-        <main className="mx-auto max-w-7xl px-8 py-16 lg:px-12 relative z-10">
-          <div className="mb-14 flex flex-col md:flex-row gap-6">
+        <main className="mx-auto max-w-7xl px-6 py-10 lg:px-10 relative z-10">
+          <div className="mb-8 flex flex-col md:flex-row gap-4">
               <div className="relative flex-1 group">
-                <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input 
-                  placeholder="Search history by date, status, or student name..." 
-                  className="pl-16 h-16 bg-white border-border rounded-2xl font-bold uppercase tracking-widest text-[10px] placeholder:text-muted-foreground focus:border-primary focus:ring-primary/10 transition-all shadow-sm"
+                  placeholder="Search by date, status, or student name..." 
+                  className="pl-12 h-12 bg-white border-border rounded-xl font-bold uppercase tracking-widest text-[9px] placeholder:text-muted-foreground focus:border-primary focus:ring-primary/10 transition-all shadow-sm"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <Button 
                 variant="outline" 
-                className="h-16 rounded-2xl px-10 font-bold uppercase tracking-widest text-[11px] border-border bg-white hover:bg-accent text-foreground transition-all shadow-sm active:scale-95"
+                className="h-12 rounded-xl px-8 font-bold uppercase tracking-widest text-[9px] border-border bg-white hover:bg-accent text-foreground transition-all shadow-sm"
                 onClick={load}
                 disabled={loading}
               >
-                <RefreshCw className={cn("mr-4 h-5 w-5", loading && "animate-spin")} />
-                Refresh
+                <RefreshCw className={cn("mr-3 h-4 w-4", loading && "animate-spin")} />
+                Refresh Archive
               </Button>
           </div>
 

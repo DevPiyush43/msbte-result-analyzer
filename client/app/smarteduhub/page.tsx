@@ -16,31 +16,28 @@ export default function SmartEduHubPage() {
         <PageHeader 
           title={
             <div className="flex items-center gap-4">
-               <div className="h-12 w-12 rounded-2xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20 shadow-[0_0_20px_rgba(var(--orange-500),0.1)]">
-                <Star className="h-6 w-6 text-orange-500 fill-orange-500/20" />
+               <div className="h-10 w-10 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20 shadow-sm">
+                <Star className="h-5 w-5 text-orange-500 fill-orange-500/20" />
               </div>
               <div>
-                <span className="font-display font-black text-3xl text-foreground tracking-tight block">SmartEdu Hub</span>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-1">College Management System</p>
+                <span className="font-display font-black text-2xl text-foreground tracking-tight block">SmartEdu Hub</span>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mt-0.5">Management System</p>
               </div>
             </div>
           }
-          subtitle="The complete institutional utility for student management and academic tracking."
+          subtitle="The complete institutional utility for student management."
           backHref="/dashboard"
           backLabel="Back to Dashboard"
         />
 
-        <main className="mx-auto max-w-7xl px-8 py-12 lg:px-12">
+        <main className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
           <FadeIn>
-            <div className="mb-16 rounded-[3rem] bg-indigo-600 shadow-xl p-12 lg:p-16 text-white relative overflow-hidden">
+            <div className="mb-12 rounded-[2.5rem] bg-primary shadow-xl p-10 lg:p-14 text-white relative overflow-hidden">
               <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.05),transparent)] pointer-events-none" />
-              <div className="absolute -top-24 -right-24 w-96 h-96 bg-white/[0.03] rounded-full blur-3xl" />
-              <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-400/[0.1] rounded-full blur-3xl opacity-50" />
-              
-              <div className="relative z-10 grid lg:grid-cols-2 gap-16 items-center">
-                <div className="space-y-10">
+              <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
+                <div className="space-y-8">
                   <div>
-                    <div className="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-white/10 border border-white/10 font-black text-[10px] uppercase tracking-[0.3em] mb-6">
+                    <div className="inline-flex items-center gap-3 px-3 py-1.5 rounded-lg bg-white/10 border border-white/10 font-black text-[9px] uppercase tracking-[0.2em] mb-4">
                       <Sparkles className="h-4 w-4 text-orange-400" />
                       Platform Alpha
                     </div>

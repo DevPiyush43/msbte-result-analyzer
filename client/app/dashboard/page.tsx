@@ -140,13 +140,30 @@ export default function DashboardPage() {
           subtitle="Comprehensive academic analytics and student performance tracking."
           actions={
             <div className="flex items-center gap-4">
-              <Button variant="outline" className="hidden sm:flex rounded-xl h-14 px-8 font-bold uppercase tracking-widest text-[11px] border-border bg-white text-foreground hover:bg-accent transition-all">
-                <FileJson className="mr-3 h-5 w-5 text-primary" />
-                Download Report
+              <Button 
+                variant="outline" 
+                className="hidden sm:flex rounded-xl h-12 px-6 font-bold uppercase tracking-widest text-[9px] border-border bg-white text-foreground hover:bg-accent transition-all"
+                onClick={async () => {
+                   try {
+                     const res = await api.get("/batches/analytics/summary/export", { responseType: "blob" });
+                     const url = window.URL.createObjectURL(new Blob([res.data]));
+                     const a = document.createElement("a");
+                     a.href = url;
+                     a.download = "academic_summary.xlsx";
+                     document.body.appendChild(a);
+                     a.click();
+                     a.remove();
+                   } catch {
+                     alert("Full report export failed. Please try downloading via individual batches.");
+                   }
+                }}
+              >
+                <FileJson className="mr-3 h-4 w-4 text-primary" />
+                Download Summary
               </Button>
               <Link href="/upload">
-                <Button className="rounded-xl h-14 px-8 font-bold uppercase tracking-widest text-[11px] bg-primary text-white hover:bg-primary/90 shadow-lg hover:-translate-y-0.5 transition-all">
-                  <Upload className="mr-3 h-5 w-5" />
+                <Button className="rounded-xl h-12 px-6 font-bold uppercase tracking-widest text-[9px] bg-primary text-white hover:bg-primary/90 shadow-lg hover:-translate-y-0.5 transition-all">
+                  <Upload className="mr-3 h-4 w-4" />
                   New Extraction
                 </Button>
               </Link>
@@ -154,11 +171,11 @@ export default function DashboardPage() {
           }
         />
 
-        <main className="mx-auto max-w-7xl px-8 py-12 relative z-10">
-          <FadeInStagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-10">
+        <main className="mx-auto max-w-7xl px-6 py-10 relative z-10">
+          <FadeInStagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8">
             <FadeInStaggerItem>
               <StatCard
-                tone="pink"
+                tone="blue"
                 label="Average Batch Percentage"
                 value={`${insights?.avgPercentage || 0}%`}
                 hint="Global academic mean"
@@ -185,10 +202,10 @@ export default function DashboardPage() {
             </FadeInStaggerItem>
           </FadeInStagger>
 
-          <FadeInStagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <FadeInStagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <FadeInStaggerItem>
               <StatCard
-                tone="pink"
+                tone="blue"
                 label="Total Students Analyzed"
                 value={analytics?.totals.totalStudents || 0}
                 hint="Verified academic records"
@@ -338,9 +355,9 @@ export default function DashboardPage() {
 
               {/* KT Risk Analysis */}
               <FadeIn delay={0.7}>
-                <Card className="border-border shadow-xl rounded-[2.5rem] bg-white overflow-hidden p-8">
+                <Card className="border-border shadow-xl rounded-[2.5rem] bg-white overflow-hidden p-6 md:p-8">
                   <div className="flex items-center justify-between mb-8">
-                    <div className="h-12 w-12 rounded-xl bg-hotpink bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
+                    <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
                       <TrendingUp className="h-6 w-6" />
                     </div>
                     <span className="text-[10px] font-black text-primary uppercase tracking-widest">Risk Analysis</span>
