@@ -38,7 +38,7 @@ export default function Home() {
 
         <div className="flex items-center gap-6">
           <Link href="/login">
-            <Button variant="ghost" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-accent rounded-xl px-6">Login</Button>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl px-6 shadow-md transition-all">Login</Button>
           </Link>
         </div>
       </header>

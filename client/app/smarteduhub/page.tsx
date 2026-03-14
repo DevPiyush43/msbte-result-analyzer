@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 // ── DEMO URL — Replace with actual link when ready ──────────────────────
-const SMART_EDU_HUB_URL = "https://smart-edu-hub-demo.vercel.app"; // placeholder
+const SMART_EDU_HUB_URL = "https://tinyurl.com/yc7cx5dd";
 
 export default function SmartEduHubPage() {
   const [activeTab, setActiveTab] = React.useState<"overview" | "features" | "roles">("overview");
@@ -78,7 +78,7 @@ export default function SmartEduHubPage() {
                   <a href={SMART_EDU_HUB_URL} target="_blank" rel="noopener noreferrer">
                     <Button className="h-12 px-8 bg-white text-emerald-700 hover:bg-emerald-50 font-black uppercase tracking-widest text-[10px] rounded-xl shadow-xl transition-all hover:-translate-y-0.5">
                       <Globe className="h-4 w-4 mr-3" />
-                      Visit Website (Demo)
+                      Visit Website
                     </Button>
                   </a>
                   <Button variant="ghost" className="h-12 px-6 bg-white/10 text-white border border-white/20 font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-white/20 transition-all">
@@ -188,20 +188,20 @@ export default function SmartEduHubPage() {
                 </div>
               </div>
 
-              {/* Demo Notice */}
+              {/* App Link Notice */}
               <div className="p-6 rounded-2xl border border-emerald-100 bg-emerald-50 flex items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                   <div className="h-12 w-12 rounded-2xl bg-emerald-600 flex items-center justify-center shrink-0 shadow-md">
                     <Globe className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm font-black text-emerald-900">Demo Link Available</p>
-                    <p className="text-[11px] text-emerald-700 mt-0.5">Live demo is hosted at the button below. A permanent URL will be configured by the project author.</p>
+                    <p className="text-sm font-black text-emerald-900">App Link Available</p>
+                    <p className="text-[11px] text-emerald-700 mt-0.5">Live app is hosted at the button below.</p>
                   </div>
                 </div>
                 <a href={SMART_EDU_HUB_URL} target="_blank" rel="noopener noreferrer">
                   <Button className="shrink-0 h-11 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-widest text-[10px] rounded-xl transition-all">
-                    Open Demo <ArrowRight className="h-4 w-4 ml-2" />
+                    Open App <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </a>
               </div>
@@ -334,13 +334,13 @@ export default function SmartEduHubPage() {
           <div className="rounded-2xl bg-slate-900 p-8 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="text-white">
               <p className="font-black text-xl mb-1">Ready to explore Smart Edu Hub?</p>
-              <p className="text-slate-400 text-sm">Open the live demo or wait for the production URL to be configured.</p>
+              <p className="text-slate-400 text-sm">Open the live app.</p>
             </div>
             <div className="flex gap-4 shrink-0">
               <a href={SMART_EDU_HUB_URL} target="_blank" rel="noopener noreferrer">
                 <Button className="h-12 px-8 bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl transition-all">
                   <ExternalLink className="h-4 w-4 mr-3" />
-                  Open Demo
+                  Open App
                 </Button>
               </a>
               <Link href="/docs">

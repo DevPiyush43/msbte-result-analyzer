@@ -113,7 +113,7 @@ export default function DashboardPage() {
       highestPass: sortedSubjects[sortedSubjects.length - 1].subject,
       avgPercentage: analytics.totals.passRate,
       criticalStudents: analytics.totals.dropped,
-      bestBatch: batches.find(b => b.status === 'completed') ? "2024-SEM-I" : "N/A"
+      bestBatch: batches.find(b => b.status === 'completed') ? "2026 K Scheme" : "N/A"
     };
   }, [analytics, sortedSubjects, batches]);
 
