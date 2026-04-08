@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { GraduationCap, Lock, Mail } from "lucide-react";
+import { GraduationCap, Lock, Mail, AlertCircle, RefreshCw } from "lucide-react";
 
 import { useAuth } from "@/components/AuthProvider";
 import { FadeIn, HoverLift } from "@/components/Animated";
@@ -39,9 +39,15 @@ export default function LoginPage() {
       await login({ username: values.username, password: values.password });
       router.push("/dashboard");
     } catch (err: any) {
-      const message = err?.response?.data?.error?.message || "Invalid credentials. Please try again.";
+      const message =
+        err?.response?.data?.error?.message ||
+        "Invalid credentials. Please check your username and password.";
       setError("root", { message });
     }
+  }
+
+  function clearError() {
+    setError("root", { message: undefined });
   }
 
   return (
@@ -109,8 +115,19 @@ export default function LoginPage() {
 
                 {errors.root?.message ? (
                   <FadeIn>
-                    <div className="bg-rose-50 border border-rose-100 text-rose-600 p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-center">
-                      {errors.root.message}
+                    <div className="bg-rose-50 border border-rose-200 text-rose-700 p-5 rounded-2xl text-[11px] font-bold uppercase tracking-widest text-center animate-shake shadow-sm">
+                      <div className="flex items-center justify-center gap-2 mb-3">
+                        <AlertCircle className="h-5 w-5 text-rose-500 shrink-0" />
+                        <span>{errors.root.message}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={clearError}
+                        className="inline-flex items-center gap-2 mt-1 px-5 py-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-600 text-[10px] font-black uppercase tracking-widest transition-all border border-rose-200"
+                      >
+                        <RefreshCw className="h-3.5 w-3.5" />
+                        Re-enter Credentials
+                      </button>
                     </div>
                   </FadeIn>
                 ) : null}

@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import { User } from "../models/User.js";
 import { Admin } from "../models/Admin.js";
@@ -16,51 +15,41 @@ export const createUserWithProfile = async ({
   institution,
   createdBy
 }) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  // Hash password
+  const passwordHash = await bcrypt.hash(password, env.BCRYPT_SALT_ROUNDS || 10);
 
+  // Create the base user document
+  const user = await User.create({
+    username,
+    email,
+    passwordHash,
+    fullName: fullName || "",
+    role,
+    createdBy,
+    status: "ACTIVE"
+  });
+
+  // Create the role-specific profile (best-effort, rollback user if it fails)
   try {
-    const passwordHash = await bcrypt.hash(password, env.BCRYPT_SALT_ROUNDS || 10);
-
-    const [user] = await User.create(
-      [{
-        username,
-        email,
-        passwordHash,
-        role,
-        createdBy,
-        status: "ACTIVE"
-      }],
-      { session }
-    );
-
     if (role === "ADMIN") {
-      await Admin.create(
-        [{
-          userId: user._id,
-          fullName,
-          contactNumber
-        }],
-        { session }
-      );
+      await Admin.create({
+        userId: user._id,
+        fullName,
+        contactNumber
+      });
     } else if (role === "TEACHER") {
-      await TeacherProfile.create(
-        [{
-          userId: user._id,
-          fullName,
-          department,
-          institution
-        }],
-        { session }
-      );
+      await TeacherProfile.create({
+        userId: user._id,
+        fullName,
+        department: department || "",
+        institution: institution || "MSBTE College"
+      });
     }
-
-    await session.commitTransaction();
-    return user;
-  } catch (error) {
-    await session.abortTransaction();
-    throw error;
-  } finally {
-    session.endSession();
+  } catch (profileError) {
+    // Rollback: delete the user if profile creation fails
+    await User.findByIdAndDelete(user._id).catch(() => {});
+    throw profileError;
   }
+
+  return user;
 };

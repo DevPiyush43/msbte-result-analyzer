@@ -104,7 +104,8 @@ export default function UserManagementPage() {
       });
       fetchUsers();
     } catch (err: any) {
-      setFormError(err?.response?.data?.error?.message || "Internal provisioning failure");
+      const apiMsg = err?.response?.data?.error?.message;
+      setFormError(apiMsg && apiMsg !== "Validation error" ? apiMsg : "Please fill in all required fields correctly.");
     } finally {
       setSubmitting(false);
     }
@@ -195,7 +196,7 @@ export default function UserManagementPage() {
                       <Input 
                         required
                         value={modalForm.username}
-                        onChange={e => setModalForm({...modalForm, username: e.target.value})}
+                        onChange={e => { setFormError(null); setModalForm({...modalForm, username: e.target.value}); }}
                         placeholder="e.g. j.wilson"
                         className="h-16 pl-14 bg-slate-50 border-border rounded-2xl font-bold text-[13px] text-slate-900 focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-slate-400/50 shadow-sm"
                       />
@@ -206,7 +207,7 @@ export default function UserManagementPage() {
                     <Input 
                       required
                       value={modalForm.fullName}
-                      onChange={e => setModalForm({...modalForm, fullName: e.target.value})}
+                      onChange={e => { setFormError(null); setModalForm({...modalForm, fullName: e.target.value}); }}
                       placeholder="e.g. James Wilson"
                       className="h-16 bg-slate-50 border-border rounded-2xl font-bold text-[13px] text-slate-900 focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-slate-400/50 shadow-sm"
                     />
@@ -221,7 +222,7 @@ export default function UserManagementPage() {
                       required
                       type="email"
                       value={modalForm.email}
-                      onChange={e => setModalForm({...modalForm, email: e.target.value})}
+                      onChange={e => { setFormError(null); setModalForm({...modalForm, email: e.target.value}); }}
                       placeholder="staff@institution.edu"
                       className="h-16 pl-14 bg-slate-50 border-border rounded-2xl font-bold text-[13px] text-slate-900 focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-slate-400/50 shadow-sm"
                     />
@@ -237,7 +238,7 @@ export default function UserManagementPage() {
                         required
                         type="password"
                         value={modalForm.password}
-                        onChange={e => setModalForm({...modalForm, password: e.target.value})}
+                        onChange={e => { setFormError(null); setModalForm({...modalForm, password: e.target.value}); }}
                         placeholder="••••••••"
                         className="h-16 pl-14 bg-slate-50 border-border rounded-2xl font-bold text-[13px] text-slate-900 focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-slate-400/50 shadow-sm"
                       />
@@ -251,7 +252,7 @@ export default function UserManagementPage() {
                         value={modalForm.role}
                         onChange={e => setModalForm({...modalForm, role: e.target.value as "ADMIN" | "TEACHER"})}
                       >
-                        <option value="TEACHER">Instructor</option>
+                        <option value="TEACHER">Teacher</option>
                         {currentUser?.role === "SYSTEM_ADMIN" && <option value="ADMIN">Administrator</option>}
                       </select>
                       <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 h-5 w-5 text-primary/40 pointer-events-none group-hover/input:text-primary transition-colors" />
@@ -301,7 +302,7 @@ export default function UserManagementPage() {
                           <option value="all">All Users</option>
                           <option value="SYSTEM_ADMIN">System Admins</option>
                           <option value="ADMIN">Administrators</option>
-                          <option value="TEACHER">Instruction Staff</option>
+                          <option value="TEACHER">Teachers</option>
                         </select>
                         <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 h-5 w-5 text-primary/40 pointer-events-none group-hover/filter:text-primary transition-colors" />
                       </div>
@@ -385,7 +386,7 @@ export default function UserManagementPage() {
                                     : 'bg-slate-50 text-slate-600 border-slate-200 shadow-slate-500/5'
                                 )}>
                                 {u.role === 'SYSTEM_ADMIN' && <Shield className="h-3.5 w-3.5" />}
-                                {u.role === 'TEACHER' ? 'Instructor' : u.role}
+                                {u.role === 'TEACHER' ? 'Teacher' : u.role === 'ADMIN' ? 'Admin' : u.role}
                               </span>
                             </td>
                             <td className="px-12 py-10">
