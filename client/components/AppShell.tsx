@@ -17,8 +17,6 @@ import {
   LogOut,
   GraduationCap,
   BookOpen,
-  Layers,
-  ExternalLink,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -48,7 +46,6 @@ const navItems: NavItem[] = [
 
 const utilityItems: NavItem[] = [
   { href: "/docs", label: "Documentation", icon: BookOpen, accent: "text-indigo-500" },
-  { href: "/smarteduhub", label: "Smart Edu Hub", icon: Layers, accent: "text-emerald-500" },
 ];
 
 import { ThemeToggle } from "@/components/ThemeToggle";
